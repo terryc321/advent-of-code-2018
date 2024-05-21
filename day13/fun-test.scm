@@ -71,21 +71,21 @@ moving left + backslash -> \ move up
   (test!
    (train-shunt-left
     '((train-no 1) (x 3) (y 3) (direction left) (internal left)) 'cross)
-    '((train-no 1) (x 2) (y 4) (direction down) (internal ahead))
+    '((train-no 1) (x 3) (y 4) (direction down) (internal ahead))
    )
 
 
   (test!
    (train-shunt-left
     '((train-no 1) (x 3) (y 3) (direction left) (internal ahead)) 'cross)
-    '((train-no 1) (x 1) (y 3) (direction left) (internal right))
+    '((train-no 1) (x 2) (y 3) (direction left) (internal right))
    )
 
 
   (test!
    (train-shunt-left
     '((train-no 1) (x 3) (y 3) (direction left) (internal right)) 'cross)
-    '((train-no 1) (x 2) (y 2) (direction up) (internal left))
+    '((train-no 1) (x 3) (y 2) (direction up) (internal left))
    )
 
   ;; for each internal configuration
@@ -96,21 +96,21 @@ moving left + backslash -> \ move up
 	      (train-shunt-left
 	       `((train-no 1) (x 3) (y 3) (direction left) (internal ,i)) 'horz))
 	       `((train-no 1) (x 2) (y 3) (direction left) (internal ,i)))
-	   
+
+	   ;; left / : down 
 	   (test!
 	    (begin	      
 	      (train-shunt-left
 	       `((train-no 1) (x 3) (y 3) (direction left) (internal ,i)) 'slash))	    
-	    `((train-no 1) (x 2) (y 4) (direction down) (internal ,i)))
+	       `((train-no 1) (x 3) (y 4) (direction down) (internal ,i)))
 
-
+	   
+           ;; left \  : up
 	   (test!
 	    (begin	      
 	      (train-shunt-left
 	       `((train-no 1) (x 3) (y 3) (direction left) (internal ,i)) 'backslash))	    
-	    `((train-no 1) (x 2) (y 2) (direction up) (internal ,i)))
-
-	   
+	       `((train-no 1) (x 3) (y 2) (direction up) (internal ,i)))
 	   
 	   ) ;; do-list
   );; test-group
@@ -119,6 +119,8 @@ moving left + backslash -> \ move up
 
 
 ;; ----------------------------------------------------------------------------------------------------------
+
+
 
 #|
 
@@ -135,21 +137,21 @@ moving right + backslash -> \ move down
   (test!
    (train-shunt-right
     `((train-no 1) (x 3) (y 3) (direction right) (internal right)) 'cross)
-   `((train-no 1) (x 4) (y 4) (direction down) (internal left))
+    `((train-no 1) (x 3) (y 4) (direction down) (internal left))
    )
 
 
   (test!
    (train-shunt-right
     '((train-no 1) (x 3) (y 3) (direction right) (internal ahead)) 'cross)
-    '((train-no 1) (x 5) (y 3) (direction right) (internal right))
+    '((train-no 1) (x 4) (y 3) (direction right) (internal right))
    )
 
   
   (test!
    (train-shunt-right
     '((train-no 1) (x 3) (y 3) (direction right) (internal left)) 'cross)
-    '((train-no 1) (x 4) (y 2) (direction up) (internal ahead))
+    '((train-no 1) (x 3) (y 2) (direction up) (internal ahead))
    )
 
   
@@ -163,21 +165,21 @@ moving right + backslash -> \ move down
 	      )
 	       `((train-no 1) (x 4) (y 3) (direction right) (internal ,i)))
 
-	   ;; ----> / 
+	   ;; right /  : up
 	   (test!
 	    (begin	      
 	      (train-shunt-right
 	       `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'slash)
 	      )	    
-	    `((train-no 1) (x 4) (y 2) (direction up) (internal ,i)))
+	    `((train-no 1) (x 3) (y 2) (direction up) (internal ,i)))
 
-	   ;; ----> \ 
+	   ;; right \ : down 
 	   (test!
 	    (begin	      
 	      (train-shunt-right
 	       `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'backslash)
 	      )	    
-	    `((train-no 1) (x 4) (y 4) (direction down) (internal ,i)))
+	    `((train-no 1) (x 3) (y 4) (direction down) (internal ,i)))
 	   
 	   
   ) ;; do-list
@@ -195,6 +197,7 @@ moving up + backslash -> \ move left
 
 |#
 
+
 (test-group "train-shunt-up"
 
   (test!
@@ -207,24 +210,23 @@ moving up + backslash -> \ move left
   (test!
    (train-shunt-up
     `((train-no 1) (x 3) (y 3) (direction up) (internal left)) 'cross)
-    `((train-no 1) (x 2) (y 2) (direction left) (internal ahead))
+    `((train-no 1) (x 2) (y 3) (direction left) (internal ahead))
    )
 
   (test!
    (train-shunt-up
     '((train-no 1) (x 3) (y 3) (direction up) (internal ahead)) 'cross)
-    '((train-no 1) (x 3) (y 1) (direction up) (internal right))
+    '((train-no 1) (x 3) (y 2) (direction up) (internal right))
    )
 
   
   (test!
    (train-shunt-up
     '((train-no 1) (x 3) (y 3) (direction up) (internal right)) 'cross)
-    '((train-no 1) (x 4) (y 2) (direction right) (internal left))
+    '((train-no 1) (x 4) (y 3) (direction right) (internal left))
    )
 
- 
-  
+   
   ;; for each internal configuration
   (do-list (i '(left right ahead))
 	   ;; up /  : right
@@ -233,7 +235,7 @@ moving up + backslash -> \ move left
 	      (train-shunt-up
 	       `((train-no 1) (x 3) (y 3) (direction up) (internal ,i)) 'slash)
 	      )	    
-	       `((train-no 1) (x 4) (y 2) (direction right) (internal ,i)))
+	       `((train-no 1) (x 4) (y 3) (direction right) (internal ,i)))
 
 	   ;; up \  : left
 	   (test!
@@ -241,7 +243,7 @@ moving up + backslash -> \ move left
 	      (train-shunt-up
 	       `((train-no 1) (x 3) (y 3) (direction up) (internal ,i)) 'backslash)
 	      )	    
-	       `((train-no 1) (x 2) (y 2) (direction left) (internal ,i)))
+	       `((train-no 1) (x 2) (y 3) (direction left) (internal ,i)))
 
   ) ;; do-list
     
@@ -251,33 +253,36 @@ moving up + backslash -> \ move left
 
 (test-group "train-shunt-down"
 
+  
+  ;; straight down 
   (test!
    (train-shunt-down
     `((train-no 1) (x 3) (y 3) (direction down) (internal left)) 'vert)
     `((train-no 1) (x 3) (y 4) (direction down) (internal left))
    )
 
-
+  
   ;; down + left : right
   (test!
    (train-shunt-down
-    `((train-no 1) (x 3) (y 3) (direction down) (internal left)) 'cross)
-    `((train-no 1) (x 4) (y 4) (direction right) (internal ahead))
+    `((train-no 1) (x 3) (y 3) (direction down)  (internal left)) 'cross)
+    `((train-no 1) (x 4) (y 3) (direction right) (internal ahead))
    )
 
-  
+
+  ;; down + ahead : down
   (test!
    (train-shunt-down
     '((train-no 1) (x 3) (y 3) (direction down) (internal ahead)) 'cross)
-    '((train-no 1) (x 3) (y 5) (direction down) (internal right))
+    '((train-no 1) (x 3) (y 4) (direction down) (internal right))
    )
 
   
-  
+  ;; down + right : left
   (test!
    (train-shunt-down
     '((train-no 1) (x 3) (y 3) (direction down) (internal right)) 'cross)
-    '((train-no 1) (x 2) (y 4) (direction left) (internal left))
+    '((train-no 1) (x 2) (y 3) (direction left) (internal left))
    )
 
   
@@ -290,7 +295,7 @@ moving up + backslash -> \ move left
 	      (train-shunt-down
 	       `((train-no 1) (x 3) (y 3) (direction down) (internal ,i)) 'slash)
 	      )	    
-	       `((train-no 1) (x 2) (y 4) (direction left) (internal ,i)))
+	       `((train-no 1) (x 2) (y 3) (direction left) (internal ,i)))
 
 	   ;; down \  : right
 	   (test!
@@ -298,13 +303,11 @@ moving up + backslash -> \ move left
 	      (train-shunt-down
 	       `((train-no 1) (x 3) (y 3) (direction down) (internal ,i)) 'backslash)
 	      )	    
-	       `((train-no 1) (x 4) (y 4) (direction right) (internal ,i)))
+	       `((train-no 1) (x 4) (y 3) (direction right) (internal ,i)))
 
   ) ;; do-list
   
 );; test-group
-
-
 
 
 (test-exit)
