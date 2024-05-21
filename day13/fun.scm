@@ -38,6 +38,7 @@
 
 (import matchable)
 
+
 ;;------------------------- code -----------------------------------
 (define input (call-with-input-file "input"
 		(lambda (port)
@@ -217,45 +218,6 @@
 
 
 
-(define (test-train-shunt-left)
-
-  (assert
-   (equal?
-    (train-shunt-left '((train-no 1) (x 3) (y 3) (direction left) (internal left)) 'cross)
-    '((train-no 1) (x 2) (y 4) (direction down) (internal ahead))))
-
-  (assert
-   (equal?
-    (train-shunt-left '((train-no 1) (x 3) (y 3) (direction left) (internal ahead)) 'cross)
-    '((train-no 1) (x 1) (y 3) (direction left) (internal right))))
-
-  (assert
-   (equal?
-    (train-shunt-left '((train-no 1) (x 3) (y 3) (direction left) (internal right)) 'cross)
-    '((train-no 1) (x 2) (y 2) (direction up) (internal left))))
-
-  ;; for each internal configuration
-  (do-list (i '(right left ahead))
-	   ;; horz does not affect internals
-	   (assert
-	    (equal?
-	     (train-shunt-left `((train-no 1) (x 3) (y 3) (direction left) (internal ,i)) 'horz)
-	     `((train-no 1) (x 2) (y 3) (direction left) (internal ,i))))
-	   
-     (assert
-      (equal?
-       (train-shunt-left
-	`((train-no 1) (x 3) (y 3) (direction left) (internal ,i)) 'slash)
-       `((train-no 1) (x 2) (y 4) (direction down) (internal ,i))))
-     
-     )
-  #t)
-
-
-
-
-    
-
   
   
 
@@ -270,8 +232,10 @@
 	   (direction (second (assoc 'direction state)))
 	   (internal (second (assoc 'internal state))))
       (cond
+       ;;
        ((eq? at 'backslash) ;; \ go down
 	`((train-no ,train-no) (x ,(+ x 1)) (y ,(+ y 1)) (direction down) (internal ,internal)))
+       ;;
        ((eq? at 'slash) ;; / go up
 	`((train-no ,train-no) (x ,(+ x 1)) (y ,(- y 1)) (direction up) (internal ,internal)))
        ;; cross
@@ -291,53 +255,7 @@
        (#t (error (list 'unknown-item at 'train-shunt-left state)))))))
 
 
-
-
-;; ---------------------------------------------------------------------------------
-
-(define (test-train-shunt-right)
-
-  (assert
-   (equal?
-    (train-shunt-right
-     `((train-no 1) (x 3) (y 3) (direction right) (internal left)) 'cross)
-     `((train-no 1) (x 4) (y 2) (direction up) (internal ahead))))
-
-  (assert
-   (equal?
-    (train-shunt-right
-     `((train-no 1) (x 3) (y 3) (direction right) (internal ahead)) 'cross)
-     `((train-no 1) (x 1) (y 3) (direction left) (internal right))))
-  ;; 
-  ;; (assert
-  ;;  (equal?
-  ;;   (train-shunt-right
-  ;;    `((train-no 1) (x 3) (y 3) (direction right) (internal right)) 'cross)
-  ;;    `((train-no 1) (x 2) (y 2) (direction up) (internal left))))
-  ;; 
-  ;; ;; for each internal configuration
-  ;; (do-list (i '(right left ahead))
-  ;; 	   ;; horz does not affect internals
-  ;; 	   (assert
-  ;; 	    (equal?
-  ;; 	     (train-shunt-right
-  ;; 	      `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'horz)
-  ;; 	      `((train-no 1) (x 2) (y 3) (direction left) (internal ,i))))
-  ;; 	   
-  ;; 	   (assert
-  ;; 	    (equal?
-  ;; 	     (train-shunt-right
-  ;; 	      `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'slash)
-  ;; 	      `((train-no 1) (x 2) (y 4) (direction down) (internal ,i))))
-  ;; 	   
-  ;; 	   )
-  
-  #t)
-
-
-
-
-;;----------------------------up  - y 1---------------------              
+;;----------------------------up  - y 1---------------------
 (define train-shunt-up
   (lambda (state at)
     (let* ((train-no (second (assoc 'train-no state)))
@@ -346,9 +264,11 @@
 	  (direction (second (assoc 'direction state)))
 	  (internal (second (assoc 'internal state))))
       (cond
+       ;; back slash
        ((eq? at 'backslash) ;; \ go left
 	`((train-no ,train-no) (x ,(- x 1)) (y ,(- y 1)) (direction left) (internal ,internal)))
-       
+
+       ;; slash
        ((eq? at 'slash) ;; / go right
 	`((train-no ,train-no) (x ,(+ x 1)) (y ,(- y 1)) (direction right) (internal ,internal)))       
 
@@ -362,7 +282,7 @@
 	  `((train-no ,train-no) (x ,x) (y ,(+ -2 y)) (direction up) (internal ,(nx internal))))
 	 
 	 ((eq? internal 'right) ; right
-	  `((train-no ,train-no) (x ,(+ x 1)) (y ,(+ 1 y)) (direction right) (internal ,(nx internal))))
+	  `((train-no ,train-no) (x ,(+ x 1)) (y ,(+ -1 y)) (direction right) (internal ,(nx internal))))
 	 
 	 (error (list 'train-shunt-up at 'crossing 'bad 'internal))))
        	
@@ -370,6 +290,7 @@
        ((eq? at 'vert)
 	`((train-no ,train-no) (x ,x) (y ,(- y 1)) (direction ,direction) (internal ,internal)))      
        (#t (error (list 'unknown-item at 'train-shunt-left state)))))))
+
 
 
 ;; ----------------------down + y 1 ----------------------------------
@@ -391,13 +312,13 @@
 	;;'train-shunt-down-cross-not-implemented
 	(cond
 	 ((eq? internal 'left) ; 
-	  `((train-no ,train-no) (x ,(+ x 1)) (y ,(+ -1 y)) (direction up) (internal ,(nx internal))))
+	  `((train-no ,train-no) (x ,(+ x 1)) (y ,(+ 1 y)) (direction right) (internal ,(nx internal))))
 	 
 	 ((eq? internal 'ahead) ;  
-	  `((train-no ,train-no) (x ,(+ x 2)) (y ,y) (direction right) (internal ,(nx internal))))
+	  `((train-no ,train-no) (x ,x) (y ,(+ 2 y)) (direction down) (internal ,(nx internal))))
 	 
 	 ((eq? internal 'right) ;  
-	  `((train-no ,train-no) (x ,(- x 1)) (y ,(+ 1 y)) (direction down) (internal ,(nx internal))))
+	  `((train-no ,train-no) (x ,(- x 1)) (y ,(+ 1 y)) (direction left) (internal ,(nx internal))))
 	 
 	 (error (list 'train-shunt-right at 'crossing 'bad 'internal))))
        ;; vert

@@ -122,12 +122,6 @@ moving left + backslash -> \ move up
 
 #|
 
-cross
-horz
-vert ?
-slash
-backslash
-
 moving right + cross -> depends on internal which direction to go next 
 moving right + horz -> continue right
 moving right + slash ->   /  move up
@@ -136,98 +130,182 @@ moving right + backslash -> \ move down
 |#
 
 (test-group "train-shunt-right"
+
   
   (test!
-   (train-shunt-right '((train-no 1) (x 3) (y 3) (direction right) (internal right)) 'cross)
-   '((train-no 1) (x 4) (y 4) (direction down) (internal ahead))
-   )
-
-
-  #|
-  (test!
-   (train-shunt-right '((train-no 1) (x 3) (y 3) (direction right) (internal ahead)) 'cross)
-   '((train-no 1) (x 1) (y 3) (direction right) (internal right))
+   (train-shunt-right
+    `((train-no 1) (x 3) (y 3) (direction right) (internal right)) 'cross)
+   `((train-no 1) (x 4) (y 4) (direction down) (internal left))
    )
 
 
   (test!
-   (train-shunt-right '((train-no 1) (x 3) (y 3) (direction right) (internal right)) 'cross)
-   '((train-no 1) (x 2) (y 2) (direction up) (internal right))
+   (train-shunt-right
+    '((train-no 1) (x 3) (y 3) (direction right) (internal ahead)) 'cross)
+    '((train-no 1) (x 5) (y 3) (direction right) (internal right))
    )
 
+  
+  (test!
+   (train-shunt-right
+    '((train-no 1) (x 3) (y 3) (direction right) (internal left)) 'cross)
+    '((train-no 1) (x 4) (y 2) (direction up) (internal ahead))
+   )
+
+  
   ;; for each internal configuration
-  (do-list (i '(right right ahead))
+  (do-list (i '(left right ahead))
 	   ;; horz does not affect internals
 	   (test!
 	    (begin
-	      (train-shunt-right `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'horz)
+	      (train-shunt-right
+	       `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'horz)
 	      )
-	     `((train-no 1) (x 2) (y 3) (direction right) (internal ,i)))
-	   
+	       `((train-no 1) (x 4) (y 3) (direction right) (internal ,i)))
+
+	   ;; ----> / 
 	   (test!
 	    (begin	      
 	      (train-shunt-right
 	       `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'slash)
 	      )	    
-	    `((train-no 1) (x 2) (y 4) (direction down) (internal ,i)))
+	    `((train-no 1) (x 4) (y 2) (direction up) (internal ,i)))
+
+	   ;; ----> \ 
+	   (test!
+	    (begin	      
+	      (train-shunt-right
+	       `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'backslash)
+	      )	    
+	    `((train-no 1) (x 4) (y 4) (direction down) (internal ,i)))
+	   
+	   
   ) ;; do-list
-
-    |#
-
   );; test-group
+
+
+
+
+#|
+
+moving up + cross -> depends on internal which direction to go next 
+moving up + vert -> continue up
+moving up + slash ->   /  move right
+moving up + backslash -> \ move left 
+
+|#
+
+(test-group "train-shunt-up"
+
+  (test!
+   (train-shunt-up
+    `((train-no 1) (x 3) (y 3) (direction up) (internal left)) 'vert)
+    `((train-no 1) (x 3) (y 2) (direction up) (internal left))
+   )
+
   
+  (test!
+   (train-shunt-up
+    `((train-no 1) (x 3) (y 3) (direction up) (internal left)) 'cross)
+    `((train-no 1) (x 2) (y 2) (direction left) (internal ahead))
+   )
+
+  (test!
+   (train-shunt-up
+    '((train-no 1) (x 3) (y 3) (direction up) (internal ahead)) 'cross)
+    '((train-no 1) (x 3) (y 1) (direction up) (internal right))
+   )
+
+  
+  (test!
+   (train-shunt-up
+    '((train-no 1) (x 3) (y 3) (direction up) (internal right)) 'cross)
+    '((train-no 1) (x 4) (y 2) (direction right) (internal left))
+   )
+
+ 
+  
+  ;; for each internal configuration
+  (do-list (i '(left right ahead))
+	   ;; up /  : right
+	   (test!
+	    (begin	      
+	      (train-shunt-up
+	       `((train-no 1) (x 3) (y 3) (direction up) (internal ,i)) 'slash)
+	      )	    
+	       `((train-no 1) (x 4) (y 2) (direction right) (internal ,i)))
+
+	   ;; up \  : left
+	   (test!
+	    (begin	      
+	      (train-shunt-up
+	       `((train-no 1) (x 3) (y 3) (direction up) (internal ,i)) 'backslash)
+	      )	    
+	       `((train-no 1) (x 2) (y 2) (direction left) (internal ,i)))
+
+  ) ;; do-list
+    
+);; test-group
 
 
 
-;; --------------------------------------------------------------------------------------------------------
+(test-group "train-shunt-down"
+
+  (test!
+   (train-shunt-down
+    `((train-no 1) (x 3) (y 3) (direction down) (internal left)) 'vert)
+    `((train-no 1) (x 3) (y 4) (direction down) (internal left))
+   )
+
+
+  ;; down + left : right
+  (test!
+   (train-shunt-down
+    `((train-no 1) (x 3) (y 3) (direction down) (internal left)) 'cross)
+    `((train-no 1) (x 4) (y 4) (direction right) (internal ahead))
+   )
+
+  
+  (test!
+   (train-shunt-down
+    '((train-no 1) (x 3) (y 3) (direction down) (internal ahead)) 'cross)
+    '((train-no 1) (x 3) (y 5) (direction down) (internal right))
+   )
+
+  
+  
+  (test!
+   (train-shunt-down
+    '((train-no 1) (x 3) (y 3) (direction down) (internal right)) 'cross)
+    '((train-no 1) (x 2) (y 4) (direction left) (internal left))
+   )
+
+  
+  ;; for each internal configuration
+  (do-list (i '(left right ahead))
+	   
+	   ;; down /  : left
+	   (test!
+	    (begin	      
+	      (train-shunt-down
+	       `((train-no 1) (x 3) (y 3) (direction down) (internal ,i)) 'slash)
+	      )	    
+	       `((train-no 1) (x 2) (y 4) (direction left) (internal ,i)))
+
+	   ;; down \  : right
+	   (test!
+	    (begin	      
+	      (train-shunt-down
+	       `((train-no 1) (x 3) (y 3) (direction down) (internal ,i)) 'backslash)
+	      )	    
+	       `((train-no 1) (x 4) (y 4) (direction right) (internal ,i)))
+
+  ) ;; do-list
+  
+);; test-group
 
 
 
-
-;; (define (test-train-shunt-right)
-;; 
-;;   (assert
-;;    (equal?
-;;     (train-shunt-right
-;;      `((train-no 1) (x 3) (y 3) (direction right) (internal left)) 'cross)
-;;      `((train-no 1) (x 4) (y 2) (direction up) (internal ahead))))
-;; 
-;;   (assert
-;;    (equal?
-;;     (train-shunt-right
-;;      `((train-no 1) (x 3) (y 3) (direction right) (internal ahead)) 'cross)
-;;      `((train-no 1) (x 1) (y 3) (direction left) (internal right))))
-;;   ;; 
-;;   ;; (assert
-;;   ;;  (equal?
-;;   ;;   (train-shunt-right
-;;   ;;    `((train-no 1) (x 3) (y 3) (direction right) (internal right)) 'cross)
-;;   ;;    `((train-no 1) (x 2) (y 2) (direction up) (internal left))))
-;;   ;; 
-;;   ;; ;; for each internal configuration
-;;   ;; (do-list (i '(right left ahead))
-;;   ;; 	   ;; horz does not affect internals
-;;   ;; 	   (assert
-;;   ;; 	    (equal?
-;;   ;; 	     (train-shunt-right
-;;   ;; 	      `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'horz)
-;;   ;; 	      `((train-no 1) (x 2) (y 3) (direction left) (internal ,i))))
-;;   ;; 	   
-;;   ;; 	   (assert
-;;   ;; 	    (equal?
-;;   ;; 	     (train-shunt-right
-;;   ;; 	      `((train-no 1) (x 3) (y 3) (direction right) (internal ,i)) 'slash)
-;;   ;; 	      `((train-no 1) (x 2) (y 4) (direction down) (internal ,i))))
-;;   ;; 	   
-;;   ;; 	   )
-;;   
-;;   #t)
-;; 
-;; 
-;; 
-;; (define test-train-shunt-up #t)
-;; 
-;; (define test-train-shunt-down #t)
 
 (test-exit)
 
