@@ -151,22 +151,6 @@
 ;; train can hit + cause it to do silly
 ;; train can hit /
 ;; train can hit \
-;; 
-
-       
-       ;; 	(cond
-       ;; 	 ((eq? (grid (- x 1) y) 'backslash) ;; \
-       ;; 	  state ;;(list (- x 1) (- y 1) 'up internal)
-       ;; 	  )
-       ;; 	 (#t
-       ;; 	  state)))
-       ;; ((eq? direction 'right)
-       ;; 	`((train-no ,train-no) (x ,x) (y ,y) (direction ,direction) (internal ,internal)))
-       ;; ((eq? direction 'up)
-       ;; 	`((train-no ,train-no) (x ,x) (y ,y) (direction ,direction) (internal ,internal)))
-       ;; ((eq? direction 'down)
-       ;; 	`((train-no ,train-no) (x ,x) (y ,y) (direction ,direction) (internal ,internal)))
-
 
 ;; UP means - y 1
 ;; DOWN means + y 1
@@ -187,556 +171,286 @@
      (#t (error (list 'nx 'bad 'direction dir))))))
 
 
-
-;; ----------------------------- ok x - 1 ----------------------------
-(define train-shunt-left
-  (lambda (state at)
-    (let* ((train-no (second (assoc 'train-no state)))
-	   (x (second (assoc 'x state)))
-	   (y (second (assoc 'y state)))
-	   (direction (second (assoc 'direction state)))
-	   (internal (second (assoc 'internal state))))
-      (cond
-       ;; 
-       ((eq? at 'backslash) ;; \ go up
-	`((train-no ,train-no) (x ,x) (y ,(- y 1)) (direction up) (internal ,internal)))
-       ;; 
-       ((eq? at 'slash) ;; / go down
-	`((train-no ,train-no) (x ,x) (y ,(+ y 1)) (direction down) (internal ,internal)))
-       ;; crossing
-       ((eq? at 'cross)
-	;;'train-shunt-left-cross-not-implemented
+(define make-train
+  (lambda (no x y dir)
+    (let ((int 'left)
+	  (old-x x)
+	  (old-y y))
+      (lambda (op)
 	(cond
-	 ((eq? internal 'left) ; down 
-	  `((train-no ,train-no) (x ,x) (y ,(+ 1 y)) (direction down) (internal ,(nx internal))))
-	 ((eq? internal 'ahead) ; left 
-	  `((train-no ,train-no) (x ,(- x 1)) (y ,y) (direction left) (internal ,(nx internal))))
-	 ((eq? internal 'right) ; up  
-	  `((train-no ,train-no) (x ,x) (y ,(+ -1 y)) (direction up) (internal ,(nx internal))))
-	 (error (list 'train-shunt-left at 'crossing 'bad 'internal))))
-       ;; horz
-       ((eq? at 'horz)
-	`((train-no ,train-no) (x ,(- x 1)) (y ,y) (direction ,direction) (internal ,internal)))
-       (#t (error (list 'unknown-item at 'train-shunt-left state)))))))
+	 ((eq? op 'state) `((train-no ,no)(x ,x)(y ,y)(direction ,dir)(internal ,int)(old-x ,old-x)(old-y ,old-y)))
+	 ((eq? op 'tick)
+	  (set! old-x x)
+	  (set! old-y y)
+	  (let ((at (grid x y)))
+	    (cond
+	     ((eq? at 'horz)
+	      (cond
+	       ((eq? dir 'left) (set! dir 'left) (set! x (- x 1)))
+	       ((eq? dir 'right) (set! dir 'right) (set! x (+ x 1)))
+	       (#t (error (list "train : horz - bad dir combo " 'train-no no 'x x 'y y 'dir dir 'int int)))))
+
+	     ;; verticals 
+	     ((eq? at 'vert)
+	      (cond
+	       ((eq? dir 'up) (set! dir 'up) (set! y (- y 1)))
+	       ((eq? dir 'down) (set! dir 'down) (set! y (+ y 1)))
+	       (#t (error (list "train : horz - bad dir combo " 'train-no no 'x x 'y y 'dir dir 'int int)))))
+
+	     ;; slash  / 
+	     ((eq? at 'slash)
+	      (cond
+	       ((eq? dir 'up) (set! dir 'right) (set! x (+ x 1)))
+	       ((eq? dir 'down) (set! dir 'left) (set! x (- x 1)))
+	       ((eq? dir 'left) (set! dir 'down) (set! y (+ y 1)))
+	       ((eq? dir 'right) (set! dir 'up) (set! y (- y 1)))
+	       (#t (error (list "train : slash - bad dir " 'train-no no 'x x 'y y 'dir dir 'int int)))))
+	     
+	     ;; backslash \
+	     ((eq? at 'backslash)
+	      (cond
+	       ((eq? dir 'up) (set! dir 'left) (set! x (- x 1)))
+	       ((eq? dir 'down) (set! dir 'right) (set! x (+ x 1)))
+	       ((eq? dir 'left) (set! dir 'up) (set! y (- y 1)))
+	       ((eq? dir 'right) (set! dir 'down) (set! y (+ y 1)))
+	       (#t (error (list "train : backslash - bad dir " 'train-no no 'x x 'y y 'dir dir 'int int)))))
+	       	     	     
+	     ;; cross 
+	     ((eq? at 'cross)
+	      (cond
+	       ((and (eq? dir 'left) (eq? int 'left)) (set! dir 'down) (set! y (+ y 1)))
+	       ((and (eq? dir 'left) (eq? int 'right)) (set! dir 'up) (set! y (- y 1)))
+	       ((and (eq? dir 'left) (eq? int 'ahead)) (set! dir 'left) (set! x (- x 1)))
+	       
+	       ((and (eq? dir 'right) (eq? int 'left)) (set! dir 'up) (set! y (- y 1)))
+	       ((and (eq? dir 'right) (eq? int 'right)) (set! dir 'down) (set! y (+ y 1)))
+	       ((and (eq? dir 'right) (eq? int 'ahead)) (set! dir 'right) (set! x (+ x 1)))
+
+	       ((and (eq? dir 'up) (eq? int 'left)) (set! dir 'left) (set! x (- x 1)))
+	       ((and (eq? dir 'up) (eq? int 'right)) (set! dir 'right) (set! x (+ x 1)))
+	       ((and (eq? dir 'up) (eq? int 'ahead)) (set! dir 'up) (set! y (- y 1)))
+
+	       ((and (eq? dir 'down) (eq? int 'left)) (set! dir 'right) (set! x (+ x 1)))
+	       ((and (eq? dir 'down) (eq? int 'right)) (set! dir 'left) (set! x (- x 1)))
+	       ((and (eq? dir 'down) (eq? int 'ahead)) (set! dir 'down) (set! y (+ y 1)))
+
+	       (#t (error (list "train : cross bad dir int combo " 'train-no no 'x x 'y y 'dir dir 'int int))))
+	      ;; next internal state left -> ahead -> right -> .... rinse n repeat 
+	      (set! int (nx int)))
+
+	     ;; unrecognised square
+	     (#t
+	      (error (list "train : dont know this square type " 'type at 'train-no no 'x x 'y y 'dir dir 'int int)))
+	     ;; 
+	     ))))))))
+
+
+(define initial-trains
+  (lambda ()
+  (map (lambda (x)
+	 (match x
+	   ( (('train-no no)('x x)('y y)('direction dir)('internal int))
+	     (make-train no x y dir)
+	     )))
+        '(((train-no 1) (x 73) (y 0) (direction left) (internal left))
+	  ((train-no 6) (x 134) (y 43) (direction left) (internal left))
+	  ((train-no 7) (x 38) (y 57) (direction left) (internal left))
+	  ((train-no 11) (x 31) (y 87) (direction left) (internal left))
+	  ((train-no 13) (x 85) (y 97) (direction left) (internal left))
+	  ((train-no 17) (x 107) (y 133) (direction left) (internal left))
+	  ((train-no 2) (x 77) (y 13) (direction right) (internal left))
+	  ((train-no 4) (x 40) (y 39) (direction right) (internal left))
+	  ((train-no 5) (x 71) (y 42) (direction right) (internal left))
+	  ((train-no 9) (x 98) (y 66) (direction right) (internal left))
+	  ((train-no 15) (x 78) (y 116) (direction right) (internal left))
+	  ((train-no 3) (x 66) (y 20) (direction down) (internal left))
+	  ((train-no 10) (x 49) (y 80) (direction down) (internal left))
+	  ((train-no 14) (x 6) (y 107) (direction down) (internal left))
+	  ((train-no 16) (x 40) (y 131) (direction down) (internal left))
+	  ((train-no 8) (x 143) (y 59) (direction up) (internal left))
+	  ((train-no 12) (x 24) (y 96) (direction up) (internal left))))))
+
 
 
  
+(define remove-train
+  (lambda (n xs)
+    (let ((ys '()))
+      (do-list (fn xs)
+	      (cond
+	       ((= (second (assoc 'train-no (fn 'state))) n)
+		#f ;; ignore it
+		)
+	       (#t (set! ys (cons fn ys)))))
+      ys)))
+
+
+;; aka find-collision
+(define remove-crashed-trains
+  (lambda (trains)
+    (let ((collisions '())
+	  (remove-list '()))
+      (do-list (train-a trains)
+	       (do-list (train-b trains)
+			(match (train-a 'state)
+			  ( (('train-no ano)
+			     ('x ax)
+			     ('y ay)
+			     ('direction adir)
+			     ('internal aint)
+			     ('old-x aox)
+			     ('old-y aoy))
+			    (match (train-b 'state)
+			      ( (('train-no bno)
+				 ('x bx)
+				 ('y by)
+				 ('direction bdir)
+				 ('internal bint)
+				 ('old-x box)
+				 ('old-y boy))
+
+				;; ensure compare different trains
+				(cond
+				 ((not (= ano bno))
+				  (cond
+				   ((and (= ax bx) (= ay by))
+				    (format #t "collision conv : ~a ~a ! ~%" (train-a 'state) (train-b 'state))
+				    (set! collisions (cons (list train-a train-b) collisions))
+				    (set! remove-list (cons train-a remove-list))
+				    (set! remove-list (cons train-b remove-list))
+				    )
+				   
+				   ((and (= ax box) (= ay boy) (= bx aox) (= by aoy))
+				    (format #t "collision pass : ~a ~a !~%" (train-a 'state) (train-b 'state))
+				    (set! remove-list (cons train-a remove-list))
+				    (set! remove-list (cons train-b remove-list))				
+				    (set! collisions (cons (list train-a train-b) collisions)))
+				   ))))				
+				(_ (error "find-collision - no match b"))))
+			    (_ (error "find-collision - no match a")))))
+      (do-list (train remove-list)
+	       (match (train 'state)
+		 ( (('train-no no)('x x)('y y)('direction dir)('internal int)('old-x ox)('old-y oy))
+		   ;; remove train no from trains list
+		   (set! trains (remove-train no trains))
+		   )
+		 ( _ (error "find-collision - no match remove list "))))
+
+      ;; how many trains remaining ...
+      (when (not (null? collisions))
+	(format #t "trains remaining ~a ~%" (length trains)))
+      
+      trains)))
 
 
 
-
-;;-----------------------------ok x + 1 --------------------       
+	     
     
-(define train-shunt-right
-  (lambda (state at)
-    (let* ((train-no (second (assoc 'train-no state)))
-	   (x (second (assoc 'x state)))
-	   (y (second (assoc 'y state)))
-	   (direction (second (assoc 'direction state)))
-	   (internal (second (assoc 'internal state))))
-      (cond
-       ;;
-       ((eq? at 'backslash) ;; \ go down
-	`((train-no ,train-no) (x ,x) (y ,(+ y 1)) (direction down) (internal ,internal)))
-       ;;
-       ((eq? at 'slash) ;; / go up
-	`((train-no ,train-no) (x ,x) (y ,(- y 1)) (direction up) (internal ,internal)))
-       ;; cross
-       ((eq? at 'cross)
-	;;'train-shunt-right-cross-not-implemented
-	(cond
-	 ((eq? internal 'left) ; up
-	  `((train-no ,train-no) (x ,x) (y ,(+ -1 y)) (direction up) (internal ,(nx internal))))
-	 ((eq? internal 'ahead) ; right 
-	  `((train-no ,train-no) (x ,(+ x 1)) (y ,y) (direction right) (internal ,(nx internal))))
-	 ((eq? internal 'right) ; down 
-	  `((train-no ,train-no) (x ,x) (y ,(+ 1 y)) (direction down) (internal ,(nx internal))))
-	 (error (list 'train-shunt-right at 'crossing 'bad 'internal))))
-       ;; horz
-       ((eq? at 'horz)
-	`((train-no ,train-no) (x ,(+ x 1)) (y ,y) (direction ,direction) (internal ,internal)))
-       (#t (error (list 'unknown-item at 'train-shunt-right state)))))))
-
-
-
-;;----------------------------up  - y 1---------------------
-(define train-shunt-up
-  (lambda (state at)
-    (let* ((train-no (second (assoc 'train-no state)))
-	  (x (second (assoc 'x state)))
-	  (y (second (assoc 'y state)))
-	  (direction (second (assoc 'direction state)))
-	  (internal (second (assoc 'internal state))))
-      (cond
-       ;; back slash
-       ((eq? at 'backslash) ;; \ go left
-	`((train-no ,train-no) (x ,(- x 1)) (y ,y) (direction left) (internal ,internal)))
-
-       ;; slash
-       ((eq? at 'slash) ;; / go right
-	`((train-no ,train-no) (x ,(+ x 1)) (y ,y) (direction right) (internal ,internal)))       
-
-       ;; cross
-       ((eq? at 'cross)
-	;;'train-shunt-up-cross-not-implemented
-	(cond
-	 ((eq? internal 'left) ; left
-	  `((train-no ,train-no) (x ,(+ -1 x)) (y ,y) (direction left) (internal ,(nx internal))))
-	 ((eq? internal 'ahead) ; up 
-	  `((train-no ,train-no) (x ,x) (y ,(+ -1 y)) (direction up) (internal ,(nx internal))))
-	 
-	 ((eq? internal 'right) ; right
-	  `((train-no ,train-no) (x ,(+ x 1)) (y ,y) (direction right) (internal ,(nx internal))))
-	 
-	 (error (list 'train-shunt-up at 'crossing 'bad 'internal))))
-       	
-       ;; vert
-       ((eq? at 'vert)
-	`((train-no ,train-no) (x ,x) (y ,(- y 1)) (direction ,direction) (internal ,internal)))      
-       (#t (error (list 'unknown-item at 'train-shunt-up state)))))))
-
-
-
-;; ----------------------down + y 1 ----------------------------------
-
-(define train-shunt-down
-  (lambda (state at)
-    (let* ((train-no (second (assoc 'train-no state)))
-	  (x (second (assoc 'x state)))
-	  (y (second (assoc 'y state)))
-	  (direction (second (assoc 'direction state)))
-	  (internal (second (assoc 'internal state))))
-      (cond
-       ((eq? at 'backslash) ;; \ go right
-	`((train-no ,train-no) (x ,(+ x 1)) (y ,y) (direction right) (internal ,internal)))
-       ((eq? at 'slash) ;; / go left
-	`((train-no ,train-no) (x ,(- x 1)) (y ,y) (direction left) (internal ,internal)))       
-       ;; cross
-       ((eq? at 'cross)
-	;;'train-shunt-down-cross-not-implemented
-	(cond
-	 ((eq? internal 'left) ; right
-	  `((train-no ,train-no) (x ,(+ x 1)) (y ,y) (direction right) (internal ,(nx internal))))
-	 
-	 ((eq? internal 'ahead) ;  down
-	  `((train-no ,train-no) (x ,x) (y ,(+ 1 y)) (direction down) (internal ,(nx internal))))
-	 
-	 ((eq? internal 'right) ;  left
-	  `((train-no ,train-no) (x ,(- x 1)) (y ,y) (direction left) (internal ,(nx internal))))
-	 
-	 (error (list 'train-shunt-down at 'crossing 'bad 'internal))))
-       ;; vert
-       ((eq? at 'vert)
-	`((train-no ,train-no) (x ,x) (y ,(+ y 1)) (direction ,direction) (internal ,internal)))       
-       (#t (error (list 'unknown-item at 'train-shunt-down state)))))))
-
-       
-
-
-(define train-shunt
-  (lambda (state)
-    (let* ((direction (second (assoc 'direction state)))
-	   (x (second (assoc 'x state)))
-	   (y (second (assoc 'y state)))
-	   (at (grid x y)))
-      (cond
-       ((eq? direction 'left) (train-shunt-left state at))
-       ((eq? direction 'up) (train-shunt-up state at))
-       ((eq? direction 'right) (train-shunt-right state at))
-       ((eq? direction 'down) (train-shunt-down state at))
-       (#t 
-        (error (list 'unknown-direction 'train-shunt)))))))
-
-
-(define (remove-trains xs na nb)
-  (let ((res '()))
-    (do-list (x xs)
-	     (let ((n (second (assoc 'train-no x))))
-	       (cond
-		((or (= na n) (= nb n)) #f)
-		(#t (set! res (cons x res))))))
-    res))
-
-
-
 
 #|
-
-do carts occupy same square ?
-x1 = x2 and y1 = y2
-
-|#
-(define cart-equal-position?
-  (lambda (a b)
-    (let ((ax (second (assoc 'x a)))
-	  (ay (second (assoc 'y a)))
-	  (bx (second (assoc 'x b)))
-	  (by (second (assoc 'y b))))
-      (let ((outcome (and (= ax bx) (= ay by))))
-	(if outcome
-	    (begin
-	      ;;(format #t "carts collided ~a ~a : ~a ~a ~%" ax ay bx by)
-	      #t
-	      )
-	    #f)))))
-
-
-#|
-
-do carts appear to be on collision course ?
-if cart 
-
-((train-no 15) (x 77) (y 27) (direction right) (internal ahead))
-
-a up       b up down left right
-a down     b up down left right
-a left     b up down left right
-a right    b up down left right
-
-|#
-(define cart-will-collide?
-  (lambda (a b)
-    (match a
-      (
-       (('train-no ano)('x ax)('y ay)('direction adir)('internal aint))
-       (match b
-	 (
-	  (('train-no bno)('x bx)('y by)('direction bdir)('internal bint))
-
-	  (let ((fax ax)
-		(fay ay)
-		(fbx bx)
-		(fby by))
-
-	    ;; figure out future position of train a			
-	    (cond
-	     ((eq? adir 'left) (set! fax (+ -1 fax)))
-	     ((eq? adir 'right) (set! fax (+ +1 fax)))
-	     ((eq? adir 'up) (set! fay (+ -1 fay)))
-	     ((eq? adir 'down) (set! fay (+ +1 fay))))
-	    
-	    ;; figure out future position of train b
-	    (cond
-	     ((eq? bdir 'left) (set! fbx (+ -1 fbx)))
-	     ((eq? bdir 'right) (set! fbx (+ +1 fbx)))
-	     ((eq? bdir 'up) (set! fby (+ -1 fby)))
-	     ((eq? bdir 'down) (set! fby (+ +1 fby))))
-
-	    ;; collision condition is future case of 
-	    (or
-	     ;; horz collision
-	     (and (= (+ ax  1)  bx) (= ay by) (eq? adir 'right) (eq? bdir 'left))
-	     (and (= (- ax  1) bx) (= ay by) (eq? adir 'left) (eq? bdir 'right))
-	     
-	     ;; vert collision
-	     (and (= ax bx) (= (+ ay 1) by)  (eq? adir 'down) (eq? bdir 'up))
-	     (and (= ax bx) (= (- ay 1) by)  (eq? adir 'up) (eq? bdir 'down))
-	     
-	     (and (= fax fbx) (= fay fby))
-	    )))
-	 (_ (error "cart-will-collide? : no match train b"))))
-      (_ (error "cart-will-collide? : no match train a")))))
-
-
-
-
-
-#|
-> (solver)
-((train-no 12) (x 69) (y 93) (direction right) (internal right))
- 69,93 
-
-
-> (solver)
-((train-no 13) (x 96) (y 92) (direction down) (internal ahead))
- 96,92  is NOT the ACCEPTED answer ...
-because collision detection is squiff
-
-collision simple if sat on same square 
-
-                   A _ B
-                  _  AB _
-
-
-problem with collision detection if two spaces between them , collision is NOT detected !
-ouch
-
-                _A_ _ _ _B_        
-                  _A_ _B_
-                  _B_ _A_
-                _B_ _ _ _A_        
-
-also pre-emptive collision detection may throw off the computation for final result
-
-
+think of a collision like a snake tail
+if both sitting on the others snake then there has been a collision
+timing is also going to be correct , so no worries there regards tick 
 
 |#
 
-
-(define train-collision?
-  (lambda (known)
-    (define train-helper (lambda (xs exit)
-			   (cond
-			    ((null? xs) #f)
-			    (#t (let ((x (car xs))
-				      (ys (cdr xs)))
-				  (do-list (y ys)
-					   (cond
-					    ((cart-will-collide? x y)
-					     
-					     ;; pre-emptive train collision detection
-					     (format #t "pre-emptive collision ~%")
-					     (pp x)
-					     (format #t "~%")
-					     (pp y)
-					     (format #t "~%")
-					     
-					     (exit (list x y)))
-					    ((cart-equal-position? x y)
-					     ;; ;; ---- message -----
-					     (format #t "trains collided ~%")
-					     (pp x)
-					     (format #t "~%")
-					     (pp y)
-					     (format #t "~%")
-					     (exit (list x y)))
-					    
-					    ))
-				  (train-helper (cdr xs) exit))))))
-					    
-    (call/cc (lambda (exit)
-	       (train-helper known exit)
-	       #f))))
-
-
-(define (check-train-collision)
-  (list
-   (train-collision? '(
-		       ((train-no 2) (x 74) (y 1) (direction left) (internal 0))
-		       ((train-no 1) (x 74) (y 1) (direction left) (internal 0))
-		       ))
-   (train-collision? '(
-		       ((train-no 2) (x 75) (y 1) (direction left) (internal 0))
-		       ((train-no 1) (x 74) (y 1) (direction left) (internal 0))
-		       ))
-   (train-collision? '(
-		       ((train-no 1) (x 74) (y 1) (direction left) (internal 0))
-		       ))
-		     
-   ))
-
-
-;; ------------- solver ----------------------
 
 (define solve
-  (lambda (step)
-    ;;(format #t "step ~a ~%" step)
-    ;; (format #t "trains ~%")
-    ;; (pp trains)
+  (lambda ()
+    (let ((trains (initial-trains))
+	  (step 0)
+	  (before '())
+	  (after '()))
+      (letrec ((foo (lambda () ;; loop
+		      (format #t "step ~a ~%" step)
+		      ;; make each train move a step 
+		      (do-list (train trains) (train 'tick))
 
-    (format output "(tick ~a)~%" *tick*)
-    (set! *tick* (+ 1 *tick*))
-    (do-list (train trains)
-	     (format output "~a~%" train))
+		      ;; remove the crashed trains
+		      (set! trains (remove-crashed-trains trains))
 
-    
-    ;; (format #t "~%")
-    ;; (show-track)
-    
-    (let ((crash (train-collision? trains)))
-      (cond
-       ((pair? crash)
-	(let ((a (car crash))
-	      (b (cadr crash)))
-	  (let* ((na (second (assoc 'train-no a)))
-		(nb (second (assoc 'train-no b)))
-		(len-before (length trains))
-		(len-after (- len-before 2)))
-	    (set! trains (remove-trains trains na nb))
-	    ;; only remove 2 trains 
-	    (assert (= len-after (length trains)))
-	    (cond
-	     ((null? (cdr trains)) (car trains))
-	     (#t
-	      ;; remove any other collisions before we move trains
-	      ;; (set! trains (map train-shunt trains))
-	      (solve (+ step 1)))))))
-       (#t
-	(set! trains (map train-shunt trains))
-
-	;; is any train on a corner ?
-	;; doesnt matter , carts can be on corners - so red herring	
-	(solve (+ step 1)))))))
-
-
-
-
-(define (solver)
-  (call-with-output-file "output"
-    (lambda (port)
-      (set! output port)
-
-      ;; display board
-      (format output "(begin-track)~%")
-      (do-list (py (iota (length input)))
-	       (do-list (px (iota (string-length (car input))))
-			(let* ((x px)
-			       (y py)
-			       (at (grid x y)))
-			  (cond
-			   ((not at)  ;; common lisp does not understand #f 
-			    (format output "(track ~a ~a nil)~%" x y at))
-			   (#t
-			    (format output "(track ~a ~a ~a)~%" x y at))))))
-      (format output "(end-track)~%")
-      (let ((first-step 1))
-	(solve first-step)))))
-
-
-
-
-
-
-;;(solver)
-
-;; how big is the track
-(define (show-track)
-  (format #t "~%~%")
-  (do-list (py (iota (length input)))
-	   (do-list (px (iota (string-length (car input))))
-		    (let* ((x px)
-			   (y py)
-			   (at (grid x y))
-			   (dir "^"))
-
-		       
-		      (let ((count 0))	   
-			(do-list (train trains)
-				 (let* ((train-no (second (assoc 'train-no train)))
-					(tx (second (assoc 'x train)))
-					(ty (second (assoc 'y train)))
-					(direction (second (assoc 'direction train)))
-					(internal (second (assoc 'internal train))))
-				   (when
-				       (and (= x tx) (= y ty))
-				     (set! count (+ count 1))
-				     (cond
-				      ((eq? direction 'up) (set! dir "^"))
-				      ((eq? direction 'left) (set! dir "<"))
-				      ((eq? direction 'right) (set! dir ">"))
-				      ((eq? direction 'down) (set! dir "v"))))
-				   ))
-			
 		      (cond
-		       ((< count 1)
-			(cond
-			 ((eq? at 'cross) (format #t "+"))
-			 ((eq? at 'slash) (format #t "/"))
-			 ((eq? at 'backslash) (format #t "\\"))
-			 ((eq? at 'horz) (format #t "-"))
-			 ((eq? at 'vert) (format #t "|"))
-			 ((eq? at #f) (format #t " "))		       
-			 ))
-		       ((= count 1) (format #t "~a" dir))
-		       ((= count 2) (format #t "*"))
-		       ((> count 2) (format #t "?"))
-		       )
+		       ((= (length trains) 1) ((car trains) 'state))
+		       (#t
+			(set! step (+ step 1))
+			(foo))))))
+	(foo)))))
 
-		      (format #t " ")
-		      
-		      ;;(format #t " , ")
-		      )))
-	   (format #t "~%")))
-
-
-
-
-
-
-
-		      
-			       
-
-  
-
-
-
-
-
-
-
-;; ---------------- just want a 2d grid then can process
 
 
 #|
 
+>(solve)
 
-v
-^ also means track is | vertical at this position
+trains remaining 1 
+((train-no 15) (x 131) (y 123) (direction right) (internal right) (old-x 130) (old-y 123))
 
-< also means track is - horizontal at this position 
->
-
-carts are only ever on vertical tracks
-
-+ is an intersection of track
-
-
-
-/
-\
-
-
-
-figure out what type of corner it is
-does the train stop on a corner ?
-
-how many trains are there ?
-
-can we visualise the solution ?
-
-step it forward , step it backwards , speed it up n steps ?
-
-track itself does not change
-
-only have train positions
-
-
-
-|#
-
-
-;; 
-;;(iter)
-
-
-#|
-
-;; -------------------- part I  --- SOLVED --------------------------
-
-step 423 
-trains collided 
-((train-no 11) (x 124) (y 90) (direction up) (internal left))
-               ^^^^^^^^^^^^^^^
-
-((train-no 8) (x 124) (y 90) (direction down) (internal ahead))
-              ^^^^^^^^^^^^^^
-trains have collided 
-
-with ZERO based indexing  x , y of first crash is 124 , 90
-
-124,90      ACCEPTED ANSWER
-
-;; ----------------- part I I ------------------------------
-
-> (solver)
-
-((train-no 13) (x 116) (y 98) (direction down) (internal left))
-
-116,98  .............. FAIL ....... huh ??
-
+ 131,123
 
 |#
 
 
 
+
+
+#|
+
+
+from visualizer
+
+CAIRO-SDL> (gethash 0 *train-history* )
+
+
+ (((TRAIN-NO 1) (X 73) (Y 0) (DIRECTION LEFT) (INTERNAL LEFT))
+ ((TRAIN-NO 6) (X 134) (Y 43) (DIRECTION LEFT) (INTERNAL LEFT))
+ ((TRAIN-NO 7) (X 38) (Y 57) (DIRECTION LEFT) (INTERNAL LEFT))
+ ((TRAIN-NO 11) (X 31) (Y 87) (DIRECTION LEFT) (INTERNAL LEFT))
+ ((TRAIN-NO 13) (X 85) (Y 97) (DIRECTION LEFT) (INTERNAL LEFT))
+ ((TRAIN-NO 17) (X 107) (Y 133) (DIRECTION LEFT) (INTERNAL LEFT)))
+
+ ((TRAIN-NO 2) (X 77) (Y 13) (DIRECTION RIGHT) (INTERNAL LEFT))
+ ((TRAIN-NO 4) (X 40) (Y 39) (DIRECTION RIGHT) (INTERNAL LEFT))
+ ((TRAIN-NO 5) (X 71) (Y 42) (DIRECTION RIGHT) (INTERNAL LEFT))
+ ((TRAIN-NO 9) (X 98) (Y 66) (DIRECTION RIGHT) (INTERNAL LEFT))
+ ((TRAIN-NO 15) (X 78) (Y 116) (DIRECTION RIGHT) (INTERNAL LEFT))
+
+ ((TRAIN-NO 3) (X 66) (Y 20) (DIRECTION DOWN) (INTERNAL LEFT))
+ ((TRAIN-NO 10) (X 49) (Y 80) (DIRECTION DOWN) (INTERNAL LEFT))
+ ((TRAIN-NO 14) (X 6) (Y 107) (DIRECTION DOWN) (INTERNAL LEFT))
+ ((TRAIN-NO 16) (X 40) (Y 131) (DIRECTION DOWN) (INTERNAL LEFT))
+
+ ((TRAIN-NO 8) (X 143) (Y 59) (DIRECTION UP) (INTERNAL LEFT))
+ ((TRAIN-NO 12) (X 24) (Y 96) (DIRECTION UP) (INTERNAL LEFT))
+T
+
+6 matches for "<" in buffer: input
+      1:-|/\                  /---------------------\           /----------------<---------------------------------------------------------------------\      
+     44:|| |||| | | |||  | |    |||  || |  | /-++-----+++--+--+++++-+-+--+++--+-+++-+++--+++-+---+-++-+++-+--++-+-+-+-+--++-+--+---+++--+--++-<-++-++-++\||   
+     58:||  || || | |||  | | /+++++--++-+--+++<+++----++---++-++++-----+-+-+----+-+--+----++++---++++-++++---++-++--+\|  ||  |||   ||| || |||| ||| |  ||||||  
+     88:    |||||| |  | || |||||| |\+-+<+-++---++--++-+--+-+--+-++-++----+---+---++-++--+-++--+++-++--+++---++++-++--++/||| ||| |  |||| |||| |  |||| ||| | |  
+     98:  /-++++++-+--++++\||| || | |   | |    |||  | |    |  | || ||   ||   |   \+-++----++-<++/|| | ||    |||| ||  ||  || |||||  |||| |  | |   ||| ||| | |  
+    134:  |    || | |   |  \+-+--------+--------+---+---------------++--+----+-+----+------+--+---+--------+--+----<+-+---------++-+-/         ||||  |        
+
+
+5 matches for ">" in buffer: input
+     14: | |   |    /-+-+----++--+------+-------+---+-+-+-+----++----++---+-----++--->+--------+----+-+-+----+---++-+-----\  |       |         ||      |   |  
+     40:|| ||||\+-+-+++--++++---+++--++-+--+---+>-----+++-/|  ||||| | |  |||\-+-++++-++--+++-+---+-++-+++-+--++-+-+-+----++-+--+---+-+-++--++---++-++-++-++/  
+     43:|| |||| | | |||  | |\---+++--++-+--+---++-----+++--+--+++++-+-+--+++--+>+++-+++--+++-+---+-++-+++-+--++-+-+-+-+--++-+--+---+++-/|  ||   || || || ||   
+     67:||  \++++-+--++--+-+++++-++--+/ |  | | ||| /--++---++-++++-----+-+-+----+-+--+----++-+++-++++-++++>--+---+--+++--+---+++---+++--+\||||  || |  |||| |  
+    117:      ||||| | | || |||      \--+--+-+----+--+--------++--+-++---++---++---+-+->----+--++-++----+----+-++++/  ||   | |  |||   || |         || |     || 
+
+
+2 matches for "\^" in buffer: input
+     60:||  || || | |||  | | |||\++--++-+--+-+-+++----++---++-++++-----+-+-+----+-+--+----++++---++++-++++---++-/|  |||  ||  |||   |||  | |||| ||| |  |^||||  
+     97:    |||||| |  |||| ||| |^ | |   | |    |||  | |    |  | || ||   ||   |   || ||    ||  |||/+-+-++----++++-++--++--++-+++\|  |||| |  | |   ||| ||| | |  
+
+4 matches for "v" in buffer: input
+     21: | |  ||    ||| ||  |\+--++-----+-------/   | | | |    |||| |||   v|  | ||    |  | |   |    | | | |  |/--++-+----++--+-------+-++---+--++--+---+--\|  
+     81:|    |||| \---+--+-+++++---+-++-+--+-+-++--++-+/ v |  |\++-+-----+---+---++--+--+-++-++++-++--+++---+++--+--/||||||  |||   |||| |||| |  |||| ||||| |  
+    108:  |  |v|||/----+++++++-+----+--\  | |   || ||      \-++--+-++---++---++--++-++-+------++-++-+--+----+-++-++--++---+-++-++--+-++-+--/|    ||| |     || 
+    132:  |    |||| |   |  || |        |  |     v   |               ||  |    | |    |      |  |  \+--------++-+-----+-+---+----/|| | |         ||||  |        
+
+
+(+ 6 5 2 4 )  17 trains
+
+|#
