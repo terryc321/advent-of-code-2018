@@ -1,3 +1,8 @@
+;; 
+;; load the cairo-sdl ffi interface 
+;; (load "/home/terry/code/c2ffi/cairo-sdl/register-asd.lisp")
+;;
+
 
 #|
 
@@ -33,10 +38,6 @@ how will it know to undo ?
 
 |#
 
-;; 
-;; load the cairo-sdl ffi interface 
-;; (load "/home/terry/code/c2ffi/cairo-sdl/register-asd.lisp")
-;;
 
 
 ;; limit to number of squares that can be accomodated
@@ -78,17 +79,24 @@ how will it know to undo ?
 (defparameter *screen-grid-box-width* 60d0)
 (defparameter *screen-grid-box-height* 60d0)
 
-(defparameter *min-screen-grid-box-width*  10d0)
-(defparameter *min-screen-grid-box-height* 10d0)
+(defparameter *min-screen-grid-box-width*  1d0)
+(defparameter *min-screen-grid-box-height* 1d0)
 
 
-(defparameter *screen-grid-box-border-width* 2d0)
-(defparameter *screen-grid-box-border-height* 2d0)
+;; 0d0 no border
+(defparameter *screen-grid-box-border-width* 1d0)
+(defparameter *screen-grid-box-border-height* 1d0)
 
 (defparameter *screen-grid-offset-x* 50d0)
 (defparameter *screen-grid-offset-y* 60d0)
 
 (defparameter *screen-grid-zoom* 1.0d0)
+
+;; -------------problem specific data structures ------------------------
+(defparameter *train-track* nil)
+(defparameter *train-history* nil)
+(defparameter *global-train-tick* 0)
+(defparameter *global-last-train-tick* 0)
 
 
 ;; --------------------------------------------------------
@@ -112,9 +120,9 @@ how will it know to undo ?
 
 ;; ---------old stuff balls , animation ? ------------------
 
-(defparameter ball-1 (make-ball))
-(defparameter ball-2 (make-ball))
-(defparameter ball-3 (make-ball))
+;; (defparameter ball-1 (make-ball))
+;; (defparameter ball-2 (make-ball))
+;; (defparameter ball-3 (make-ball))
 
 (defparameter n-balls 1)
 (defparameter balls (make-array (+ 1 n-balls)))
@@ -260,30 +268,323 @@ how will it know to undo ?
 
 
 
+(defun draw-blank-square (dx dy cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    ;;(cairo-set-source-rgb cr (+ 0.0d0 red 1.0d0) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue 1.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0d0) (+ 0.0d0 green 0.0d0) (+ 0.0d0 blue 0.0d0))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    ;;(cairo-circle cr (+ 0.0d0 ,x) (+ 0.0d0 ,y) 25d0 25d0)
+    (cairo-fill cr)
+    ))
+
+
+(defun draw-cross-square (dx dy cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+
+    ;; black background ?
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    ;; horz
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy (/ *screen-grid-box-height* 3.0d0))
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+
+    ;; vert
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 *screen-grid-box-height*))
+    
+    ;;(cairo-circle cr (+ 0.0d0 ,x) (+ 0.0d0 ,y) 25d0 25d0)
+    (cairo-fill cr)
+    ))
+
+
+;;   C 
+;;  B
+;; A 
+(defun draw-slash-square (dx dy cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+
+    ;; black background ?
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx )
+		     (+ 0.0d0 dy (* 2.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    ;; B
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy (/ *screen-grid-box-height* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+
+    
+    ;; C
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 2.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy )
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    ))
+
+
+
+
+
+
+;; A
+;;  B 
+;;    C
+(defun draw-backslash-square (dx dy cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+
+    ;; black background ?
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx )
+		     (+ 0.0d0 dy )
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    ;; B
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy (/ *screen-grid-box-height* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+
+    
+    ;; C
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 2.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy (* 2.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+
+    
+    ))
+
+
+(defun draw-vert-square (dx dy cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+
+    ;; black background ?
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0) )
+		     (+ 0.0d0 dy )
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    ))
+
+
+
+(defun draw-horz-square (dx dy cr)
+    (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+
+    ;; black background ?
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 1.0) (+ 0.0d0 green) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx )
+		     (+ 0.0d0 dy (/ *screen-grid-box-height* 3.0d0))
+		     (+ 0.0d0  *screen-grid-box-width*)
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0 )))
+    (cairo-fill cr)
+      ))
+
+
+
+
+
+
+(defun draw-train-square-left (dx dy tint cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    
+    ;; green background 
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+    ))
+
+  
+
+
+(defun draw-train-square (dx dy tno tdir tint cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+
+    ;; green background 
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+    (cond
+      ((eq tdir 'left) (draw-train-square-left dx dy tint cr))
+      ;; ((eq? tdir 'right) (draw-train-square-right dx dy tint cr))
+      ;; ((eq? tdir 'up) (draw-train-square-up dx dy tint cr))
+      ;; ((eq? tdir 'down) (draw-train-square-down dx dy tint cr))
+      )))
+
+
+
+;; keep train tick within known good values - ie where always a train on the track
+(defun next-train-tick ()
+  (incf *global-train-tick*)
+  (when (> *global-train-tick* *global-last-train-tick*)
+    (setq *global-train-tick* *global-last-train-tick*)))
+  
+
+(defun prev-train-tick ()
+  (decf *global-train-tick*)
+  (when (< *global-train-tick* 0)
+    (setq *global-train-tick* 0)))
+
+
+
+;;
+;;
+;; infinite drawing area 
+;;
 
 
 (defun draw-screen-grid (cr)
+  ;; lookup trains outside the loop , then just run over 17 trains each square we draw
   (let* ((dx 0)
 	 (dy 0)
-	 (red 1.0d0)
-	 (green 1.0d0)
-	 (blue 1.0d0)
+	 (red 0.0d0)
+	 (green 0.0d0)
+	 (blue 0.0d0)
+	 (trains (gethash *global-train-tick* *train-history*))
 	 )
     (setq dy *screen-grid-offset-y*)
     (loop for y from 0 to 150 do
       (setq dx *screen-grid-offset-x*)
       
       (loop for x from 0 to 150 do
-	
-	(cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
-	(cairo-rectangle cr
-			 (+ 0.0d0 dx)
-			 (+ 0.0d0 dy)
-			 (+ 0.0d0 *screen-grid-box-width*)
-			 (+ 0.0d0 *screen-grid-box-height*))
-	;;(cairo-circle cr (+ 0.0d0 ,x) (+ 0.0d0 ,y) 25d0 25d0)
-	(cairo-fill cr)
 
+
+	;; black background
+	(cairo-set-source-rgb cr (+ 0.0d0 red 0.0d0) (+ 0.0d0 green 0.0d0) (+ 0.0d0 blue 0.0d0))
+	
+	;; white background
+	;;(cairo-set-source-rgb cr (+ 0.0d0 red 1.0d0) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue 1.0d0))
+	
+	;; dispatch on type of train track square we need to draw 
+	(let* ((sq (list (- x *grid-top-x*)  (- y *grid-top-y*)))
+	       (at (gethash sq *train-track*)))
+	  ;;(format t "draw-screen-grid [~a ~a : ~a]~%" x y at)
+	  (cond
+	    ((eq at 'cross) (draw-cross-square dx dy cr))
+	    ((eq at 'slash) (draw-slash-square dx dy cr)) 
+	    ((eq at 'backslash) (draw-backslash-square dx dy cr)) ;; todo 
+	    ((eq at 'vert) (draw-vert-square dx dy cr));; todo
+	    ((eq at 'horz) (draw-horz-square dx dy cr));; todo
+	    (t (draw-blank-square dx dy cr))
+	    ))
+
+	  (dolist (train trains)
+	    (destructuring-bind ((train-no tno)(xx tx)(yy ty)(direction tdir)(internal tint)) train
+	      (when
+		  (and (= (- x *grid-top-x*) tx) (= (- y *grid-top-y*) ty))
+		(draw-train-square dx dy tno tdir tint cr))))
+	
+	;; 
 	(incf dx *screen-grid-box-border-width*)
 	(incf dx *screen-grid-box-width*)
 	    ) ;; for x
@@ -293,6 +594,7 @@ how will it know to undo ?
       ) ;; for y 
       
     ))
+
 
 
 
@@ -319,14 +621,59 @@ how will it know to undo ?
 
 
 
+;; remember to be in ;; (in-package :cairo-sdl)
+(defun load-output-file ()
+  (let ((tick nil)
+	(known nil))
+    (setq *train-track* (make-hash-table :test #'equalp))
+    (setq *train-history* (make-hash-table :test #'eql))
+    (cl:with-open-file (stream "output" :direction :input)
+      (catch 'done
+	(loop while t do
+	  (let ((in (read stream nil)))
+	    ;; (format t "in = [~a]~%" in)
+	    ;; track ...
+	    ;; (when (and (consp in) (eq (first in) 'track))
+	    ;;   (format t " ... TRACK piece found ~%"))
+	    (cond
+	      ((null in) (throw 'done t))
+	      ;; train track 
+	      ((and (consp in) (eq (car in) 'track) (fourth in)) ;; exclude empty track pieces
+	       ;; (format t "track ~A ..." in)
+	       ;;(format t "(4th=> ~A) ~%" (fourth in))
+	       (let ((x (second in))
+		     (y (third in))
+		     (at (fourth in)))
+		 (setf (gethash (list x y) *train-track*) at)
+		 ))
+	      ((and (consp in) (eq (car in) 'tick))
+	       ;; record trains in previous tick , locations etc..
+	       (when tick
+		 (setf (gethash tick *train-history*) known))
+	       (setq tick (second in))
+	       (setq *global-last-train-tick* tick)
+	       (setq known '())
+	       ;;(format t "tick ~a ~%" tick)
+	       )
+	      ((and (consp in) (consp (car in)) (assoc 'train-no in)) ;; train data
+	       (setq known (cons in known))
+	       ;;(format t "~a => ~a~%" in tick)
+	       )
+	      (t
+	       ;;(format t ";;?? IGNORED ~a~%" in)
+	       t
+	       ))))))))
+
+
+
+
+
+
+(defun trains-demo ()
+
+  (load-output-file)
   
-
-
-
-
-(defun balls-demo ()
-
-  (reboot-balls)
+  ;; (reboot-balls)
   
   (sdl-init (logior +sdl-init-video+ +sdl-init-events+))
   (img-init (logior +img-init-png+))
@@ -464,6 +811,11 @@ how will it know to undo ?
       (cairo-fill cr)
       (screen-format 20 30 "last key event ~a : "    *last-key-event-string*)
 
+      (cairo-set-source-rgb cr (+ 0.0d0) (+ 0.0d0 ) (+ 1.0d0 ))
+      (cairo-rectangle cr (+ 250.0d0 20.0) (+ 0.0d0 20.0) (+ 0.0d0 200.0) (+ 0.0d0 *font-size*))
+      (cairo-fill cr)
+      (screen-format 250 30 "current tick [ ~a of ~a ]"    *global-train-tick* *global-last-train-tick*)
+
 
 
       
@@ -547,6 +899,9 @@ how will it know to undo ?
 		      ;;(format t "mouse motion v1.0 : mouse at position ~a ~a ~%" x y)
 		      (setq *mouse-x* x)
 		      (setq *mouse-y* y)
+		      		   ;; how fast ?
+		      (next-train-tick)
+
 		      )
 
 		    ;; can use structure definition and read it off that
@@ -710,6 +1065,21 @@ how will it know to undo ?
 			
 			)
 
+		      ;; next train tick 
+		      (when (= scancode +sdl-scancode-m+)
+			(format t "action NEXT TICK !~%")
+			(setq *last-key-event-string* "NEXT TICK")
+			(next-train-tick)
+			)
+
+		      ;; prev train tick 
+		      (when (= scancode +sdl-scancode-n+)
+			(format t "action PREV TICK !~%")
+			(setq *last-key-event-string* "PREV TICK")
+			(prev-train-tick)
+			)
+
+
 		      
 		      ;; ENLARGE ........
 		      (when (= scancode +sdl-scancode-equals+)
@@ -725,9 +1095,7 @@ how will it know to undo ?
 			(setq *last-key-event-string* "shrink !")
 			(zoom-shrink)
 			)
-		      
-
-		      
+		      		      
 		      
 		      ;; if press escape key
 		      (when (= scancode +sdl-scancode-escape+)
@@ -736,8 +1104,10 @@ how will it know to undo ?
 		      
 		      
 		      )) ;; --- keydown ---
+
 		   
 		   )))))))))
+
   
   ;; roughly 1 60th of a second
   ;; (sdl-delay (floor (/ 1000 60)))
@@ -752,8 +1122,8 @@ how will it know to undo ?
   )
 
 
-;; -------- start bouncing balls demo
-(format t "(cairo-sdl::balls-demo) to start the bouncing balls demo ~%")
+;; -------- tell user how start trains demo
+(format t "(cairo-sdl::trains-demo) to start the train simulation ~%")
 
 ;;(demo)
 

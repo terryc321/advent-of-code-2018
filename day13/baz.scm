@@ -1,5 +1,7 @@
 
 ;; --------------------------------------------------------------------------------
+;; BAZ .scm
+
 
 (import scheme)
 
@@ -732,9 +734,6 @@ with ZERO based indexing  x , y of first crash is 124 , 90
 ((train-no 13) (x 116) (y 98) (direction down) (internal left))
 
 116,98  .............. FAIL ....... huh ??
-
-
-
 
 
 |#
