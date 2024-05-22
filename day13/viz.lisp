@@ -372,6 +372,7 @@ how will it know to undo ?
 
 
 
+
 ;; A
 ;;  B 
 ;;    C
@@ -479,6 +480,152 @@ how will it know to undo ?
 
 
 
+(defun draw-train-square-down (dx dy tint cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    
+    ;; green background 
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 1.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy (* 2.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    ;; B
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx )
+		     (+ 0.0d0 dy (* 1.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    
+    ;; C
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 2.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy (* 1.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+
+    
+    
+    ))
+
+
+
+(defun draw-train-square-up (dx dy tint cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    
+    ;; green background 
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 1.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy )
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    ;; B
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx )
+		     (+ 0.0d0 dy (* 1.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    
+    ;; C
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 2.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy (* 1.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    ))
+
+
+
+
+(defun draw-train-square-right (dx dy tint cr)
+  (let ((red 0.0d0)
+	(green 0.0d0)
+	(blue 0.0d0))
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green) (+ 0.0d0 blue))
+    
+    ;; green background 
+    (cairo-set-source-rgb cr (+ 0.0d0 red) (+ 0.0d0 green 1.0d0) (+ 0.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx)
+		     (+ 0.0d0 dy)
+		     (+ 0.0d0 *screen-grid-box-width*)
+		     (+ 0.0d0 *screen-grid-box-height*))
+    (cairo-fill cr)
+
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (* 2.0d0 (/ *screen-grid-box-width* 3.0d0)))
+		     (+ 0.0d0 dy (/ *screen-grid-box-height* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    ;; B
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy )
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    
+    ;; C
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy (* 2.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+
+    
+    
+    ))
+
 
 (defun draw-train-square-left (dx dy tint cr)
   (let ((red 0.0d0)
@@ -494,6 +641,38 @@ how will it know to undo ?
 		     (+ 0.0d0 *screen-grid-box-width*)
 		     (+ 0.0d0 *screen-grid-box-height*))
     (cairo-fill cr)
+
+
+    ;; A
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx )
+		     (+ 0.0d0 dy (/ *screen-grid-box-height* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0  (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    ;; B
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy )
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+    
+    
+    ;; C
+    (cairo-set-source-rgb cr (+ 0.0d0 red 0.0) (+ 0.0d0 green) (+ 1.0d0 blue))
+    (cairo-rectangle cr
+		     (+ 0.0d0 dx (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 dy (* 2.0d0 (/ *screen-grid-box-height* 3.0d0)))
+		     (+ 0.0d0 (/ *screen-grid-box-width* 3.0d0))
+		     (+ 0.0d0 (/ *screen-grid-box-height* 3.0d0)))
+    (cairo-fill cr)
+
+    
+    
     ))
 
   
@@ -516,24 +695,25 @@ how will it know to undo ?
 
     (cond
       ((eq tdir 'left) (draw-train-square-left dx dy tint cr))
-      ;; ((eq? tdir 'right) (draw-train-square-right dx dy tint cr))
-      ;; ((eq? tdir 'up) (draw-train-square-up dx dy tint cr))
-      ;; ((eq? tdir 'down) (draw-train-square-down dx dy tint cr))
+      ((eq tdir 'right) (draw-train-square-right dx dy tint cr))
+      ((eq tdir 'up) (draw-train-square-up dx dy tint cr))
+      ((eq tdir 'down) (draw-train-square-down dx dy tint cr))
       )))
 
 
 
 ;; keep train tick within known good values - ie where always a train on the track
-(defun next-train-tick ()
-  (incf *global-train-tick*)
+(defun next-train-tick (&optional (step 1))
+  (incf *global-train-tick* step)
   (when (> *global-train-tick* *global-last-train-tick*)
     (setq *global-train-tick* *global-last-train-tick*)))
   
 
-(defun prev-train-tick ()
-  (decf *global-train-tick*)
+(defun prev-train-tick (&optional (step 1))
+  (decf *global-train-tick* step)
   (when (< *global-train-tick* 0)
     (setq *global-train-tick* 0)))
+
 
 
 
@@ -579,7 +759,8 @@ how will it know to undo ?
 	    ))
 
 	  (dolist (train trains)
-	    (destructuring-bind ((train-no tno)(xx tx)(yy ty)(direction tdir)(internal tint)) train
+	    (destructuring-bind ((train-no tno)(xx tx)(yy ty)(direction tdir)(internal tint)
+				 (old-x tox)(old-y toy)) train
 	      (when
 		  (and (= (- x *grid-top-x*) tx) (= (- y *grid-top-y*) ty))
 		(draw-train-square dx dy tno tdir tint cr))))
@@ -594,6 +775,8 @@ how will it know to undo ?
       ) ;; for y 
       
     ))
+
+
 
 
 
@@ -1067,16 +1250,38 @@ how will it know to undo ?
 
 		      ;; next train tick 
 		      (when (= scancode +sdl-scancode-m+)
-			(format t "action NEXT TICK !~%")
-			(setq *last-key-event-string* "NEXT TICK")
-			(next-train-tick)
+			(let ((mods (decode-keyboard-modifier modifier)))
+		  ;;(format t "type of modifier [~a , ~a]~%" (type-of mods) (type-of (car mods)))
+			  (cond
+			    ((member "any shift" mods :test #'equalp)
+			     (format t "SHIFT PRESSED with M key ~%")
+			     (next-train-tick 10)
+			     )
+			    (t			      
+			     (format t "action NEXT TICK !~%")
+			     (setq *last-key-event-string* "NEXT TICK")
+			     (next-train-tick)
+			     )
+			    )
+			  )
 			)
-
+		      
 		      ;; prev train tick 
 		      (when (= scancode +sdl-scancode-n+)
-			(format t "action PREV TICK !~%")
-			(setq *last-key-event-string* "PREV TICK")
-			(prev-train-tick)
+			(let ((mods (decode-keyboard-modifier modifier)))
+		  ;;(format t "type of modifier [~a , ~a]~%" (type-of mods) (type-of (car mods)))
+			  (cond
+			    ((member "any shift" mods :test #'equalp)
+			     (format t "SHIFT PRESSED with N key ~%")
+			     (prev-train-tick 10)
+			     )
+			    (t			      
+			     ;;(format t "action NEXT TICK !~%")
+			     (setq *last-key-event-string* "PREV TICK")
+			     (prev-train-tick)
+			     )
+			    )
+			  )
 			)
 
 
@@ -1120,6 +1325,7 @@ how will it know to undo ?
   (img-quit)
   (sdl-quit)
   )
+
 
 
 ;; -------- tell user how start trains demo

@@ -285,6 +285,7 @@
       ys)))
 
 
+
 ;; aka find-collision
 (define remove-crashed-trains
   (lambda (trains)
@@ -314,6 +315,7 @@
 				 ((not (= ano bno))
 				  (cond
 				   ((and (= ax bx) (= ay by))
+				    (format #t "(tick ~a)~%" *tick*)
 				    (format #t "collision conv : ~a ~a ! ~%" (train-a 'state) (train-b 'state))
 				    (set! collisions (cons (list train-a train-b) collisions))
 				    (set! remove-list (cons train-a remove-list))
@@ -321,6 +323,7 @@
 				    )
 				   
 				   ((and (= ax box) (= ay boy) (= bx aox) (= by aoy))
+				    (format #t "(tick ~a)~%" *tick*)
 				    (format #t "collision pass : ~a ~a !~%" (train-a 'state) (train-b 'state))
 				    (set! remove-list (cons train-a remove-list))
 				    (set! remove-list (cons train-b remove-list))				
@@ -344,6 +347,8 @@
 
 
 
+
+
 	     
     
 
@@ -355,26 +360,54 @@ timing is also going to be correct , so no worries there regards tick
 |#
 
 
-(define solve
+
+(define solver
   (lambda ()
-    (let ((trains (initial-trains))
-	  (step 0)
-	  (before '())
-	  (after '()))
-      (letrec ((foo (lambda () ;; loop
-		      (format #t "step ~a ~%" step)
-		      ;; make each train move a step 
-		      (do-list (train trains) (train 'tick))
+    (call-with-output-file "output"
+      (lambda (port)
+	(set! output port)
 
-		      ;; remove the crashed trains
-		      (set! trains (remove-crashed-trains trains))
+	;; display board
+	(format output "(begin-track)~%")
+	(do-list (py (iota (length input)))
+		 (do-list (px (iota (string-length (car input))))
+			  (let* ((x px)
+				 (y py)
+				 (at (grid x y)))
+			    (cond
+			     ((not at)  ;; common lisp does not understand #f 
+			      (format output "(track ~a ~a nil)~%" x y at))
+			     (#t
+			      (format output "(track ~a ~a ~a)~%" x y at))))))
+	(format output "(end-track)~%")
+	
+	;; simple loop ...
+	(let ((trains (initial-trains))
+	      (step 0)
+	      (before '())
+	      (after '()))
+	  (letrec ((foo (lambda () ;; loop
+			  ;;(format #t "step ~a ~%" step)
 
-		      (cond
-		       ((= (length trains) 1) ((car trains) 'state))
-		       (#t
-			(set! step (+ step 1))
-			(foo))))))
-	(foo)))))
+			      (format output "(tick ~a)~%" *tick*)
+			      (set! *tick* (+ 1 *tick*))
+			      (do-list (train trains)
+				       (format output "~a~%" (train 'state)))
+
+			  
+			  ;; make each train move a step 
+			  (do-list (train trains) (train 'tick))
+
+			  ;; remove the crashed trains
+			  (set! trains (remove-crashed-trains trains))
+
+			  (cond
+			   ((= (length trains) 1) ((car trains) 'state))
+			   (#t
+			    (set! step (+ step 1))
+			    (foo))))))
+	    (foo)))))))
+
 
 
 
@@ -452,5 +485,78 @@ T
 
 
 (+ 6 5 2 4 )  17 trains
+
+|#
+
+
+
+
+
+
+
+#|
+
+latest collision sheet
+    422     457    471     492    1023    1324    2464    32942
+
+--------------------------------------------------------------------------
+
+(tick 422)
+collision conv : ((train-no 11) (x 124) (y 90) (direction up) (internal left) (old-x 124) (old-y 91)) ((train-no 8) (x 124) (y 90) (direction down) (internal ahead) (old-x 124) (old-y 89)) ! 
+
+(tick 422)
+collision conv : ((train-no 8) (x 124) (y 90) (direction down) (internal ahead) (old-x 124) (old-y 89)) ((train-no 11) (x 124) (y 90) (direction up) (internal left) (old-x 124) (old-y 91)) ! 
+trains remaining 15 
+
+(tick 457)
+collision pass : ((train-no 2) (x 57) (y 118) (direction up) (internal ahead) (old-x 57) (old-y 119)) ((train-no 16) (x 57) (y 119) (direction down) (internal ahead) (old-x 57) (old-y 118)) !
+
+(tick 457)
+collision pass : ((train-no 16) (x 57) (y 119) (direction down) (internal ahead) (old-x 57) (old-y 118)) ((train-no 2) (x 57) (y 118) (direction up) (internal ahead) (old-x 57) (old-y 119)) !
+trains remaining 13 
+
+(tick 471)
+collision conv : ((train-no 9) (x 131) (y 74) (direction down) (internal right) (old-x 131) (old-y 73)) ((train-no 3) (x 131) (y 74) (direction right) (internal right) (old-x 130) (old-y 74)) ! 
+
+(tick 471)
+collision conv : ((train-no 3) (x 131) (y 74) (direction right) (internal right) (old-x 130) (old-y 74)) ((train-no 9) (x 131) (y 74) (direction down) (internal right) (old-x 131) (old-y 73)) ! 
+trains remaining 11 
+
+(tick 492)
+collision pass : ((train-no 17) (x 62) (y 36) (direction right) (internal ahead) (old-x 61) (old-y 36)) ((train-no 5) (x 61) (y 36) (direction left) (internal left) (old-x 62) (old-y 36)) !
+
+(tick 492)
+collision pass : ((train-no 5) (x 61) (y 36) (direction left) (internal left) (old-x 62) (old-y 36)) ((train-no 17) (x 62) (y 36) (direction right) (internal ahead) (old-x 61) (old-y 36)) !
+trains remaining 9 
+
+(tick 1023)
+collision conv : ((train-no 10) (x 54) (y 40) (direction left) (internal right) (old-x 55) (old-y 40)) ((train-no 14) (x 54) (y 40) (direction up) (internal ahead) (old-x 54) (old-y 41)) ! 
+
+(tick 1023)
+collision conv : ((train-no 14) (x 54) (y 40) (direction up) (internal ahead) (old-x 54) (old-y 41)) ((train-no 10) (x 54) (y 40) (direction left) (internal right) (old-x 55) (old-y 40)) ! 
+trains remaining 7 
+
+(tick 1324)
+collision pass : ((train-no 6) (x 138) (y 115) (direction down) (internal right) (old-x 138) (old-y 114)) ((train-no 12) (x 138) (y 114) (direction up) (internal left) (old-x 138) (old-y 115)) !
+(tick 1324)
+collision pass : ((train-no 12) (x 138) (y 114) (direction up) (internal left) (old-x 138) (old-y 115)) ((train-no 6) (x 138) (y 115) (direction down) (internal right) (old-x 138) (old-y 114)) !
+trains remaining 5 
+
+
+(tick 2464)
+collision pass : ((train-no 7) (x 36) (y 81) (direction left) (internal right) (old-x 37) (old-y 81)) ((train-no 13) (x 37) (y 81) (direction right) (internal left) (old-x 36) (old-y 81)) !
+(tick 2464)
+collision pass : ((train-no 13) (x 37) (y 81) (direction right) (internal left) (old-x 36) (old-y 81)) ((train-no 7) (x 36) (y 81) (direction left) (internal right) (old-x 37) (old-y 81)) !
+
+trains remaining 3 
+
+(tick 32942)
+collision conv : ((train-no 1) (x 40) (y 17) (direction down) (internal left) (old-x 40) (old-y 16)) ((train-no 4) (x 40) (y 17) (direction up) (internal left) (old-x 40) (old-y 18)) ! 
+(tick 32942)
+collision conv : ((train-no 4) (x 40) (y 17) (direction up) (internal left) (old-x 40) (old-y 18)) ((train-no 1) (x 40) (y 17) (direction down) (internal left) (old-x 40) (old-y 16)) ! 
+
+trains remaining 1 
+((train-no 15) (x 131) (y 123) (direction right) (internal right) (old-x 130) (old-y 123))
+
 
 |#
