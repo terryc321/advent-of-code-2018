@@ -1333,4 +1333,36 @@ how will it know to undo ?
 
 ;;(demo)
 
+#|
 
+looking at baz.scm output , seems train may have been ticked ' one time too many
+as step 32940 looks like this , train 15 and 4 will 
+
+NIL
+CAIRO-SDL> (gethash 32940 *train-history*)
+(((TRAIN-NO 15) (X 129) (Y 123) (DIRECTION RIGHT) (INTERNAL RIGHT) (OLD-X 128)
+  (OLD-Y 123))
+ ((TRAIN-NO 4) (X 41) (Y 18) (DIRECTION LEFT) (INTERNAL RIGHT) (OLD-X 42)
+  (OLD-Y 18))
+ ((TRAIN-NO 1) (X 40) (Y 15) (DIRECTION RIGHT) (INTERNAL RIGHT) (OLD-X 39)
+  (OLD-Y 15)))
+T
+CAIRO-SDL> (gethash (list 129 123) *train-track*)
+HORZ
+T
+
+
+last train should be
+
+130,123     NOT ACCEPTED ... huh...
+
+huh
+
+131,123  NOT ACCEPTED 
+
+132,123
+
+
+
+
+|#
