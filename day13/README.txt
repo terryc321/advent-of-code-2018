@@ -1,4 +1,35 @@
 
+General idea is use scheme programming language to produce an output file "output"
+use common lisp to make sdl interactive video window reads "output" and
+displays to user , can forward and backward ```the computation ```
+as we have the full history of the cart movements at any time step
+
+Keys
+n  back one time step 
+m  forward one time step
+
+N  back ten time steps
+M  forward ten time steps
+
+-  zoom out
+=  zoom in
+arrow keys move grid on screen
+
+
+
+
+Consistently getting wrong result.
+
+may be a timing issue
+
+when cart hits a corner piece , possibly should determine what direction train should face
+then 
+
+
+
+
+
+
 visualiser shows sometimes where logic errors occur in programming
 
 at time step 7599 two trains are coming together , but never crash , as though they pass through

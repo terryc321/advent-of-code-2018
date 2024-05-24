@@ -51,7 +51,7 @@ how will it know to undo ?
 ;; (defpackage #:cairo-balls
 ;;   (:use #:cl #:cairo-sdl))
 
-(in-package #:cairo-sdl)
+(in-package :cairo-sdl)
 
 
 (declaim (optimize (speed 0)(debug 3)(safety 3)))
@@ -98,20 +98,12 @@ how will it know to undo ?
 (defparameter *global-train-tick* 0)
 (defparameter *global-last-train-tick* 0)
 
-
 ;; --------------------------------------------------------
 
 ;; -------- x increases to right
 ;; -------- y increases down ... inversion of math principles ...? 
 (defparameter *grid-top-x* 0)
 (defparameter *grid-top-y* 0)
-
-
-
-
-
-
-
 
 ;; ---------------------------------------------------------
 
@@ -804,6 +796,7 @@ how will it know to undo ?
 
 
 
+
 ;; remember to be in ;; (in-package :cairo-sdl)
 (defun load-output-file ()
   (let ((tick nil)
@@ -998,10 +991,6 @@ how will it know to undo ?
       (cairo-rectangle cr (+ 250.0d0 20.0) (+ 0.0d0 20.0) (+ 0.0d0 200.0) (+ 0.0d0 *font-size*))
       (cairo-fill cr)
       (screen-format 250 30 "current tick [ ~a of ~a ]"    *global-train-tick* *global-last-train-tick*)
-
-
-
-      
       
       ;; ;; (cairo-set-source-rgb cr (+ 0.0d0) (+ 0.2d0 ) (+ 0.0d0 ))
       ;; ;; (cairo-rectangle cr (+ 0.0d0 40.0) (+ 0.0d0 40.0) (+ 0.0d0 250.0) (+ 0.0d0 *font-size*))
@@ -1292,8 +1281,7 @@ how will it know to undo ?
 			(setq *last-key-event-string* "enlarge !")
 			(zoom-enlarge)
 			)
-		      
-
+      
 		      ;; SHRINKING......
 		      (when (= scancode +sdl-scancode-minus+)
 			(format t "action SHRINK !~%")

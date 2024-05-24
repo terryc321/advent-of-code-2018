@@ -51,7 +51,6 @@
 (define train-grid #f)
 (define trains #f)
 
-
 (define decode-track
   (lambda ()
     (let ((train-no 0)
