@@ -295,8 +295,8 @@
 		  (tree*lumber ,(* n-tree n-lumber)))))))
     
 			
-
-
+;;(chdir "day18")
+;;(explore)
 
 
 
