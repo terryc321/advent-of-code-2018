@@ -1,7 +1,7 @@
 ;; 
 ;; load the cairo-sdl ffi interface 
 ;; (load "/home/terry/code/c2ffi/cairo-sdl/register-asd.lisp")
-;;
+;; (setf *default-pathname-defaults* (truename "/home/terry/code/advent-of-code/advent-of-code-2018/day13"))
 
 
 #|

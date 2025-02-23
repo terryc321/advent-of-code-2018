@@ -296,7 +296,10 @@
     
 			
 
-
+;; (getcwd)
+;; (chdir "../")
+;; (chdir "day18/guile")
+;; (explore)
 
 
 
