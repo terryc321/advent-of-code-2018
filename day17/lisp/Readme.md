@@ -12,11 +12,12 @@ x=504, y=10..13
 y=13, x=498..504
 ```
 
-thought just 3 values to pick using regular expression 
-actually two regular expressions
+one first glance was going to pull 3 numbers from a line and be done.
+
+on closer inspection actually need two regular expressions
 
 tag the list as either 'x-y-y  or 'y-x-x so i know its a range of x or 
-a range of ys
+a range of y
 ```
 x = 501 , y = A .. B
 
@@ -34,7 +35,23 @@ y = 13 , x = A ... B
 
 ```
 
+represent board as a hash table 
+simply case of filling in and figuring out min and max values of X and Ys
+convert to 2d grid 
+fill it 
+show grid 
+
+
+
+
+
 ## development notes 
+
+quickproject so can load packages from asd easier
+(ql:quickload :quickproject)
+(quickproject:make-project "foo")
+
+(ql:quickload :aoc18)
 
 for ppcre match one or more digits
 ```
