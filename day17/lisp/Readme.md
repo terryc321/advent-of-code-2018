@@ -42,6 +42,15 @@ fill it
 show grid 
 
 
+## bugs : conversion from X , Y to smallX,smallY
+
+conversion from coordinate to an array which breaks things , so 
+if we go back to a hash table that will keep coordinates the same - no tricky off by 1 conversion to 
+fixed sized array required 
+
+## bug2 : unwinding from array smallX,smallY to hash table 
+
+
 
 
 
