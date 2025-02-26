@@ -122,6 +122,9 @@
 	(setq off-x min-x)
 	(setq off-y min-y)
 	(setq grid tmp)
+	(loop for y from min-y to max-y do
+	  (loop for x from min-x to max-x do
+	    (setf (gethash (list x y) grid) #\.))) ;; all sand initially
 	(process-grid xs)	  
 	(format t "~a~%"
 		(list 'grid-is min-x min-y 'to max-x max-y))
@@ -129,6 +132,7 @@
 				 :min-x min-x :max-x max-x :min-y min-y
 				 :max-y max-y)))
 	  result)))))
+
 
 
 
@@ -142,11 +146,12 @@
     ;; (loop for y from (- min-y 3) to (+ max-y 3) do
      (loop for y from 0 to (+ max-y 3) do    
       (loop for x from (- min-x 3) to (+ max-x 3) do 
-	(let ((val (gethash (list x y) data )))
+	(let ((val (gethash (list x y) data)))
 	  (cond
 	    ((and (= x 500)(= y 0) (equalp val #\#)) (error "something at sprinker!"))
 	    ((and (= x 500)(= y 0)) (format t "+"))
 	    ((equalp val #\#) (format t "#" ))
+	    ((equalp val #\~) (format t "~a" #\~ ))
 	    (t (format t "." )))))
       (format t "~%"))))
 
@@ -169,20 +174,22 @@
 ;;
 
 (defun on-grid (g x y)
-  (let ((width (grid-width g))
-	(height (grid-height g))
-	(min-x (grid-min-x g))
+  (let ((min-x (grid-min-x g))
 	(max-x (grid-max-x g))
 	(min-y (grid-min-y g))
 	(max-y (grid-max-y g)))
     ;; (and (>= x min-x) (<= x min-y)
     ;; 	 (>= y min-y) (<= y max-y))
-    (and (>= x 0) (< x width)
-	 (>= y 0) (< y height))))
+    (and (>= x min-x) (<= x max-x)
+	 (>= y min-y) (<= y max-y))))
 
 (defun at (g x y)
   (cond
-    ((on-grid g x y) (aref (grid-data g) x y))
+    ((on-grid g x y)
+     (let ((val (gethash (list x y) (grid-data g))))
+       (cond
+	 (val val) ;; either #\# clay or #\~ water 
+	 (t #\.)))) ;; sand otherwise 
     (t nil)))
 
 
@@ -203,12 +210,14 @@
   (let ((data (grid-data g)))
     (when (on-grid g x y)
       ;; coming up from #...# clay clay should be water
-      (assert (equalp (aref data x y) #\~))
+      ;;(assert (equalp (at g x y) #\~))
+      (setf (gethash (list x y) data) #\~)
       (let* ((L (left g x y))
 	     (R (right g x y)))
 	(cond
 	  ((and (equalp L 'clay) (equalp R 'clay)) (overflow g x (- y 1)))
 	  (t nil))))))
+
 
 
 
@@ -220,13 +229,13 @@
       (catch 'water
 	(loop while (on-grid g x y) do
 	  (let ((item (at g x y)))
-	    (format t "item = ~a~%" item)
+	    (format t "item%% = ~a~%" item)
 	    (cond
 	      ((equalp item #\#) ; clay
 	       (setq y (- y 1))
 	       (throw 'water t))
 	      ((or (equalp item #\.) (equalp item #\~)) ; sand or water
-	       (setf (aref data x y) #\~)
+	       (setf (gethash (list x y) data) #\~)
 	       (setq y (+ y 1)))))
 	  (when (not (on-grid g x y))
 	    (throw 'kicked-out t))))
@@ -235,107 +244,111 @@
 	     (R (right g x y)))
 	(cond
 	  ((or (listp L)(listp R))
-	   (when (listp L) (destructuring-bind (ign x2 y2) L (vertical g x2 y2)))
-	   (when (listp R) (destructuring-bind (ign x2 y2) R (vertical g x2 y2))))
+	   (when (and (not (null L)) (listp L))
+	     (destructuring-bind (ign x2 y2) L (vertical g x2 y2)))
+	   (when (and (not (null R)) (listp R))
+	     (destructuring-bind (ign x2 y2) R (vertical g x2 y2))))
 	  (t (overflow g x (- y 1))))))))
-
-
-
-
 
 
 (defun left (g x y)
   (catch 'out
-    (let ((data (grid-data g))
-	  (status nil))
+    (let ((data (grid-data g)))	  
       (loop while (on-grid g x y) do
 	(let ((item (at g x y)))
-	  (format t "item = ~a~%" item)
+	  ;; (format t "itemLL = ~a~%" item)
 	  (cond
 	    ((equalp item #\#) ; hit clay
 	     (throw 'out 'clay))
 	    ; sand x y - should be water or clay below
 	    ((or (equalp item #\.) (equalp item #\~)) 
-	     (setf (aref data x y) #\~)
+	     (setf (gethash (list x y) data) #\~)
 	     (when (on-grid g x (+ y 1))
 	       (let ((item2 (at g x (+ y 1))))
 		 (cond
 		   ((or (equalp item2 #\~)(equalp item2 #\#))
 		    (setq x (- x 1)))
 		   (t
-		    (setf (aref data x y) #\~)
+		    (setf (gethash (list x y) data) #\~)
 		    (vertical g x y)
 		    (throw 'out (list 'open x y)))))))))))))
+
+
+
 
 
 ;; what stops us going right ? should always be clay beneath us or water ?
 (defun right (g x y)
   (catch 'out
-    (let ((data (grid-data g))
-	  (status nil))
+    (let ((data (grid-data g)))	  
       (loop while (on-grid g x y) do
 	(let ((item (at g x y)))
-	  ;;(format t "item = ~a~%" item)
+	  ;; (format t "itemRR = ~a~%" item)
 	  (cond
 	    ((equalp item #\#) ; hit clay
 	     (throw 'out 'clay))
 	    ; sand x y - should be water or clay below
-	    ((or (equalp item #\.) (equalp item #\~)) 
-	     (setf (aref data x y) #\~)
+	    ((or (equalp item #\.) (equalp item #\~))
+	     (setf (gethash (list x y) data) #\~)
 	     (when (on-grid g x (+ y 1))
 	       (let ((item2 (at g x (+ y 1))))
 		 (cond
 		   ((or (equalp item2 #\~)(equalp item2 #\#))
 		    (setq x (+ x 1)))
 		   (t
-		    (setf (aref data x y) #\~)
+		    (setf (gethash (list x y) data) #\~)
 		    (vertical g x y)
 		    (throw 'out (list 'open x y)))))))))))))
 
-(defun find-clay-left (g x y)
+
+;; (defun find-clay-left (g x y)
+;;   (cond
+;;     ((equalp (at g x y) #\.) (find-clay-left g (- x 1) y))
+;;     ((equalp (at g x y) #\#) t)
+;;     (t nil)))
+
+;; (defun find-clay-right (g x y)
+;;   (cond
+;;     ((equalp (at g x y) #\.) (find-clay-right g (+ x 1) y))
+;;     ((equalp (at g x y) #\#) t)
+;;     (t nil)))
+
+;; (defun water-left (g x y)  (equalp (at g (- x 1) y) #\~))
+;; (defun water-right (g x y)  (equalp (at g (+ x 1) y) #\~))
+
+
+
+;; sprinkler located at 500 0
+;; but input data when processed says on-grid is at Y=6 onwards ... upto 1631
+;; so we need to fake water until enters the on-grid , then we call vertical
+(defun shelp (g x y)
   (cond
-    ((equalp (at g x y) #\.) (find-clay-left g (- x 1) y))
-    ((equalp (at g x y) #\#) t)
-    (t nil)))
+    ((on-grid g x y)
+     (format t "shelp: going vertical at ~a ~a ~%" x y)
+     (vertical g x y))
+    (t (shelp g x (+ y 1)))))
 
-(defun find-clay-right (g x y)
-  (cond
-    ((equalp (at g x y) #\.) (find-clay-right g (+ x 1) y))
-    ((equalp (at g x y) #\#) t)
-    (t nil)))
-
-(defun water-left (g x y)  (equalp (at g (- x 1) y) #\~))
-(defun water-right (g x y)  (equalp (at g (+ x 1) y) #\~))
-
-
-
-;; assume sprinkler is top of data ??
 (defun sprinkler (g)
-  (let ((width (grid-width g))
-	(height (grid-height g))
-	(data (grid-data g))
-	(min-x (grid-min-x g))
-	(max-x (grid-max-x g))
-	(min-y (grid-min-y g))
-	(max-y (grid-max-y g)))
-    (let ((sprinkler-x (- 500 min-x))
-	  (sprinkler-y (- 1 min-y)))      
-      (vertical g sprinkler-x (+ 1 sprinkler-y)))))
+  (let ((sx 500)(sy 0))
+    (shelp g sx sy)))
 
 
 ;; count water tiles
 (defun count-tiles (g)
-  (let ((width (grid-width g))
-	(height (grid-height g))
+  (let ((min-x (grid-min-x g))
+	(max-x (grid-max-x g))
+	(min-y (grid-min-y g))
+	(max-y (grid-max-y g))
 	(data (grid-data g))
 	(count 0))
-    (loop for y from 0 to (- height 1) do
-      (loop for x from 0 to (- width 1) do
+    (loop for y from min-y to max-y do
+      (loop for x from min-x to max-x do
 	(when (on-grid g x y)
-	  (let ((elem (aref data x y)))
+	  (let ((elem (gethash (list x y) data)))
 	    (cond
 	      ((equalp elem #\~) (incf count)))))))
     count))
+
 
 
 
