@@ -1,0 +1,30 @@
+
+
+;; show Y from 0 to max-Y
+;; show X from min-X to max-X inclusive
+;; show grid
+;; some thing to figure out
+;; regex
+;; (define regex1 (regexp "([0-9]+)"))
+;;(string-match regex1 (car example))
+;; (string-match "x=([0-9]+)" (car example))
+;; (string-match "x=([0-9]+).*y=([0-9]+)[.][.]([0-9]+)" (list-ref example 0))
+;; (string-match "y=([0-9]+).*x=([0-9]+)[.][.]([0-9]+)" (list-ref example 1))
+
+
+
+;; (define foo (lambda () (format #t "hello from FOO !~%")))
+;; (foo)
+;; (define foo2 (lambda () (format #t "hello from FOO2 !~%")))
+;; (foo2)
+;; (define foo3 (lambda () (format #t "hello from FOO3 !~%")))
+;; (foo3)
+
+
+
+;; (cond
+;;  ((> water-count limit)
+;;   (@show-grid)
+;;   (set! water-count 0)
+;;   (newline)(format #t "===BEAKER-BREAK===")(newline)))			     
+;; (format #t "water count : ~a~%" water-count)

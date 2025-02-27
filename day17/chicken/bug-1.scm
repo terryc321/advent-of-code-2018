@@ -80,8 +80,8 @@
     (apply append (map range (map decipher (get-input f))))))
 
 (define input (fix "../input.txt"))
+
 (define example (fix "../example.txt"))
-(define puzzle (fix "../puzzle1.txt"))
 
 (define clay-hash #f)
 
@@ -179,69 +179,95 @@
 ;; call k-done #f when one or both sides are spill overs , which means we do not
 ;; overflow vertically upwards 
 (define run
-  (lambda (in)
+  (lambda (in #!optional (limit 0))
     (call/cc (lambda (exit) 
     (let ((clay? (make-clay in)))
       (bind (min-x max-x min-y max-y) (find-limits in)
 	    (format #t " ~a ~a ~a ~a ~%" min-x max-x min-y max-y)
 	    ;; (@show-grid)
+	    
+	    ;; (define foo (lambda () (format #t "hello from FOO !~%")))
+	    ;; (foo)
+	    ;; (define foo2 (lambda () (format #t "hello from FOO2 !~%")))
+	    ;; (foo2)
+	    ;; (define foo3 (lambda () (format #t "hello from FOO3 !~%")))
+	    ;; (foo3)
+	    
 	    (define out? (lambda (x y) (or (< y 0)(> y max-y))))
 	    (define vert (lambda (x y)
 			   (cond
+			    ((> water-count limit)
+			     (@show-grid)
+			     (set! water-count 0)
+			     (newline)(format #t "===BEAKER-BREAK===")(newline)
+			     ))
+			   (format #t "water count : ~a~%" water-count)
+			   (cond
 			    ((clay? (list x y)) (fill x (- y 1)))
-			    ((water? (list x y)) #f) ;; already been here			    
 			    ((out? x y) #f) ;; prevent infinite loop when outside pond
 			    (#t
 			     (water! (list x y))
 			     (vert x (+ y 1))))))
-
 	    (define fill (lambda (x y)
 			   (water! (list x y))
-			   (let ((L (call/cc (lambda (done) (fill-left x y done))))
-				 (R (call/cc (lambda (done) (fill-right x y done)))))
+			   (let ((L (call/cc (lambda (done) (fill-left #f x y done))))
+				 (R (call/cc (lambda (done) (fill-right #f x y done)))))
 			     ;;(format #t "L ~a : R ~a ~%" L R)
 			     (cond ;; overflow vertically upwards
 			      ((and L R) (fill x (- y 1))))
 			     #t)))
 	    
-	    (define fill-left (lambda (x y done)
+	    (define fill-left (lambda (passed-over-clay x y done)
 				(cond
 				 ((clay? (list x y)) (done #t)) ;; hit clay
-				 ((or (clay? (list x (+ y 1)))
-				      (water? (list x (+ y 1))))
-				  (water! (list x y))
-				  (fill-left (- x 1) y done))
-				 (#t
+				 ((and (not passed-over-clay) ;; change to #t 
+				       (clay? (list x (+ y 1))))
+				  (fill-left #t x y done))
+				 ((and passed-over-clay
+				       ;; passed over clay directly underneath
+				       ;; no clay below us now
+				       ;;(clay? (list (+ x 1) (+ y 1))) ;; clay? south-east
+				       (not (clay? (list x (+ y 1)))))
 				  ;;spillover
-				  ;; (water! (list x y))
+				  (water! (list x y))
 				  ;; loop back to vert routine from this point
 				  (vert x y)
 				  ;; nothing more to do so save unwinding stack
 				  ;; just cut it off at knees
-				  (done #f)))))
-
-	    (define fill-right (lambda (x y done)
-				(cond
-				 ((clay? (list x y)) (done #t)) ;; hit clay
-				 ((or (clay? (list x (+ y 1)))
-				      (water? (list x (+ y 1))))
-				  (water! (list x y))
-				  (fill-right (+ x 1) y done))
+				  (done #f) 
+				  )
 				 (#t
-				  ;;spillover
-				  ;; (water! (list x y))
-				  ;; loop back to vert routine from this point
-				  (vert x y)
-				  ;; nothing more to do so save unwinding stack
-				  ;; just cut it off at knees
-				  (done #f)))))
-
+				  ;; keep moving left
+				  (water! (list x y))
+				  (fill-left passed-over-clay (- x 1) y done)))))
+	    
+	    (define fill-right (lambda (passed-over-clay x y done)
+				 (cond
+				  ((clay? (list x y)) (done #t)) ;; hit clay
+				  ((and
+				    (not passed-over-clay)
+				    (clay? (list x (+ y 1))))
+				   (fill-right #t x y done))
+				  ((and passed-over-clay
+				       ;; passed over clay directly underneath
+				       ;; no clay below us now				
+					(not (clay? (list x (+ y 1)))))
+				   ;;spillover
+				   (water! (list x y))
+				   ;; loop back to vert routine from this point
+				   (vert x y)
+				   ;; nothing more to do so save unwinding stack
+				   ;; just cut it off at knees
+				   (done #f) 
+				   )
+				  (#t
+				   ;; keep moving left
+				   (water! (list x y))
+				   (fill-right passed-over-clay (+ x 1) y done)))))
 	    
 	    (let ((sprinkler-x 500)(sprinkler-y 0))
 	      (vert sprinkler-x (+ 1 sprinkler-y))
-	      (@show-grid)
 	      #t)))))))
-
 
   
 
