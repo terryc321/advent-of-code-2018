@@ -1,5 +1,15 @@
 ;; -*- geiser-scheme-implementation: guile -*-
 
+;; set load path on starting
+;; (add-to-load-path "/home/terry/code/advent-code/advent-of-code-2018/day15/guile/")
+;; place libpixelformat.so in correct location -- see README.md
+;; start emacs
+;; guile cannot find shared libraries if guile already started
+;; > (add-to-load-path "/home/terry/code/advent-code/advent-of-code-2018/day15/guile/")
+;; compile this file using geiser
+;; > (demo)
+;; 
+
 ;; where are we located in the file system 
 (define (base s)
   (string-append
@@ -17,6 +27,8 @@ can display image on screen
 we can mask out a color of image
 can we make a png from what is on the screen ?
 e.g can we draw a car on screen using paint pots and then save that as the car image
+
+
 
 |#
 
@@ -68,8 +80,8 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 (define *mouse-x* 0)
 (define *mouse-y* 0)
-;;(define *screen-width* 1920) ;; full screen my monitor
-;;(define *screen-height* 1080)
+;; (define *screen-width* 1920) ;; full screen my monitor
+;; (define *screen-height* 1080)
 (define *screen-width* 1024) ;; a window
 (define *screen-height* 768)
 
@@ -342,15 +354,7 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 ;; ==========================
 
-(define (draw-cairo)
-
-  ;; compensate resize 
-  (when *resized*
-    ;; ?? resize compensate-window-resize-with-desired-aspect does not work ?? 
-    ;;(compensate-window-resize-with-desired-aspect (/ 16 9))
-    (set! *resized* #f))
-
-  
+(define (draw-cairo-specific)
   (cairo:set-source-rgba *cr* 1 1 1 1)
   (cairo:rectangle *cr* 0 0 *screen-width* *screen-height*)
   (cairo:fill *cr*)
@@ -377,6 +381,17 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
   (cairo:arc *cr*  xc  yc  radius  angle2  angle2) 
   (cairo:line-to *cr*  xc  yc) 
   (cairo:stroke *cr*) 
+  )
+
+(define (draw-cairo)
+
+  ;; compensate resize 
+  (when *resized*
+    ;; ?? resize compensate-window-resize-with-desired-aspect does not work ?? 
+    ;;(compensate-window-resize-with-desired-aspect (/ 16 9))
+    (set! *resized* #f))
+
+  (draw-cairo-specific)
   
   (cairo:surface-flush *cairo-surface*)
   (sdl:update-texture *texture* %null-pointer (sdl:surface-pixels *surface*) (sdl:surface-pitch *surface*))
@@ -565,8 +580,8 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 
 (define (draw-frame)
-  ;;(draw-cairo)
-  (draw-sdl)
+  (draw-cairo)
+  ;;(draw-sdl)
   (sdl:render-present *render*))
 
 
