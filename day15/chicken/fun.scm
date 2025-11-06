@@ -1,0 +1,109 @@
+;; -*- geiser-scheme-implementation: chicken -*-
+
+(import (chicken format))
+;; (format #t "asdf~a~%" 123)
+
+(import (chicken pretty-print))
+;; pp 
+
+(import (chicken process-context))
+;;(current-directory)
+;;(change-directory "day15/chicken")
+
+;; may need to
+;; > sudo chicken-install srfi-25
+(import srfi-25)
+;; srfi 25 provides 2d arrays 
+;;
+(import (chicken io))
+;; read-lines 
+
+(import srfi-1)
+;; srfi-1 for filter first second etc..
+
+#|
+(let ((a (make-array
+                (shape 4 5 4 5 4 5))))
+       (array-set! a 4 4 4 'huuhkaja)
+       (array-ref a 4 4 4))
+
+;; if stuck finding documentation
+,wtf array
+,wtf make-array 
+
+elfs and goblins
+
+You scan the area, generating a map of the walls (#), open cavern (.), and starting position of every Goblin (G) and Elf (E) (your puzzle input).
+
+(use utils)
+(read-all "mydata.txt")
+
+|#
+
+;; convert input from strings to a 2d array 
+
+(define (get-lines filename)
+  (with-input-from-file filename
+		      (lambda ()
+			(read-lines (current-input-port)))
+		      #:text))
+
+
+(define (input)
+  (let* ((str-lines (get-lines "../input.txt"))
+	 (nlines (length str-lines))
+	 (nwidth (string-length (car str-lines)))
+	 (all-nwidth (filter (lambda (n) (not (= n nwidth))) (map string-length str-lines))))
+    ;; assertions survive compilation
+    (assert (null? all-nwidth))
+    (format #t "all lines have width ~a~%" nwidth)
+    ;; make an oversize array - using 1 indexing to N indexing !! 
+    (let* ((w nwidth)
+	   (h nlines)
+	   (arr (make-array (shape 1 (+ w 1)  1 (+ h 1))))
+	  (j 0))
+      (map (lambda (str)
+	     (let ((i 0))
+	       (map (lambda (ch)
+		      ;;(format #t "char at ~a ~a is ~a ~%" i j ch)
+		      ;; must be elf E goblin G wall # or cavern . 
+		      (assert (or (char=? ch #\#) (char=? ch #\.) (char=? ch #\E) (char=? ch #\G)))
+		      (let ((cnv 
+			     (case ch
+			       ((#\#) 'wall)
+			       ((#\.) 'cavern)
+			       ((#\E) 'elf)
+			       ((#\G) 'goblin)
+			       (else (error (format #f "bad char {~a} at {line ~a,col ~a}" ch j i))))))
+		      (array-set! arr (+ i 1) (+ j 1) cnv))
+		      (set! i (+ i 1)))
+		    (string->list (list-ref str-lines j))))
+	     (set! j (+ j 1)))
+	   str-lines)
+      (values arr w h))))
+
+(define (width arr)
+  (- (array-end *input* 0) (array-start *input* 0)))
+
+(define (height arr)
+  (- (array-end *input* 1) (array-start *input* 1)))
+
+(define *input* (input))
+;; width & height of a 2d array using srfi-25
+;; (- (array-end *input* 0) (array-start *input* 0))
+;; (- (array-end *input* 1) (array-start *input* 1))
+
+
+
+#|
+(define arr (make-array (shape 1 3 1 3) 0))
+(array-ref arr 2 2)
+(array-ref arr 1 1)
+(array-set! arr 1 1 'im-1-1)
+|#
+
+
+
+
+
+

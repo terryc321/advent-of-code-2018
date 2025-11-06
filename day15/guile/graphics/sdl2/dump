@@ -1,0 +1,447 @@
+	    
+#|
+img-linked-version
+img-quit
+img-loadtyped-rw
+img-load
+img-load-rw
+img-loadtexture
+img-loadtexture-rw
+img-loadtexturetyped-rw
+img-isavif
+img-isico
+img-iscur
+img-isbmp
+img-isgif
+img-isjpg
+img-isjxl
+img-islbm
+img-ispcx
+img-ispng
+img-ispnm
+img-issvg
+img-isqoi
+img-istif
+img-isxcf
+img-isxpm
+img-isxv
+img-iswebp
+img-loadavif-rw
+img-loadico-rw
+img-loadcur-rw
+img-loadbmp-rw
+img-loadgif-rw
+img-loadjpg-rw
+img-loadjxl-rw
+img-loadlbm-rw
+img-loadpcx-rw
+img-loadpng-rw
+img-loadpnm-rw
+img-loadsvg-rw
+img-loadqoi-rw
+img-loadtga-rw
+img-loadtif-rw
+img-loadxcf-rw
+img-loadxpm-rw
+img-loadxv-rw
+img-loadwebp-rw
+img-loadsizedsvg-rw
+img-readxpmfromarray
+img-readxpmfromarraytorgb888
+img-savepng
+img-savepng-rw
+img-savejpg
+img-savejpg-rw
+img-loadanimation
+img-loadanimation-rw
+img-loadanimationtyped-rw
+img-freeanimation
+img-loadgifanimation-rw
+img-loadwebpanimation-rw
+|#
+
+==========================================
+
+
+
+
+#|
+;; definition 6889 from /usr/include/SDL2/SDL_image.h:253:39
+(define img-loadtyped-rw
+   (foreign-library-function "libSDL2_image-so.2" "IMG_LoadTyped_RW" 
+     #:return-type '*       #:arg-types ('* int '* )))
+
+
+
+
+;; definition 6891 from /usr/include/SDL2/SDL_image.h:348:39
+(define img-load-rw
+   (foreign-library-function "libSDL2_image" "IMG_Load_RW" 
+     #:return-type '*       #:arg-types ('* int )))
+
+
+;; definition 6892 from /usr/include/SDL2/SDL_image.h:386:39
+(define img-loadtexture
+   (foreign-library-function "libSDL2_image" "IMG_LoadTexture" 
+     #:return-type '*       #:arg-types ('* '* )))
+
+
+;; definition 6893 from /usr/include/SDL2/SDL_image.h:433:39
+(define img-loadtexture-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadTexture_RW" 
+     #:return-type '*       #:arg-types ('* '* int )))
+
+
+;; definition 6894 from /usr/include/SDL2/SDL_image.h:488:39
+(define img-loadtexturetyped-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadTextureTyped_RW" 
+     #:return-type '*       #:arg-types ('* '* int '* )))
+
+
+;; definition 6895 from /usr/include/SDL2/SDL_image.h:533:29
+(define img-isavif
+   (foreign-library-function "libSDL2_image" "IMG_isAVIF" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6896 from /usr/include/SDL2/SDL_image.h:576:29
+(define img-isico
+   (foreign-library-function "libSDL2_image" "IMG_isICO" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6897 from /usr/include/SDL2/SDL_image.h:619:29
+(define img-iscur
+   (foreign-library-function "libSDL2_image" "IMG_isCUR" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6898 from /usr/include/SDL2/SDL_image.h:662:29
+(define img-isbmp
+   (foreign-library-function "libSDL2_image" "IMG_isBMP" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6899 from /usr/include/SDL2/SDL_image.h:705:29
+(define img-isgif
+   (foreign-library-function "libSDL2_image" "IMG_isGIF" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6900 from /usr/include/SDL2/SDL_image.h:748:29
+(define img-isjpg
+   (foreign-library-function "libSDL2_image" "IMG_isJPG" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6901 from /usr/include/SDL2/SDL_image.h:791:29
+(define img-isjxl
+   (foreign-library-function "libSDL2_image" "IMG_isJXL" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6902 from /usr/include/SDL2/SDL_image.h:834:29
+(define img-islbm
+   (foreign-library-function "libSDL2_image" "IMG_isLBM" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6903 from /usr/include/SDL2/SDL_image.h:877:29
+(define img-ispcx
+   (foreign-library-function "libSDL2_image" "IMG_isPCX" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6904 from /usr/include/SDL2/SDL_image.h:920:29
+(define img-ispng
+   (foreign-library-function "libSDL2_image" "IMG_isPNG" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6905 from /usr/include/SDL2/SDL_image.h:963:29
+(define img-ispnm
+   (foreign-library-function "libSDL2_image" "IMG_isPNM" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6906 from /usr/include/SDL2/SDL_image.h:1006:29
+(define img-issvg
+   (foreign-library-function "libSDL2_image" "IMG_isSVG" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6907 from /usr/include/SDL2/SDL_image.h:1049:29
+(define img-isqoi
+   (foreign-library-function "libSDL2_image" "IMG_isQOI" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6908 from /usr/include/SDL2/SDL_image.h:1092:29
+(define img-istif
+   (foreign-library-function "libSDL2_image" "IMG_isTIF" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6909 from /usr/include/SDL2/SDL_image.h:1135:29
+(define img-isxcf
+   (foreign-library-function "libSDL2_image" "IMG_isXCF" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6910 from /usr/include/SDL2/SDL_image.h:1178:29
+(define img-isxpm
+   (foreign-library-function "libSDL2_image" "IMG_isXPM" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6911 from /usr/include/SDL2/SDL_image.h:1221:29
+(define img-isxv
+   (foreign-library-function "libSDL2_image" "IMG_isXV" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6912 from /usr/include/SDL2/SDL_image.h:1264:29
+(define img-iswebp
+   (foreign-library-function "libSDL2_image" "IMG_isWEBP" 
+     #:return-type int       #:arg-types ('* )))
+
+
+;; definition 6913 from /usr/include/SDL2/SDL_image.h:1298:39
+(define img-loadavif-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadAVIF_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6914 from /usr/include/SDL2/SDL_image.h:1332:39
+(define img-loadico-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadICO_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6915 from /usr/include/SDL2/SDL_image.h:1366:39
+(define img-loadcur-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadCUR_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6916 from /usr/include/SDL2/SDL_image.h:1400:39
+(define img-loadbmp-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadBMP_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6917 from /usr/include/SDL2/SDL_image.h:1434:39
+(define img-loadgif-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadGIF_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6918 from /usr/include/SDL2/SDL_image.h:1468:39
+(define img-loadjpg-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadJPG_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6919 from /usr/include/SDL2/SDL_image.h:1502:39
+(define img-loadjxl-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadJXL_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6920 from /usr/include/SDL2/SDL_image.h:1536:39
+(define img-loadlbm-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadLBM_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6921 from /usr/include/SDL2/SDL_image.h:1570:39
+(define img-loadpcx-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadPCX_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6922 from /usr/include/SDL2/SDL_image.h:1604:39
+(define img-loadpng-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadPNG_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6923 from /usr/include/SDL2/SDL_image.h:1638:39
+(define img-loadpnm-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadPNM_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6924 from /usr/include/SDL2/SDL_image.h:1672:39
+(define img-loadsvg-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadSVG_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6925 from /usr/include/SDL2/SDL_image.h:1706:39
+(define img-loadqoi-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadQOI_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6926 from /usr/include/SDL2/SDL_image.h:1740:39
+(define img-loadtga-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadTGA_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6927 from /usr/include/SDL2/SDL_image.h:1774:39
+(define img-loadtif-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadTIF_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6928 from /usr/include/SDL2/SDL_image.h:1808:39
+(define img-loadxcf-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadXCF_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6929 from /usr/include/SDL2/SDL_image.h:1842:39
+(define img-loadxpm-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadXPM_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6930 from /usr/include/SDL2/SDL_image.h:1876:39
+(define img-loadxv-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadXV_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6931 from /usr/include/SDL2/SDL_image.h:1910:39
+(define img-loadwebp-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadWEBP_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6932 from /usr/include/SDL2/SDL_image.h:1931:39
+(define img-loadsizedsvg-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadSizedSVG_RW" 
+     #:return-type '*       #:arg-types ('* int int )))
+
+
+;; definition 6933 from /usr/include/SDL2/SDL_image.h:1950:39
+(define img-readxpmfromarray
+   (foreign-library-function "libSDL2_image" "IMG_ReadXPMFromArray" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6934 from /usr/include/SDL2/SDL_image.h:1969:39
+(define img-readxpmfromarraytorgb888
+   (foreign-library-function "libSDL2_image" "IMG_ReadXPMFromArrayToRGB888" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6935 from /usr/include/SDL2/SDL_image.h:1986:29
+(define img-savepng
+   (foreign-library-function "libSDL2_image" "IMG_SavePNG" 
+     #:return-type int       #:arg-types ('* '* )))
+
+
+;; definition 6936 from /usr/include/SDL2/SDL_image.h:2003:29
+(define img-savepng-rw
+   (foreign-library-function "libSDL2_image" "IMG_SavePNG_RW" 
+     #:return-type int       #:arg-types ('* '* int )))
+
+
+;; definition 6937 from /usr/include/SDL2/SDL_image.h:2022:29
+(define img-savejpg
+   (foreign-library-function "libSDL2_image" "IMG_SaveJPG" 
+     #:return-type int       #:arg-types ('* '* int )))
+
+
+;; definition 6938 from /usr/include/SDL2/SDL_image.h:2039:29
+(define img-savejpg-rw
+   (foreign-library-function "libSDL2_image" "IMG_SaveJPG_RW" 
+     #:return-type int       #:arg-types ('* '* int int )))
+
+
+;; definition 6941 from /usr/include/SDL2/SDL_image.h:2067:41
+(define img-loadanimation
+   (foreign-library-function "libSDL2_image" "IMG_LoadAnimation" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6942 from /usr/include/SDL2/SDL_image.h:2088:41
+(define img-loadanimation-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadAnimation_RW" 
+     #:return-type '*       #:arg-types ('* int )))
+
+
+;; definition 6943 from /usr/include/SDL2/SDL_image.h:2118:41
+(define img-loadanimationtyped-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadAnimationTyped_RW" 
+     #:return-type '*       #:arg-types ('* int '* )))
+
+
+;; definition 6944 from /usr/include/SDL2/SDL_image.h:2133:30
+(define img-freeanimation
+   (foreign-library-function "libSDL2_image" "IMG_FreeAnimation" 
+     #:return-type void       #:arg-types ('* )))
+
+
+;; definition 6945 from /usr/include/SDL2/SDL_image.h:2153:41
+(define img-loadgifanimation-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadGIFAnimation_RW" 
+     #:return-type '*       #:arg-types ('* )))
+
+
+;; definition 6946 from /usr/include/SDL2/SDL_image.h:2173:41
+(define img-loadwebpanimation-rw
+   (foreign-library-function "libSDL2_image" "IMG_LoadWEBPAnimation_RW" 
+     #:return-type '*       #:arg-types ('* )))
+|#
+
+
+
+============================================
+
+;; (define (image-init)
+;;   (let* ((flags (logior *sdl-image-init-jpg*
+;; 			*sdl-image-init-png*
+;; 			*sdl-image-init-tif*
+;; 			*sdl-image-init-webp*
+;; 			;;*sdl-image-init-jxl*
+;; 			;;*sdl-image-init-avif*
+;; 			))
+;; 	 (result (%img-init flags)))
+;;     (= result flags)))
+
+
+
+
+
+
+#|
+shared libraries
+
+/usr/lib/x86_64-linux-gnu/libSDL2_image.so
+
+  libSDL2_image 
+ .so suffix will be added by guile
+|#
+
+
+#|
+;; (define sdl-upper-blit-scaled
+;;   (foreign-library-function "libSDL2_image-2.0" "SDL_IMAGE2_C_FUNCTION_HERE"
+;;                             #:return-type int
+;;                             #:arg-types (list '* '* '* '*)))
+typedef enum IMG_InitFlags
+{
+    IMG_INIT_JPG    = 0x00000001,
+    IMG_INIT_PNG    = 0x00000002,
+    IMG_INIT_TIF    = 0x00000004,
+    IMG_INIT_WEBP   = 0x00000008,
+    IMG_INIT_JXL    = 0x00000010,
+    IMG_INIT_AVIF   = 0x00000020
+    } IMG_InitFlags;
+|#
+
+
