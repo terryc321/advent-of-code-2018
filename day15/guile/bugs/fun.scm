@@ -2,14 +2,19 @@
 
 #|
 
-enjoy experience trying to load my own sdl ffi library into guile scheme - from game1 
+Compiling /home/terry/code/advent-code/advent-of-code-2018/day15/guile/bugs/fun.scm ...
 
-load + compile game1.scm first , since everything is practically at toplevel and open 
+ice-9/boot-9.scm:1712:22: In procedure raise-exception:
+not found 618
+
+
+[Debugging level: 2]
+
 
 |#
 
 
-(use-modules (ice-9 optargs)) ;; optional args
+(use-modules (ice-9 optargs))
 (use-modules (system foreign)) ;; %null-pointer
 (use-modules (system foreign-library))
 (use-modules (rnrs bytevectors))
@@ -82,7 +87,7 @@ load + compile game1.scm first , since everything is practically at toplevel and
 	 (all-nwidth (filter (lambda (n) (not (= n nwidth))) (map string-length str-lines))))
     ;; assertions survive compilation
     (assert (null? all-nwidth))
-    ;; (format #t "all lines have width ~a~%" nwidth)
+    (format #t "all lines have width ~a~%" nwidth)
     ;; make an oversize array - using 1 indexing to N indexing !! 
     (let* ((w nwidth)
 	   (h nlines)
@@ -107,9 +112,6 @@ load + compile game1.scm first , since everything is practically at toplevel and
 	     (set! j (+ j 1)))
 	   str-lines)
       (values arr w h))))
-
-(define arr (input))
-
 
 (define (output arr)
   (with-output-to-file "output.txt"
@@ -178,21 +180,21 @@ load + compile game1.scm first , since everything is practically at toplevel and
 	    (when  (<= x width)
 	      (let ((symbol (array-ref arr x y)))
 		(cond
-		 ((eq? symbol 'wall) #f)
-		 ((eq? symbol 'cave) #f)
+		 ((eq? symbol 'wall) (format #t "~a" #\#))
+		 ((eq? symbol 'cave) (format #t "~a" #\.))
 		 ((eq? symbol 'elf)  (set! elfs (cons (list x y) elfs))  )
 		 ((eq? symbol 'goblin) (set! goblins (cons (list x y) goblins)) )
 		 (#t (error "bad symbol"))))
 	      ;; next x 
 	      (loopx (+ x 1)))) ;; let loopx
 	  ;; newline 
-	  ;; (when (<= y height)
-	  ;;   ;; (format #t "~%")
-	  ;;   #t
-	  ;;   )
+	  (when (<= y height)
+	    ;; (format #t "~%")
+	    #t
+	    )
 	  ;; next y	    
 	  (loopy (+ y 1)))) ;; let loopy
-      (values elfs goblins))))
+      )))
 
 
 #|
@@ -218,36 +220,6 @@ load + compile game1.scm first , since everything is practically at toplevel and
 	      (loopy (+ y 1))))))))))
 
 
-(define (goblins arr)
-  (call-with-values (lambda () (find-elfs-goblins arr))
-    (lambda (efs gobs)
-      (map (lambda (p)
-	     (match p
-	       ((x y) (format #t "at {~a,~a} is {~a}~%" x y (array-ref arr x y)))))
-	   gobs)
-      gobs)))
 
-(define (elfs arr)
-  (call-with-values (lambda () (find-elfs-goblins arr))
-    (lambda (efs gobs)
-      (map (lambda (p)
-	     (match p
-	       ((x y) (format #t "at {~a,~a} is {~a}~%" x y (array-ref arr x y)))))
-	   efs)
-      efs)))
-
-
-#|
-
-determine shortest path between an elf and a goblin
-determine shortest paths between an? goblin and elfs
-any elf in reach of a goblin < > ^ v not diagonally , then attacks rather than moves
-does the shortest path move around an already present E elf or G goblin ?
-
-need to make elfs and goblins records or objects as they also now have properties
-such as health 
-
-
-|#
 
 

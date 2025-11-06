@@ -1,14 +1,17 @@
 ;; -*- geiser-scheme-implementation: guile -*-
 
-;; set load path on starting
-;; (add-to-load-path "/home/terry/code/advent-code/advent-of-code-2018/day15/guile/")
-;; place libpixelformat.so in correct location -- see README.md
-;; start emacs
-;; guile cannot find shared libraries if guile already started
-;; > (add-to-load-path "/home/terry/code/advent-code/advent-of-code-2018/day15/guile/")
-;; compile this file using geiser
-;; > (demo)
-;; 
+
+
+#|
+set load path on starting
+(add-to-load-path "/home/terry/code/advent-code/advent-of-code-2018/day15/guile/")
+place libpixelformat.so in correct location -- see README.md
+start emacs
+guile cannot find shared libraries if guile already started
+> (add-to-load-path "/home/terry/code/advent-code/advent-of-code-2018/day15/guile/")
+compile this file using geiser
+> (demo)
+|#
 
 ;; where are we located in the file system 
 (define (base s)
@@ -18,7 +21,6 @@
 
 #|
 
-game1.scm
 
 can we get a sprite on to screen at x y ?
 how do we do animation ?
@@ -80,10 +82,10 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 (define *mouse-x* 0)
 (define *mouse-y* 0)
-;; (define *screen-width* 1920) ;; full screen my monitor
-;; (define *screen-height* 1080)
-(define *screen-width* 1024) ;; a window
-(define *screen-height* 768)
+(define *screen-width* 1920) ;; full screen my monitor
+(define *screen-height* 1080)
+;; (define *screen-width* 1024) ;; a window
+;; (define *screen-height* 768)
 
 (define *resized* #f)
 (define *quit* #f)
@@ -110,6 +112,15 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 (define *sprites-texture* #f)
 (define *background-texture* #f)
 (define *man-texture* #f)
+
+(define *goblins-texture* #f)
+(define *vikings-texture* #f)
+(define *wall-texture* #f)
+(define *cave-texture* #f)
+(define *grass-texture* #f)
+
+
+
 
 (define *frames* 0)
 
@@ -354,6 +365,9 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 ;; ==========================
 
+;; how do we go from this -> to something like smalltalk ?
+;; 
+
 (define (draw-cairo-specific)
   (cairo:set-source-rgba *cr* 1 1 1 1)
   (cairo:rectangle *cr* 0 0 *screen-width* *screen-height*)
@@ -428,7 +442,7 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
   
   ;; background
-  (sdl:render-copy *render* *background-texture* %null-pointer %null-pointer)
+  ;;(sdl:render-copy *render* *background-texture* %null-pointer %null-pointer)
 
   ;; ;; man texture
   ;; (let ((src %null-pointer)
@@ -558,6 +572,8 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 		      %null-pointer
 		      sdl:*flip-none*)
 
+
+
   
   
   ;; next sprite
@@ -577,11 +593,31 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 
 
+(define (draw-sdl2)
+
+  ;; draw it at 100,100 - keep same dimension being 200 wide x 200 high 
+  (sdl:render-copy *render*
+		   *wall-texture*
+		   (make-sdl-rect-pointer 0 0 200 200) ;;src
+		   (make-sdl-rect-pointer 100 100 200 200)) ;; dest
+
+  ;; 
+  (sdl:render-copy *render*
+		   *cave-texture*
+		   (make-sdl-rect-pointer 0 0 200 200) ;;src
+		   (make-sdl-rect-pointer 100 100 200 200)) ;; dest
+
+  
+
+  )
+
+
 
 
 (define (draw-frame)
   (draw-cairo)
   ;;(draw-sdl)
+  (draw-sdl2)
   (sdl:render-present *render*))
 
 
@@ -619,7 +655,7 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 				    (logior
 				     sdl:*window-allow-highdpi*
 				     sdl:*window-always-on-top*
-				     ;;sdl:*window-fullscreen*
+				     sdl:*window-fullscreen*
 				     )))
 ;; 			
 ;; ;; convenience middle of my screen 1920 x 1080 default resolution
@@ -671,6 +707,43 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
     (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
     (set! *sprites3-texture* (sdl:create-texture-from-surface *render* surf))
     (format #t "sprites texture ~a~%" *sprites3-texture*)
+    (sdl:free-surface surf))
+
+
+  (let ((surf (img:load (string->pointer (base "./images/vikings.png")))))
+    ;; mask for sprites is fully red R gb
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+    (set! *vikings-texture* (sdl:create-texture-from-surface *render* surf))
+    (format #t "vikings texture ~a~%" *vikings-texture*)
+    (sdl:free-surface surf))
+
+  (let ((surf (img:load (string->pointer (base "./images/goblins.png")))))
+    ;; mask for sprites is fully red R gb
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+    (set! *goblins-texture* (sdl:create-texture-from-surface *render* surf))
+    (format #t "goblins texture ~a~%" *goblins-texture*)
+    (sdl:free-surface surf))
+
+  (let ((surf (img:load (string->pointer (base "./images/wall.png")))))
+    ;; mask for sprites is fully red R gb
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+    (set! *wall-texture* (sdl:create-texture-from-surface *render* surf))
+    (format #t "wall texture ~a~%" *wall-texture*)
+    (sdl:free-surface surf))
+
+  ;; no cave image yet
+  ;; (let ((surf (img:load (string->pointer (base "./images/cave.png")))))
+  ;;   ;; mask for sprites is fully red R gb
+  ;;   (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+  ;;   (set! *cave-texture* (sdl:create-texture-from-surface *render* surf))
+  ;;   (format #t "cave texture ~a~%" *cave-texture*)
+  ;;   (sdl:free-surface surf))
+
+  (let ((surf (img:load (string->pointer (base "./images/grass.png")))))
+    ;; mask for sprites is fully red R gb
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+    (set! *grass-texture* (sdl:create-texture-from-surface *render* surf))
+    (format #t "grass texture ~a~%" *grass-texture*)
     (sdl:free-surface surf))
 
   
@@ -979,6 +1052,13 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
   ;;(sdl:destroy-texture *sprites2-texture*)  
   (sdl:destroy-texture *sprites3-texture*)
   (sdl:destroy-texture *man-texture*)
+
+  ;; some textures
+  (sdl:destroy-texture *grass-texture*)
+  (sdl:destroy-texture *wall-texture*)
+  (sdl:destroy-texture *vikings-texture*)
+  (sdl:destroy-texture *goblins-texture*)
+
   
   (sdl:destroy-renderer *render*)
   (sdl:destroy-window *window*)
