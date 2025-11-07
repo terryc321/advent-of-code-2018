@@ -617,7 +617,6 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 
 (define (draw-sdl2)
-
   ;; iterate over 2d array arr 
   (array-loop arr
 	      (lambda (arr x y)
@@ -627,28 +626,27 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 		       (wid 32) ;; pixels wid x hgt
 		       (hgt 32))		       
 		  (cond
-		   ((eq? elem 'wall)
+		   ((wall? elem)
 		    (set! texture *wall-texture*)
 		    (set! src (make-sdl-rect-pointer 0 0 200 200)))
-		   ((eq? elem 'cave)
+		   ((cave? elem)
 		    (set! texture *white-texture*)
 		    (set! src (make-sdl-rect-pointer 0 0 200 200)))
-		   ((eq? elem 'goblin)
+		   ((goblin? elem)
 		    (set! texture *goblins-texture*)
 		    (set! src (make-sdl-rect-pointer 95 20 (- 200 95) (- 120 20))))
-		   ((eq? elem 'elf)
+		   ((elf? elem)
 		    (set! texture *vikings-texture*)
 		    (set! src (make-sdl-rect-pointer 288 58 (- 387 288) (- 155 58)))))
-
 		  (when (and src texture)		  
 		    ;; draw it at 100,100 - keep same dimension being 200 wide x 200 high 
 		    (sdl:render-copy *render*
 				     texture
 				     src
-				     (make-sdl-rect-pointer (+ wid (* x wid )) (+ 0 (* y hgt)) wid hgt))))))
+				     (make-sdl-rect-pointer (+ wid (* x wid )) (+ 0 (* y hgt)) wid hgt)))))))
 
   
-  )
+  
 
 
 
