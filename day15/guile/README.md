@@ -1,4 +1,24 @@
 
+# Puzzle
+
+elfs and goblins or two types characters 
+
+each is trying to attack the others , only move horizontal or vertical
+
+look for shortest path to enemy , shortest path to any desired location is taken same as move criteria below.
+
+first to move is taken top left grid to last at bottom right , moving horizontally
+
+need to think out strategy of code organisation 
+
+draw a diagram of how it should work
+
+think about making a debugging environment as guile scheme is nonsensical 
+
+think about an abstraction layer than if go below - just assume computer is on fire and walk away !
+
+
+
 # Graphical Ability
 
 install the shared library to correct location , without this everything else will not work
