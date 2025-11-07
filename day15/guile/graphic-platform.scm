@@ -1,6 +1,10 @@
 ;; -*- geiser-scheme-implementation: guile -*-
 
-
+;; compile fun.scm + this file too => arr 2d array is available!
+;; draw-sdl2 is where we draw the board 32 x 32
+;; 1024 x 768 screen then 32 wide , but need 24 pixel high to fit into 768
+;; choose 24 x 24 pixel sizes for each square
+;; entire map on screen 
 
 #|
 set load path on starting
@@ -46,12 +50,17 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 (use-modules (ice-9 pretty-print)) 
 (define pp pretty-print)
 
+(use-modules (ice-9 match))
+
 ;; these modules are not in guile ecosystem they require an altered %load-path to make them visible
 (use-modules (macros fcase))
 (use-modules (macros inc))
+(use-modules (macros array-loop))
+
 (use-modules ((graphics sdl2 sdl) #:prefix sdl:))
 (use-modules ((graphics sdl2 image) #:prefix img:))
 (use-modules ((graphics cairo cairo) #:prefix cairo:))
+
 
 
 (define (setup) #f)
@@ -82,10 +91,10 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 (define *mouse-x* 0)
 (define *mouse-y* 0)
-(define *screen-width* 1920) ;; full screen my monitor
-(define *screen-height* 1080)
-;; (define *screen-width* 1024) ;; a window
-;; (define *screen-height* 768)
+;; (define *screen-width* 1920) ;; full screen my monitor
+;; (define *screen-height* 1080)
+(define *screen-width* 1024) ;; a window
+(define *screen-height* 768)
 
 (define *resized* #f)
 (define *quit* #f)
@@ -118,6 +127,7 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 (define *wall-texture* #f)
 (define *cave-texture* #f)
 (define *grass-texture* #f)
+(define *white-texture* #f)
 
 
 
@@ -368,10 +378,23 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 ;; how do we go from this -> to something like smalltalk ?
 ;; 
 
+(define (draw-cairo-black-screen)
+    (cairo:set-source-rgba *cr* 0 0 0 1) ;; 0 0 0 1 is black ??
+    (cairo:rectangle *cr* 0 0 *screen-width* *screen-height*)
+    (cairo:fill *cr*))
+
+(define (draw-cairo-white-screen)
+    (cairo:set-source-rgba *cr* 0 0 0 1) ;; 0 0 0 1 is black ??
+    (cairo:rectangle *cr* 0 0 *screen-width* *screen-height*)
+    (cairo:fill *cr*))
+
+
+
 (define (draw-cairo-specific)
-  (cairo:set-source-rgba *cr* 1 1 1 1)
-  (cairo:rectangle *cr* 0 0 *screen-width* *screen-height*)
-  (cairo:fill *cr*)
+  ;;(cairo:set-source-rgba *cr* 1 1 1 1)
+  ;; (cairo:set-source-rgba *cr* 0 0 0 1) ;; 0 0 0 1 is black ??
+  ;; (cairo:rectangle *cr* 0 0 *screen-width* *screen-height*)
+  ;; (cairo:fill *cr*)
   
   ;; (define xc 320.0)
   ;; (define yc 240.0)
@@ -408,8 +431,8 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
   (draw-cairo-specific)
   
   (cairo:surface-flush *cairo-surface*)
-  (sdl:update-texture *texture* %null-pointer (sdl:surface-pixels *surface*) (sdl:surface-pitch *surface*))
-  (sdl:render-copy *render* *texture* %null-pointer %null-pointer)
+  ;; (sdl:update-texture *texture* %null-pointer (sdl:surface-pixels *surface*) (sdl:surface-pitch *surface*))
+  ;; (sdl:render-copy *render* *texture* %null-pointer %null-pointer)
   )
 
 
@@ -595,28 +618,52 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
 
 (define (draw-sdl2)
 
-  ;; draw it at 100,100 - keep same dimension being 200 wide x 200 high 
-  (sdl:render-copy *render*
-		   *wall-texture*
-		   (make-sdl-rect-pointer 0 0 200 200) ;;src
-		   (make-sdl-rect-pointer 100 100 200 200)) ;; dest
+  ;; iterate over 2d array arr 
+  (array-loop arr
+	      (lambda (arr x y)
+		(let* ((texture #f)
+		       (src #f)
+		       (elem (array-ref arr x y))
+		       (wid 32) ;; pixels wid x hgt
+		       (hgt 32))		       
+		  (cond
+		   ((eq? elem 'wall)
+		    (set! texture *wall-texture*)
+		    (set! src (make-sdl-rect-pointer 0 0 200 200)))
+		   ((eq? elem 'cave)
+		    (set! texture *white-texture*)
+		    (set! src (make-sdl-rect-pointer 0 0 200 200)))
+		   ((eq? elem 'goblin)
+		    (set! texture *goblins-texture*)
+		    (set! src (make-sdl-rect-pointer 95 20 (- 200 95) (- 120 20))))
+		   ((eq? elem 'elf)
+		    (set! texture *vikings-texture*)
+		    (set! src (make-sdl-rect-pointer 288 58 (- 387 288) (- 155 58)))))
 
-  ;; 
-  (sdl:render-copy *render*
-		   *cave-texture*
-		   (make-sdl-rect-pointer 0 0 200 200) ;;src
-		   (make-sdl-rect-pointer 100 100 200 200)) ;; dest
+		  (when (and src texture)		  
+		    ;; draw it at 100,100 - keep same dimension being 200 wide x 200 high 
+		    (sdl:render-copy *render*
+				     texture
+				     src
+				     (make-sdl-rect-pointer (+ wid (* x wid )) (+ 0 (* y hgt)) wid hgt))))))
 
   
-
   )
 
 
 
 
+
+
 (define (draw-frame)
-  (draw-cairo)
+  (draw-cairo-black-screen)
+  ;;(draw-cairo)
   ;;(draw-sdl)
+  (draw-cairo)
+  
+  (sdl:update-texture *texture* %null-pointer (sdl:surface-pixels *surface*) (sdl:surface-pitch *surface*))
+  (sdl:render-copy *render* *texture* %null-pointer %null-pointer)
+    
   (draw-sdl2)
   (sdl:render-present *render*))
 
@@ -718,8 +765,8 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
     (sdl:free-surface surf))
 
   (let ((surf (img:load (string->pointer (base "./images/goblins.png")))))
-    ;; mask for sprites is fully red R gb
-    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+    ;; mask for sprites is fully red R gb - white for goblins
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #xFF #xFF #xFF)) 
     (set! *goblins-texture* (sdl:create-texture-from-surface *render* surf))
     (format #t "goblins texture ~a~%" *goblins-texture*)
     (sdl:free-surface surf))
@@ -740,12 +787,20 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
   ;;   (sdl:free-surface surf))
 
   (let ((surf (img:load (string->pointer (base "./images/grass.png")))))
-    ;; mask for sprites is fully red R gb
-    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #x78 #x00 #x00)) 
+    ;; mask for sprites is fully red R gb - white for grass
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #xFF #x00 #xFF)) 
     (set! *grass-texture* (sdl:create-texture-from-surface *render* surf))
     (format #t "grass texture ~a~%" *grass-texture*)
     (sdl:free-surface surf))
 
+  (let ((surf (img:load (string->pointer (base "./images/white.png")))))
+    ;; mask for sprites is fully red R gb - white for grass
+    (sdl:set-color-key surf #x1 (sdl:map-rgb (sdl:surface-pixelformat surf) #xFF #xFF #xFF)) 
+    (set! *white-texture* (sdl:create-texture-from-surface *render* surf))
+    (format #t "white texture ~a~%" *white-texture*)
+    (sdl:free-surface surf))
+
+  
   
   
   ;; background
@@ -1058,6 +1113,7 @@ e.g can we draw a car on screen using paint pots and then save that as the car i
   (sdl:destroy-texture *wall-texture*)
   (sdl:destroy-texture *vikings-texture*)
   (sdl:destroy-texture *goblins-texture*)
+  (sdl:destroy-texture *white-texture*)
 
   
   (sdl:destroy-renderer *render*)

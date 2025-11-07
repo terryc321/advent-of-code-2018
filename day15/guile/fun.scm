@@ -26,6 +26,7 @@ load + compile game1.scm first , since everything is practically at toplevel and
 ;; these modules are not in guile ecosystem they require an altered %load-path to make them visible
 (use-modules (macros fcase))
 (use-modules (macros inc))
+(use-modules (macros array-loop))
 (use-modules ((graphics sdl2 sdl) #:prefix sdl:))
 (use-modules ((graphics sdl2 image) #:prefix img:))
 (use-modules ((graphics cairo cairo) #:prefix cairo:))
@@ -193,29 +194,6 @@ load + compile game1.scm first , since everything is practically at toplevel and
 	  ;; next y	    
 	  (loopy (+ y 1)))) ;; let loopy
       (values elfs goblins))))
-
-
-#|
-
- for y from 1 to array-height do 
-  for x from 1 to array-width do 
-   f{x,y}
-
-|#
-(define-syntax array-loop
-  (syntax-rules ()
-    ((_ arr foo)
-     (match (array-shape arr)
-       (((x0 x1)(y0 y1))
-	(let ((width x1)
-	      (height y1))
-	  (let loopy ((y 1))
-	    (when  (<= y height)
-	      (let loopx ((x 1))
-		(when  (<= x width)
-		  (foo arr x y)
-		  (loopx (+ x 1))))
-	      (loopy (+ y 1))))))))))
 
 
 (define (goblins arr)
