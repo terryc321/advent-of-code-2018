@@ -1,0 +1,6 @@
+# dune init proj ocaml
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /home/terry/.cache/dune/db
+# Workspace root: /home/terry/code/advent-code/advent-of-code-2018/day15/ocaml
+# Auto-detected concurrency: 16

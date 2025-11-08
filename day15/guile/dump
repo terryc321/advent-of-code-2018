@@ -1,6 +1,229 @@
 ;; -*- geiser-scheme-implementation: guile -*-
 
 
+;; (map breadth-first (lexicographic arr))
+;; h health : x pos : y pos : type = elf / goblin : 
+;; result will hold positions of next move each goblin or elf
+(define (task arr)
+  (let* ((arr2 (array-copy arr)) ;; reuse arr2 over and over as a scratch area 
+	 (xlim (array-width arr2))
+	 (ylim (array-height arr2))
+	 (result '()))
+    (define (breadth-first elem)
+      (format #t "breadth first on ~a ~%" elem)
+      (zero-array! arr2)
+      (match elem
+	((type h x y) (recur-entry type h x y))))
+    (define (onboard? x y)
+      (and (>= x 1)(<= x xlim)
+	   (>= y 1)(<= y ylim)))
+    (define (opponent? type x y)
+      (and (onboard? x y)
+	   (or
+	    (and (elf? type) (goblin? (array-ref arr x y)))
+	    (and (goblin? type) (elf? (array-ref arr x y))))))
+    (define (recur-entry type h x y)
+      (define (recur x y n)
+	(when
+	 (onboard? x y)
+	 (let ((elem (array-ref arr2 x y)))
+	   (cond
+	    ((wall? elem) #f)
+	    ((cave? elem)
+	     (array-set! arr2 n x y)
+	     ;; recursively relabel each square based on distance 
+	     (recur x (- y 1) (+ n 1))      
+	     (recur (- x 1) y (+ n 1))
+	     (recur (+ x 1) y (+ n 1))
+	     (recur x (+ y 1) (+ n 1)))
+	    ((elf? elem) #f)
+	    ((goblin? elem) #f)
+	    ((integer? elem) (cond
+			      ((< elem n) #f) ;; square has better minima 
+			      ((= elem n) #f) ;; also been here before
+			      ((> elem n) ;; new low found
+			       (array-set! arr2 n x y)	
+			       (recur x (- y 1) (+ n 1))      
+			       (recur (- x 1) y (+ n 1))
+			       (recur (+ x 1) y (+ n 1))
+			       (recur x (+ y 1) (+ n 1)))
+			      ))))))
+      ;; find enemies within range with lowest health , then sort by Y axis , then sort X axis
+      ;; if no such enemies then go looking for opponent  FOOO
+      
+      (cond
+       (#f 1)       
+       ;; ((attack-imminent type x y)	
+       ;; ((opponent? type x (- y 1)) attack x y-1)
+       ;; ((opponent? type (- x 1) y)  attack x-1 y)
+       ;; ((opponent? type (+ x 1) y)  attack x+1 y)
+       ;; ((opponent? type x (+ y 1))  attack x (+ y 1))
+       (#t ;; go looking for opponent 
+	(recur x (- y 1) 1)      
+	(recur (- x 1) y 1)
+	(recur (+ x 1) y 1)
+	(recur x (+ y 1) 1)
+	;; all empty squares (cave?) in arr2 should now be numbered
+	;; we need to find all the paths back from each existing opponent  
+	;; find all enemies
+	(format #t "Line471 : type = ~a~%" type)
+	(let ((enemies
+	       (cond
+		((eq? type 'goblin)
+		 (elfs arr2))	
+		((eq? type 'elf) 
+		 (goblins arr2)))))	  
+	  ;; for each enemy - record numbered squares around it and position of the square
+	  ;; SCORE X Y of the scored square
+	  ;; sort - select the minimum SCOREd squares
+	  ;; with these mim SCOREd squares we can trace back to current player - we have a path back 
+	  ;; find out what squares lead to these paths around current player
+	  ;; sort them lexicographic order
+	  ;; choose that square
+	  ;; if no such square the turn ends for this player
+	  (let ((scores '())
+		(min-score #f)
+		(choices '()))
+	    (define determine-and-accept
+	      (lambda (score x2 y2)
+		(cond
+		 ((not min-score) (set! min-score score)
+		  (set! scores (cons (list score x2 y2) scores)))
+		 ((> score min-score) 'ignore)
+		 ((= score min-score) (set! scores (cons (list score x2 y2) scores)))
+		 ((< score min-score)
+		  (set! min-score score)
+		  (set! scores '())
+		  (set! scores (cons (list score x2 y2) scores))))))
+	    (define func (lambda (enemy)
+			   (format #t "enemy data structure { ~a } ~%" enemy)
+			   (let ((xp (char-x enemy))
+				 (yp (char-y enemy)))
+			     (when (and (onboard? (- xp 1) yp) (integer? (array-ref arr2 (- xp 1) yp)))
+			       (let ((score  (array-ref arr2 (- xp 1) yp)))
+				 (determine-and-accept score (- xp 1) yp)))
+			     (when (and (onboard? (+ xp 1) yp) (integer? (array-ref arr2 (+ xp 1) yp)))
+			       (let ((score  (array-ref arr2 (+ xp 1) yp)))
+				 (determine-and-accept score (+ xp 1) yp)))
+			       
+			     (when (and (onboard? xp (- yp 1)) (integer? (array-ref arr2 xp (- yp 1))))
+			       (let ((score  (array-ref arr2 xp (- yp 1))))
+				 (determine-and-accept score xp (- yp 1))))
+
+			     (when (and (onboard? xp (+ yp 1)) (integer? (array-ref arr2 xp (+ yp 1))))
+			       (let ((score  (array-ref arr2 xp (+ yp 1))))
+				 (determine-and-accept score xp (+ yp 1))))
+			     )))
+	    
+	    ;; cannot write add-to-list! like this because needs to be a macro
+	    ;; (define (add-to-list! xs e)
+	    ;;   (cond
+	    ;;    ((member? e xs) xs)
+	    ;;    (#t (set! xs
+	    (define member?
+	      (lambda (e xs)
+		(cond
+		 ((null? xs) #f)
+		 ((equal? e (car xs)) #t)
+		 (#t (member? e (cdr xs))))))
+	      
+	    ;; (define initiate-recursive-path-back
+	    ;;   (lambda (n x y)
+	    ;; 	(when (onboard? x y)
+	    ;; 	  (cond
+	    ;; 	   ((< n 2)
+	    ;; 	    (let ((xy (list x y)))
+	    ;; 	      (cond
+	    ;; 	       ((member? xy choices) #f)
+	    ;; 	       (#t (set! choices (cons xy choices))))))
+	    ;; 	   (#t (let ((elem (array-ref arr2 x y)))
+	    ;; 		 (when (and (integer? elem) (= elem n))
+	    ;; 		   (initiate-recursive-path-back (- n 1) (- x 1) y)
+	    ;; 		   (initiate-recursive-path-back (- n 1) (+ x 1) y)
+	    ;; 		   (initiate-recursive-path-back (- n 1) x (- y 1))
+	    ;; 		   (initiate-recursive-path-back (- n 1) x (+ y 1)))))))))
+	    
+	    ;; run func over the enemies	    
+	    (map func enemies)
+	    ;; for those squares in scores => ((1 1)(5 4)(6 9)) initiate a recursive search for min path back to square 1
+	    (format #t "scores => ~%")
+	    (pp scores)
+	    (format #t "~%")
+	    ;; if we can find such a min path square at 1 which is guaranteed because we did breadth first
+
+   	    (define initiate-recursive-path-back
+	      (lambda (n x2 y2)
+		(zero-array! arr2)
+		;; breadth-first search from x2 y2
+		(define (recur x y n)
+		  (when
+		      (onboard? x y)
+		    (let ((elem (array-ref arr2 x y)))
+		      (cond
+		       ((wall? elem) #f)
+		       ((cave? elem)
+			;; recursively relabel each square based on distance 
+			(array-set! arr2 n x y)			
+			(recur x (- y 1) (+ n 1))      
+			(recur (- x 1) y (+ n 1))
+			(recur (+ x 1) y (+ n 1))
+			(recur x (+ y 1) (+ n 1)))
+		       ((elf? elem) #f)
+		       ((goblin? elem) #f)
+		       ((integer? elem) (cond
+					 ((< elem n) #f) ;; square has better minima 
+					 ((= elem n) #f) ;; also been here before
+					 ((> elem n) ;; new low found
+					  (array-set! arr2 n x y)	
+					  (recur x (- y 1) (+ n 1))      
+					  (recur (- x 1) y (+ n 1))
+					  (recur (+ x 1) y (+ n 1))
+					  (recur x (+ y 1) (+ n 1)))
+					 ))))))
+		
+		(format #t "checking array zero'd ~%")
+		(show-array arr2)		
+		(recur x2 y2 1)
+		(format #t "checking insight ~%")
+		(show-array arr2)
+		))
+		
+	    
+	    (define score-fn
+	      (lambda (score)
+		(format #t " we got {~a}~%" score)
+		(apply initiate-recursive-path-back score)))
+	    ;;
+	    (map score-fn scores)
+	    ;; we can add that square to the four possible lexicographic choice squares
+	    ;; which by default will just be the scores list
+	    (format #t "choices are {~a}~%" choices)
+	    )))))
+       ;; recur entry
+    
+    ;;(map breadth-first (lexicographic arr))
+    ;; iterate over lexicographic ordering
+    (let loop ((ordering (lexicographic arr))
+	       (i 0))
+      (cond
+       ((null? ordering) 'done)
+       (#t (let ((actor (car ordering)))
+	     (breadth-first actor)
+	     (format #t "~%actor <~a>~%" i)
+	     (show-array arr2)
+	     (format #t "~%~%")
+	     (loop (cdr ordering) (+ i 1))))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+    
+
+     
+
+
+
 #|
 ;; may need to
 ;; > sudo chicken-install srfi-25
