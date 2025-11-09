@@ -20,9 +20,7 @@ let () =
   Stdio.printf "Pi ≈ %.2f\n" 3.14159;
   Stdio.eprintf "Warning: %s\n" "something went wrong";;
 
-
-
-
+let a = 3 ;;
 
 
 
