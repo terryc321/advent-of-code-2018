@@ -25,3 +25,10 @@ to run a project
 ```
 opam exec -- dune exec ocaml
 ```
+
+
+otherwise can 
+```
+dune build
+dune exec ocaml
+```

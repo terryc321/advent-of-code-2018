@@ -123,23 +123,21 @@ load + compile game1.scm first , since everything is practically at toplevel and
 ;; (wall? (make-cave))
 
 (define-record-type goblin
-  (make-goblin hits power x y turn)
+  (make-goblin hits power x y)
   goblin?
   (hits get-goblin-hits set-goblin-hits!)
   (power get-goblin-power set-goblin-power!)
   (x get-goblin-x set-goblin-x!)
-  (y get-goblin-y set-goblin-y!)
-  (turn get-goblin-turn set-goblin-turn!))
+  (y get-goblin-y set-goblin-y!))
 
 
 (define-record-type elf
-  (make-elf hits power x y turn)
+  (make-elf hits power x y)
   elf?
   (hits get-elf-hits set-elf-hits!)
   (power get-elf-power set-elf-power!)
   (x get-elf-x set-elf-x!)
-  (y get-elf-y set-elf-y!)
-  (turn get-elf-turn set-elf-turn!))
+  (y get-elf-y set-elf-y!))
 
 
 ;; template for learning define-record-type
@@ -194,7 +192,7 @@ load + compile game1.scm first , since everything is practically at toplevel and
 
 
 (define (input)
-  (let* ((str-lines (get-lines "../input.txt"))
+  (let* ((str-lines (get-lines "../../input.txt"))
 	 (nlines (length str-lines))
 	 (nwidth (string-length (car str-lines)))
 	 (all-nwidth (filter (lambda (n) (not (= n nwidth))) (map string-length str-lines))))
@@ -216,8 +214,8 @@ load + compile game1.scm first , since everything is practically at toplevel and
 			     (cond 
 			       ((char=? ch #\#) (make-wall))
 			       ((char=? ch #\.) (make-cave))
-			       ((char=? ch #\E) (make-elf elf-hit-points elf-power i j #f))
-			       ((char=? ch #\G) (make-goblin goblin-hit-points goblin-power i j #f))
+			       ((char=? ch #\E) (make-elf elf-hit-points elf-power i j))
+			       ((char=? ch #\G) (make-goblin goblin-hit-points goblin-power i j))
 			       (#t (error (format #f "bad char {~a} at {line ~a,col ~a}" ch j i))))))
 			(array-set! arr cnv (+ i 1) (+ j 1)))
 		      (set! i (+ i 1)))
@@ -502,17 +500,17 @@ only move through empty cave? squares not through players
 (define (array-height arr) (second (second (array-shape arr))))
 
 
-;; (define (char-x x)
-;;   (third x))
+(define (char-x x)
+  (third x))
 
-;; (define (char-y y)
-;;   (fourth y))
+(define (char-y y)
+  (fourth y))
 
-;; (define (char-type x)
-;;   (car x))
+(define (char-type x)
+  (car x))
 
-;; (define (char-health x)
-;;   (second x))
+(define (char-health x)
+  (second x))
 
 ;; idea now is that the breadth-first search should be started from the opponent and not the player 
 ;; this way there is only one such shortest back to player - which then identifies what square can reach that
@@ -727,8 +725,10 @@ begins search on each square can reach vertically or horizontally
 
 ;; sort opponents based on lowest health (hit points)
 ;; if opponent dies - need to reconfigure board ?
-(define (find-opponent-in-range arr p x y)
-  (let ((type (player-type p))
+(define (find-opponent-in-range p arr)
+  (let ((x (player-x p))
+	(y (player-y p))
+	(type (player-type p))
 	(targets '()))
     ;;check up
     (when (and (onboard? x (- y 1) arr)
@@ -764,34 +764,21 @@ begins search on each square can reach vertically or horizontally
 	  (up (assoc 'up targets))
 	  (down (assoc 'down targets)))
       (cond
-       (up (list (second up) x (- y 1)))
-       (left (list (second left) (- x 1) y))
-       (right (list (second right) (+ x 1) y))
-       (down (list (second down) x (+ y 1)))
+       (up (second up))
+       (left (second left))
+       (right (second right))
+       (down (second down))
        (#t #f)))))
-
        
 
 
-(define (attack arr p x y)
-  (let ((target (find-opponent-in-range arr p x y)))
+(define (%attack% p arr)
+  (let ((target (find-opponent-in-range p arr)))
     (when target
-      (let ((elem (car target))
-	    (tx (second target))
-	    (ty (third target)))
-	(cond
-	 ((elf? elem)
-	  (set-elf-hits! target (- (get-elf-hits target) (player-power p)))
-	  (when (<= (get-elf-hits target) 0)
-	    (format #t "elf has died !~%")
-	    (array-set! arr (make-cave) tx ty)))
-	 ((goblin? target)
-	  (set-goblin-hits! target (- (get-goblin-hits target) (player-power p)))
-	  (when (<= (get-goblin-hits target) 0)
-	    (format #t "goblin has died !~%")
-	    (array-set! arr (make-cave) tx ty)))
-	 (#t (error "cannot attack target not recognised")))))))
-
+      (cond
+       ((elf? target) (set-elf-hits! target (- (get-elf-hits target) (player-power p))))
+       ((goblin? target) (set-goblin-hits! target (- (get-goblin-hits target) (player-power p))))
+       (#t (error "cannot attack target not recognised"))))))
 
 
 
@@ -925,13 +912,6 @@ begins search on each square can reach vertically or horizontally
 
 
 (define (task arr)
-  ;; enable everyone to participate in moving and attacking - using turn property 
-  (array-loop arr (lambda (arr x y)
-		    (let ((e (array-ref arr x y)))
-		      (cond
-		       ((elf? e) (set-elf-turn! e #t))
-		       ((goblin? e) (set-goblin-turn! e #t))))))
-
   (array-loop arr (lambda (arr x y)
 		    (let ((e (array-ref arr x y)))
 		      (cond
@@ -939,69 +919,38 @@ begins search on each square can reach vertically or horizontally
 		       ((goblin? e) (task-goblin arr e x y )))))))
 
 
-(define (move! arr x y x2 y2)
-  (let ((elem (array-ref arr x y))
-	(elem2 (array-ref arr x2 y2)))
-    (cond
-     ((and (player? elem) (or (integer? elem2) (cave? elem2)))
-      (array-set! arr elem x2 y2)
-      (array-set! arr (make-cave) x y))
-     (#t
-      (error (format #f "cannot move=> - neither elem or empty cave :elem=> ~a ~%:elem2=> ~a~%" elem elem2))))))
-
-
-(define (player-dead? p)
-  (cond
-   ((goblin? p) (goblin-dead? p))
-   ((elf? p) (elf-dead? p))
-   (#t #f)))
-
-(define (goblin-dead? p)
-  (and (goblin? p)
-       (<= (get-goblin-hits p) 0)))
-
-(define (elf-dead? p)
-  (and (elf? p)
-       (<= (get-elf-hits p) 0)))
-
-
-  
-
 
 ;; task-elf exactly same except elf / goblin swap 
 (define (task-goblin arr p px py)
   (cond
-   ((goblin-dead? p) #f) 
-   ((not (get-goblin-turn p)) #f) 
    ((opponent-in-range? arr p px py) #f)
    (#t
     ;; move
-    (let ((left #f)(right #f)(up #f)(down #f)(dirs '())(moved #f))
+    (let ((left #f)(right #f)(up #f)(down #f)(dirs '()))
       (array-loop arr (lambda (arr x y)
 			(let ((e (array-ref arr x y)))
 			  (cond
-			   ((elf-dead? e) #f)
 			   ((elf? e)
 			    (format #t "enemy elf at ~a ~a~%" x y)
 			    (breadth-first-label-caves! arr x y)
-			    ;;(show-array arr)
-
-			    (let ((dx (- px 1))(dy py))
-			      (when (and (onboard? dx dy arr) (integer? (array-ref arr dx dy)))
-				(when (or (not left)
-					  (< (array-ref arr dx dy) left))
-				  (set! left (array-ref arr dx dy)))))
+			    (show-array arr)
+			    
+			    (when (and (onboard? (- px 1) py arr) (integer? (array-ref arr (- px 1) py)))
+			      (when (or (not left)
+					(< (array-ref arr (- px 1) py) left))
+				(set! left (array-ref arr (- px 1) py))))
+			    
 			    
 			    (when (and (onboard? (+ px 1) py arr) (integer? (array-ref arr (+ px 1) py)))
 			      (when (or (not right) (< (array-ref arr (+ px 1) py) right))
 				(set! right (array-ref arr (+ px 1) py))))
 
 			    (when (and (onboard? px (- py 1) arr) (integer? (array-ref arr px (- py 1))))
-			      (when (or (not up) (< (array-ref arr px (- py 1)) up))
+			      (when (or (not up) (< (array-ref arr px (- py 1) py) up))
 				(set! up (array-ref arr px (- py 1)))))
 
 			    (when (and (onboard? px (+ py 1) arr) (integer? (array-ref arr px (+ py 1))))
-			      (when (or (not down) (< (array-ref arr px (+ py 1)) down))
+			      (when (or (not down) (< (array-ref arr px (+ py 1) py) down))
 				(set! down (array-ref arr px (+ py 1)))))
 			    
 			    )))))
@@ -1015,104 +964,17 @@ begins search on each square can reach vertically or horizontally
       (set! dirs (filter (lambda (x) (= (second x) (second (car dirs)))) dirs))
       (format #t "sorted dirs only lowest => ~a~%" dirs)
       
-      (cond
-       ((assoc 'up dirs) (move! arr px py px (- py 1)))
-       ((assoc 'left dirs) (move! arr px py (- px 1) py))
-       ((assoc 'right dirs) (move! arr px py (+ px 1) py))
-       ((assoc 'down dirs) (move! arr px py px (+ py 1)))
-       (#t 'cannot-move))
-
-      ;; ok 
-      ;; (when (null? dirs)
-      ;; 	(format #t "NULL DIRS => ~a~%" p)
-      ;; 	(show-array arr))
-      
       )))
   (when
       (opponent-in-range? arr p px py)
-    (attack arr p px py)    
-    )
-
-  ;; goblin has had its turn 
-  (set-goblin-turn! p #f)
-  )
-
-
-
-
-;; task-elf exactly same except elf / goblin swap 
-(define (task-elf arr p px py)
-  (cond
-   ((elf-dead? p) #f) 
-   ((not (get-elf-turn p)) #f) 
-   ((opponent-in-range? arr p px py) #f)
-   (#t
-    ;; move
-    (let ((left #f)(right #f)(up #f)(down #f)(dirs '())(moved #f))
-      (array-loop arr (lambda (arr x y)
-			(let ((e (array-ref arr x y)))
-			  (cond
-			   ((goblin-dead? e) #f)
-			   ((goblin? e)
-			    (format #t "enemy goblin at ~a ~a~%" x y)
-			    (breadth-first-label-caves! arr x y)
-			    ;;(show-array arr)
-
-			    (let ((dx (- px 1))(dy py))
-			      (when (and (onboard? dx dy arr) (integer? (array-ref arr dx dy)))
-				(when (or (not left)
-					  (< (array-ref arr dx dy) left))
-				  (set! left (array-ref arr dx dy)))))
-			    
-			    (when (and (onboard? (+ px 1) py arr) (integer? (array-ref arr (+ px 1) py)))
-			      (when (or (not right) (< (array-ref arr (+ px 1) py) right))
-				(set! right (array-ref arr (+ px 1) py))))
-
-			    (when (and (onboard? px (- py 1) arr) (integer? (array-ref arr px (- py 1))))
-			      (when (or (not up) (< (array-ref arr px (- py 1)) up))
-				(set! up (array-ref arr px (- py 1)))))
-
-			    (when (and (onboard? px (+ py 1) arr) (integer? (array-ref arr px (+ py 1))))
-			      (when (or (not down) (< (array-ref arr px (+ py 1)) down))
-				(set! down (array-ref arr px (+ py 1)))))
-			    
-			    )))))
-      
-      (set! dirs `((left ,left)(right ,right)(down ,down)(up ,up)))
-      (format #t "dirs => ~a~%" dirs)
-      (set! dirs (filter (lambda (x) (if (second x) x #f)) dirs))
-      (format #t "removed false dirs => ~a~%" dirs)
-      (set! dirs (sort dirs (lambda (x y)(< (second x)(second y)))))
-      (format #t "sorted dirs based on size => ~a~%" dirs)
-      (set! dirs (filter (lambda (x) (= (second x) (second (car dirs)))) dirs))
-      (format #t "sorted dirs only lowest => ~a~%" dirs)
-      
-      (cond
-       ((assoc 'up dirs) (move! arr px py px (- py 1)))
-       ((assoc 'left dirs) (move! arr px py (- px 1) py))
-       ((assoc 'right dirs) (move! arr px py (+ px 1) py))
-       ((assoc 'down dirs) (move! arr px py px (+ py 1)))
-       (#t 'cannot-move))
-
-      ;; ok 
-      ;; (when (null? dirs)
-      ;; 	(format #t "NULL DIRS => ~a~%" p)
-      ;; 	(show-array arr))
-      
-      )))
-  (when
-      (opponent-in-range? arr p px py)
-    (attack arr p px py)    
-    )
-
-  ;; goblin has had its turn 
-  (set-elf-turn! p #f)
-  )
-
-
+    #t ;;attack
+    ))
 
 
   
+
+(define (task-elf arr p px py) #f)
+
 
 
 
