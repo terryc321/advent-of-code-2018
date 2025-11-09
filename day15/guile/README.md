@@ -1,6 +1,11 @@
 
 # Puzzle
 
+```
+fun.scm -- guile solution (well if we ever get it to work that is)
+```
+
+
 elfs and goblins or two types characters 
 
 each is trying to attack the others , only move horizontal or vertical

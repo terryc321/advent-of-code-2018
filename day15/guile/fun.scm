@@ -35,6 +35,7 @@ load + compile game1.scm first , since everything is practically at toplevel and
 |#
 
 
+
 (use-modules (ice-9 optargs)) ;; optional args
 (use-modules (system foreign)) ;; %null-pointer
 (use-modules (system foreign-library))
@@ -193,8 +194,8 @@ load + compile game1.scm first , since everything is practically at toplevel and
 
 
 
-(define (input)
-  (let* ((str-lines (get-lines "../input.txt"))
+(define (input filename)
+  (let* ((str-lines (get-lines filename))
 	 (nlines (length str-lines))
 	 (nwidth (string-length (car str-lines)))
 	 (all-nwidth (filter (lambda (n) (not (= n nwidth))) (map string-length str-lines))))
@@ -232,7 +233,7 @@ load + compile game1.scm first , since everything is practically at toplevel and
 
 
 
-(define arr (input))
+(define arr (input "../input.txt"))
 
 ;; wall?
 ;; cave?
@@ -261,22 +262,45 @@ load + compile game1.scm first , since everything is practically at toplevel and
 		  (#t (format #f " ~a" x))))))
 		  
 ;; abstracted out iterating over the array with ARRAY-LOOP macro 
-(define (show-array arr)
+(define* (show-array arr #:optional (port #t))
   (define xlim (array-width arr))
   (define foo (lambda (ar x y)
 		(let ((elem (array-ref arr x y)))
 		  (cond
-		   ((wall? elem) (format #t "~a" (pad #\#)))
-		   ((cave? elem) (format #t "~a" (pad #\.)))
-		   ((elf? elem) (format #t "~a" (pad #\E)))
-		   ((goblin? elem) (format #t "~a" (pad #\G)))
-		   ((integer? elem) (format #t "~a" (pad elem)))
+		   ((wall? elem) (format port "~a" (pad #\#)))
+		   ((cave? elem) (format port "~a" (pad #\.)))
+		   ((elf? elem) (format port "~a" (pad #\E)))
+		   ((goblin? elem) (format port "~a" (pad #\G)))
+		   ((integer? elem) (format port "~a" (pad elem)))
 		   (#t (error "bad symbol")))
 		  ;; end of line
 		  (when (= x xlim)
-		    (format #t "~%")))))
+		    (format port "~%")))))
   (array-loop arr foo))
-	      	    
+
+
+
+(define* (show-array2 arr #:optional (port #t))
+  (define xlim (array-width arr))
+  (define foo (lambda (ar x y)
+		(let ((elem (array-ref arr x y)))
+		  (cond
+		   ((wall? elem) (format port "#"))
+		   ((cave? elem) (format port "."))
+		   ((elf? elem) (format port "E"))
+		   ((goblin? elem) (format port "G"))
+		   ((integer? elem) (format port "~a" elem))
+		   (#t (error "bad symbol")))
+		  ;; end of line
+		  (when (= x xlim)
+		    (format port "~%")))))
+  (array-loop arr foo))
+
+
+
+
+
+
 
 ;; (define show-array 
 ;;   (lambda (arr)  ;; how get width height of generated array in guile ?
@@ -776,21 +800,29 @@ begins search on each square can reach vertically or horizontally
 (define (attack arr p x y)
   (let ((target (find-opponent-in-range arr p x y)))
     (when target
+      (format #t "found target {~a}~%" target)
+      (format #t "found player p {~a}~%" p)
+      
       (let ((elem (car target))
 	    (tx (second target))
 	    (ty (third target)))
+	(format #t "found target.elem {~a}~%" elem)
+      	(format #t "found target.tx {~a}~%" ty)
+	(format #t "found target.ty {~a}~%" tx)
+      
 	(cond
 	 ((elf? elem)
-	  (set-elf-hits! target (- (get-elf-hits target) (player-power p)))
-	  (when (<= (get-elf-hits target) 0)
+	  (set-elf-hits! elem (- (get-elf-hits elem) (player-power p)))
+	  (when (<= (get-elf-hits elem) 0)
 	    (format #t "elf has died !~%")
 	    (array-set! arr (make-cave) tx ty)))
-	 ((goblin? target)
-	  (set-goblin-hits! target (- (get-goblin-hits target) (player-power p)))
-	  (when (<= (get-goblin-hits target) 0)
+	 ((goblin? elem)
+	  (set-goblin-hits! elem (- (get-goblin-hits elem) (player-power p)))
+	  (when (<= (get-goblin-hits elem) 0)
 	    (format #t "goblin has died !~%")
 	    (array-set! arr (make-cave) tx ty)))
 	 (#t (error "cannot attack target not recognised")))))))
+
 
 
 
@@ -936,7 +968,9 @@ begins search on each square can reach vertically or horizontally
 		    (let ((e (array-ref arr x y)))
 		      (cond
 		       ((elf? e) (task-elf arr e x y))
-		       ((goblin? e) (task-goblin arr e x y )))))))
+		       ((goblin? e) (task-goblin arr e x y ))))))
+  (zero-array! arr))
+
 
 
 (define (move! arr x y x2 y2)
@@ -1022,6 +1056,8 @@ begins search on each square can reach vertically or horizontally
        ((assoc 'down dirs) (move! arr px py px (+ py 1)))
        (#t 'cannot-move))
 
+      (format #t "we got past moving.")
+      
       ;; ok 
       ;; (when (null? dirs)
       ;; 	(format #t "NULL DIRS => ~a~%" p)
@@ -1109,8 +1145,33 @@ begins search on each square can reach vertically or horizontally
   (set-elf-turn! p #f)
   )
 
+(define (one-side-won? arr)
+  (call-with-values (lambda () (find-elfs-goblins arr))
+    (lambda (elfs gobs)
+      (cond
+       ((and (null? elfs) gobs) #t) ;; goblins won
+       ((and (null? gobs) elfs) #t) ;; elfs won
+       (#t #f)))))
 
 
+(define (example)
+  (set! arr (input "../example.txt"))
+  (let ((p (open-output-file "out/example.ss")))
+    (define (task-loop round)
+      (task arr)
+      (format p "after round ~A~%" round)    
+      (show-array2 arr p)    
+      (cond
+       ((one-side-won? arr) (format p "~%one side has won the fight!~%"))
+       (#t (task-loop (+ round 1)))))
+    (format p "initially :~%")
+    (show-array2 arr p)    
+    (task-loop 1)  
+    (close-output-port p)))
+
+
+
+  
 
   
 
