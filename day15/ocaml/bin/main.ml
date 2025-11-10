@@ -738,21 +738,21 @@ let moveGoblin g e x y =
                           in match ok with
                              | true -> (let elem = Grid.get g2 (x + 1) y
                                         in match elem with
-                                           | Val v -> (if v < !left then (right := v ; ()))
+                                           | Val v -> (if v < !right then (right := v ; ()))
                                            | _ -> ())
                              | _ -> ()
      and upfn g2 x y = let ok = Grid.onboard g2 x (y - 1)
                        in match ok with
                           | true -> (let elem = Grid.get g2 x (y - 1)
                                      in match elem with
-                                        | Val v -> (if v < !left then (up := v ; ()))
+                                        | Val v -> (if v < !up then (up := v ; ()))
                                         | _ -> ())
                           | _ -> ()
      and downfn g2 x y = let ok = Grid.onboard g2 x (y + 1)
                          in match ok with
                             | true -> (let elem = Grid.get g2 x (y + 1)
                                        in match elem with
-                                          | Val v -> (if v < !left then (down := v ; ()))
+                                          | Val v -> (if v < !down then (down := v ; ()))
                                           | _ -> ())
                             | _ -> ()
      in let record g2 = leftfn g2 x y ;
@@ -787,21 +787,21 @@ let moveElf g e x y =
                           in match ok with
                              | true -> (let elem = Grid.get g2 (x + 1) y
                                         in match elem with
-                                           | Val v -> (if v < !left then (right := v ; ()))
+                                           | Val v -> (if v < !right then (right := v ; ()))
                                            | _ -> ())
                              | _ -> ()
      and upfn g2 x y = let ok = Grid.onboard g2 x (y - 1)
                        in match ok with
                           | true -> (let elem = Grid.get g2 x (y - 1)
                                      in match elem with
-                                        | Val v -> (if v < !left then (up := v ; ()))
+                                        | Val v -> (if v < !up then (up := v ; ()))
                                         | _ -> ())
                           | _ -> ()
      and downfn g2 x y = let ok = Grid.onboard g2 x (y + 1)
                          in match ok with
                             | true -> (let elem = Grid.get g2 x (y + 1)
                                        in match elem with
-                                          | Val v -> (if v < !left then (down := v ; ()))
+                                          | Val v -> (if v < !down then (down := v ; ()))
                                           | _ -> ())
                             | _ -> ()
      in let record g2 = leftfn g2 x y ;
@@ -1078,9 +1078,10 @@ exception RecurException;;
 let awaken g = 
   let g2 = gridCopy g
   in let foo x y z = match z with
-       | (Goblin(h,p,i,a)) -> Grid.set g2 x y (Goblin(h,p,i,true)) ; ()
-       | (Elf(h,p,i,a)) -> Grid.set g2 x y (Elf(h,p,i,true)) ; ()
-       | _ -> () 
+       | (Goblin(h,p,i,_)) -> Grid.set g2 x y (Goblin(h,p,i,true)) ; ()
+       | (Elf(h,p,i,_)) -> Grid.set g2 x y (Elf(h,p,i,true)) ; ()
+       | Val _ ->  Grid.set g2 x y Cave ; ()
+       | _ -> ()
      in let () = gridTraverseXY g2 foo
         in g2 ;;
      
@@ -1101,8 +1102,8 @@ let round g2 =
 let rec cont n lim g xs =
   if n = 0 then (Stdio.printf "Initial grid \n" ;
                  Grid.show2 g ;
-                 cont (n+1) lim g xs)
-  else if n > lim then xs
+                 cont (n+1) lim g (("round",0,g) :: xs))
+  else if n > lim then List.rev xs
   else let gout = round g
        in Stdio.printf "<after round %d > \n" n ;
           Stdio.printf "<elfFloods> \n" ;
@@ -1119,5 +1120,76 @@ let run = cont 0 48 g6 [];;
 
 List.drop run 30 ;;
 
+let showRun (s,n,x) = Stdio.printf "< round %d > \n" n ;
+                    Stdio.printf "round %d - elfFloods \n" n ;
+                    List.map (elfFloods x) Grid.show2 ;
+                    Stdio.printf "round %d - actual grid \n" n ;
+                    Grid.show2 x ;;
+
 (* debug the thing *)
-List.map (List.rev run) ~f:(fun (s,n,x) -> Stdio.printf "round %d\n" n ; Grid.show2 x  ) ;;
+List.map run showRun;;
+
+List.nth run 42 ;;
+
+List.nth run 27 ;;
+
+let debug26 () = 
+  match (List.nth run 26) with | Some (s,n,x) ->
+                                  Stdio.printf "< problematic round %d > \n" n ;
+                                  showRun (s,n,x); (* G200 at 4,6 not moving ?? *)
+                                  let g = awaken x
+                                  in round g ;; (* Grid.get g 4 6 ;; *)
+
+let debug27 () = 
+  match (List.nth run 27) with | Some (s,n,x) ->
+                                  Stdio.printf "< problematic round %d > \n" n ;
+                                  showRun (s,n,x);;
+
+
+(*
+< problematic round 26 > 
+< round 26 > 
+round 26 - elfFloods 
+   #     #     #     #     #     #     #  
+   #   G200    .     .     .     .     #  
+   #     .   G131    .     .     .     #  
+   #     .     #     .     #   G122    #  
+   #     .     .     .     #   E122    #  
+   #     .     .   G200 {  2}{  1}   #  
+   #     #     #     #     #     #     #  
+round 26 - actual grid 
+   #     #     #     #     #     #     #  
+   #   G200    .     .     .     .     #  
+   #     .   G131    .     .     .     #  
+   #     .     #     .     #   G122    #  
+   #     .     .     .     #   E122    #  
+   #     .     .   G200    .     .     #  
+   #     #     #     #     #     #     #  
+- : unit/3 = ()
+# debug27 () ;;
+< problematic round 27 > 
+< round 27 > 
+round 27 - elfFloods 
+   #     #     #     #     #     #     #  
+   #   G200    .     .     .     .     #  
+   #     .   G131    .     .     .     #  
+   #     .     #     .     #   G122    #   <<-- these two stopped fighting ??
+   #     .     .     .     #   E122    #   <<--   
+   #     .     .   G200 {  2}{  1}   #     <<--- this guy has stopped moving ??
+   #     #     #     #     #     #     #  
+round 27 - actual grid 
+   #     #     #     #     #     #     #  
+   #   G200    .     .     .     .     #  
+   #     .   G131    .     .     .     #  
+   #     .     #     .     #   G122    #  
+   #     .     .     .     #   E122    #  
+   #     .     .   G200    .     .     #  
+   #     #     #     #     #     #     #  
+- : unit/3 = ()
+# 
+
+ *)
+
+
+
+

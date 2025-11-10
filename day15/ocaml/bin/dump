@@ -1,0 +1,60 @@
+(* lexi g6 *)
+
+(*
+let round g =
+  let rec recur g = 
+         
+  and roundElf e x y =
+    let atk = None in
+    match atk with
+    | Some g2 -> recur g2 (* proceed with attack happened and player who attacked is now active=false *)
+    | None -> g
+  in   let lex = lexi g
+       in match lex with
+          | [] -> g  (* no more active players - this g has all inactive players? *)
+          |  h :: t  -> match h with
+                        | (Goblin (hits,power,id,active),x,y) -> roundGoblin (Goblin (hits,power,id,active)) x y
+                        | (Elf (hits,power,id,active),x,y) -> roundElf (Elf (hits,power,id,active)) x y
+;;
+ *)
+
+
+
+(*
+
+
+                             let opp = elf_oir g x y
+                             in match opp with
+                                | [] -> (* move + attack ? *) g
+                                |  o :: t2  -> (* attack o ;
+                                                   set this goblin to false ;
+                                                   round changed g *)
+                                                   g ;;
+
+                                                   
+  
+                       let opp = goblin_oir g x y
+                       in match opp with
+                          | [] -> let dir = moveGoblin g e x y
+                                  and newg = ref g
+                                  in let _ = match dir with
+                                       | Stay -> () 
+                                       | Left -> newg := moveLeft g x y ; ()
+                                       | Right -> newg := moveRight g x y ; ()
+                                       | Up -> newg := moveUp g x y ; ()
+                                       | Down -> newg := moveDown g x y ; ()
+                                     in let g = !newg
+                                        in g
+                          |  o :: t2  -> (* attack o ;
+                                          set this goblin to false ;
+                                          round changed g *)
+                             g
+
+
+let ts = [1;2;3] in
+    match ts with
+    | [] -> true
+    | h :: t -> false ;;
+
+ *)
+
