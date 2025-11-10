@@ -504,31 +504,85 @@ let inrange x1 y1 x2 y2 =  (x1 = x2 && abs(y1 - y2) = 1) || (y1 = y2 && abs(x1 -
   recursive case let rec moveGoblin
   other recursive definitions drop let
   also assumed to be recursive also 
+
+
+  WHY DOES THIS NOT LOAD ?? 
+  
   
  *)
 
-let rec moveGoblin g e x1 y1 =
-  let elfs = allElfXY g
-  and reach = ref []
-  in let rec recur xs =
-       match xs with 
-       | [] -> ()
-       | (h :: t) ->
-          match h with
-          | ((Elf(hits,power,id,active)),x2,y2) ->  if (inrange x1 y1 x2 y2) then
-                                                      (reach := ((Elf(hits,power,id,active)),x2,y2) :: !reach ;
-                                                       recur t)
-                                                    else recur t
-          | _ -> recur t 
-     in recur elfs ;
-        (* if any elfs in range - move directly to attackGoblin *)
-        match !reach with
-        | [] -> moveGoblin2 g e x1 y1 elfs
-        | _ -> attackGoblin g e x1 y1 !reach
-  and attackGoblin g e x1 y1 r = ()
-  and moveGoblin2 g e x1 y1 elfs = ()
-;;
+let topGoblin g e x1 y1 =
+  let left = ref Int.max_value
+  and right = ref Int.max_value
+  and up = ref Int.max_value
+  and down = ref Int.max_value  
+  in let rec moveGoblin g e x1 y1 =  
+       let rec elfs = allElfXY g
+       and reach = ref []
+       in let rec recur xs =
+            match xs with 
+            | [] -> ()
+            | (h :: t) ->
+               match h with
+               | ((Elf(hits,power,id,active)),x2,y2) ->  if (inrange x1 y1 x2 y2) then
+                                                           (reach := ((Elf(hits,power,id,active)),x2,y2) :: !reach ;
+                                                            recur t)
+                                                         else recur t
+               | _ -> recur t 
+          in recur elfs ;
+             (* if any elfs in range - move directly to attackGoblin *)
+             match !reach with
+             | [] -> moveGoblin2 g e x1 y1 elfs
+             | _ -> attackGoblin g e x1 y1 !reach
+     and attackGoblin g e x1 y1 r = ()
+     and moveGoblin2 g e x1 y1 elfs =
+       let rec recur xs =
+         match xs with 
+         | [] -> ()
+         | (h :: t) ->
+            match h with
+            | ((Elf(hits,power,id,active)),x2,y2) ->  let fg = flood g x2 y2  (* fg flooded grid *)
+                                                      in record_left fg (x1 - 1) y1 ;
+                                                         record_right fg (x1 + 1) y1 ;
+                                                         record_up fg x1 (y1 - 1) ;
+                                                         record_down fg x1 (y1 + 1) ;
+                                                         recur t
+            | _ -> recur t 
+       in recur elfs
+     and record_left fd x3 y3 =
+       if Grid.onboard fd x3 y3 then (let z = Grid.get fd x3 y3 in
+                                      match z with
+                                      | Val n -> if n < !left then left := n ; ()
+                                      | _ -> ())
+       else ()
+     and record_right fd x3 y3 =
+       if Grid.onboard fd x3 y3 then (let z = Grid.get fd x3 y3 in
+                                      match z with
+                                      | Val n -> if n < !right then right := n ; ()
+                                      | _ -> ())
+       else ()
+     and record_up fd x3 y3 =
+       if Grid.onboard fd x3 y3 then (let z = Grid.get fd x3 y3 in
+                                      match z with
+                                      | Val n -> if n < !up then up := n ; ()
+                                      | _ -> ())
+       else ()
+     and record_down fd x3 y3 =
+       if Grid.onboard fd x3 y3 then (let z = Grid.get fd x3 y3 in
+                                      match z with
+                                      | Val n -> if n < !down then down := n ; ()
+                                      | _ -> ())
+       else ();;
 
+
+
+
+
+
+
+(* for each elf position , flood on that position , from x1 y1 determine lowest scores
+   then decide best direction to move in
+ *)
 
 
 
