@@ -1,3 +1,22 @@
+
+exception RecurException;;
+
+let awaken g = 
+  let g2 = gridCopy g
+  in let foo x y z = match z with
+       | (Goblin(h,p,i,_)) -> Grid.set g2 x y (Goblin(h,p,i,true)) ; ()
+       | (Elf(h,p,i,_)) -> Grid.set g2 x y (Elf(h,p,i,true)) ; ()
+       | Val _ ->  Grid.set g2 x y Cave ; ()
+       | _ -> ()
+     in let () = gridTraverseXY g2 foo
+        in g2 ;;
+     
+(* idea 1 - rewrite lexi so we do not use true false on elf goblins ,
+   just use the id number which should be unique
+   then be no need to re-awaken everyone
+ *)
+
+
 (* lexi g6 *)
 
 (*
