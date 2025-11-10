@@ -655,7 +655,7 @@ let isGoblin x =
 (* for a given goblin does not matter where it is , only where elf is and elf flood fills the grid
    similarly for the elf
  *)
-let goblinFloods g =
+let elfFloods g =
   let obs = ref []
   in let f x y z = match z with
        | (Elf(hits,power,id,active)) ->  let fg = flood g x y in (obs := fg :: !obs ; ())
@@ -663,7 +663,7 @@ let goblinFloods g =
      in gridTraverseXY g f ;
         !obs;;
 
-let elfFloods g =
+let goblinFloods g =
   let obs = ref []
   in let f x y z = match z with
        | (Goblin(hits,power,id,active)) ->  let fg = flood g x y in (obs := fg :: !obs ; ())
@@ -769,6 +769,65 @@ let moveGoblin g e x y =
                                      else if v1= v2 then 0
                                      else 1)
                      in cdirs;;
+
+
+let moveElf g e x y =
+  let left = ref Int.max_value
+  and right = ref Int.max_value
+  and up = ref Int.max_value
+  and down = ref Int.max_value
+  in let leftfn g2 x y = let ok = Grid.onboard g2 (x - 1) y
+                         in match ok with
+                            | true -> (let elem = Grid.get g2 (x - 1) y
+                                       in match elem with
+                                          | Val v -> (if v < !left then (left := v ; ()))
+                                          | _ -> ())
+                            | _ -> ()
+     and rightfn g2 x y = let ok = Grid.onboard g2 (x + 1) y
+                          in match ok with
+                             | true -> (let elem = Grid.get g2 (x + 1) y
+                                        in match elem with
+                                           | Val v -> (if v < !left then (right := v ; ()))
+                                           | _ -> ())
+                             | _ -> ()
+     and upfn g2 x y = let ok = Grid.onboard g2 x (y - 1)
+                       in match ok with
+                          | true -> (let elem = Grid.get g2 x (y - 1)
+                                     in match elem with
+                                        | Val v -> (if v < !left then (up := v ; ()))
+                                        | _ -> ())
+                          | _ -> ()
+     and downfn g2 x y = let ok = Grid.onboard g2 x (y + 1)
+                         in match ok with
+                            | true -> (let elem = Grid.get g2 x (y + 1)
+                                       in match elem with
+                                          | Val v -> (if v < !left then (down := v ; ()))
+                                          | _ -> ())
+                            | _ -> ()
+     in let record g2 = leftfn g2 x y ;
+                        rightfn g2 x y ;
+                        upfn g2 x y ;
+                        downfn g2 x y                         
+        in  let ef = goblinFloods g      
+            in let _ = List.map ef ~f:record in
+               let res = [(Up,!up) ; (Left , !left) ; (Right, !right) ; (Down,!down) ]
+               in let lows = List.filter res ~f:(fun x -> match x with
+                                                          | (s , v) -> if v = Int.max_value then false else true)
+                  in let cdirs = List.sort lows (fun (_,v1) (_,v2) ->
+                                     if v1 < v2 then -1
+                                     else if v1= v2 then 0
+                                     else 1)
+                     in cdirs;;
+
+(* sort <  *)
+List.sort [10;9;8;7;6;5;4;3;2;1] compare ;;
+
+(* filter evens *)
+List.filter [10;9;8;7;6;5;4;3;2;1] (fun x-> x % 2 = 0 ) ;;
+
+(* filter odds *)
+List.filter [10;9;8;7;6;5;4;3;2;1] (fun x-> x % 2 != 0 ) ;;
+
 
 let cdirs xs =
   match (List.hd xs) with
@@ -906,7 +965,7 @@ let attack g x y x2 y2 =
         Grid.set g2 x y (Elf(h,p,i,false)) ;
         let h3 = h2 - p
         in if h3 < 0 then Grid.set g2 x2 y2 Cave
-           else Grid.set g2 x2 y2 (Elf(h2 - p,p2,i2,a2));
+           else Grid.set g2 x2 y2 (Goblin(h2 - p,p2,i2,a2));
            g2 ;;
                   
 (* as is a reserved word in ocaml , obviously *)
@@ -962,82 +1021,103 @@ let moveDown g x y =
         g2 ;;
 
 
+(*
+  roundGoblin2 just does attack if possible otherwise cycles to recur with current grid
+  roundGoblin 
+ *)
+
+let rec roundGoblin2 g e x y recur =
+  let myas = goblin_oir g x y
+  in match List.hd myas with 
+     | Some ((Elf (h,p,i,a)),x2,y2) -> let g2 = attack g x y x2 y2
+                                       in recur g2
+     | _ -> recur g ;;
+
 
 let rec roundGoblin g e x y recur =
-  (let myas = goblin_oir g x y
+  let myas = goblin_oir g x y
   in match List.hd myas with 
      | Some ((Elf (h,p,i,a)),x2,y2) -> let g2 = attack g x y x2 y2
                                        in recur g2
      | _ -> let mv = cdirs (moveGoblin g e x y)
             in match mv with
                | Stay -> g 
-               | Left -> let g2 = moveLeft g x y  in g2 
-               | Right -> let g2 = moveRight g x y in g2
-               | Up -> let g2 = moveUp g x y in g2
-               | Down -> let g2 = moveDown g x y in g2 : gp Grid.grid) ;;
+               | Left -> let g2 = moveLeft g x y  in roundGoblin2 g2 (Grid.get g2 (x-1) y) (x-1) y recur
+               | Right -> let g2 = moveRight g x y in roundGoblin2 g2 (Grid.get g2 (x+1) y) (x+1) y recur
+               | Up -> let g2 = moveUp g x y in roundGoblin2 g2 (Grid.get g2 x (y-1)) x (y-1) recur
+               | Down -> let g2 = moveDown g x y in roundGoblin2 g2 (Grid.get g2 x (y+1)) x (y+1) recur ;;
 
 
+(* the elf routines almost exactly same *)
 
 
+let rec roundElf2 g e x y recur =
+  let myas = elf_oir g x y
+  in match List.hd myas with 
+     | Some ((Goblin (h,p,i,a)),x2,y2) -> let g2 = attack g x y x2 y2
+                                          in recur g2
+     | _ -> recur g ;;
 
 
-
-(* lexi g6 *)
-
-(*
-let round g =
-  let rec recur g = 
-         
-  and roundElf e x y =
-    let atk = None in
-    match atk with
-    | Some g2 -> recur g2 (* proceed with attack happened and player who attacked is now active=false *)
-    | None -> g
-  in   let lex = lexi g
-       in match lex with
-          | [] -> g  (* no more active players - this g has all inactive players? *)
-          |  h :: t  -> match h with
-                        | (Goblin (hits,power,id,active),x,y) -> roundGoblin (Goblin (hits,power,id,active)) x y
-                        | (Elf (hits,power,id,active),x,y) -> roundElf (Elf (hits,power,id,active)) x y
-;;
- *)
+let rec roundElf g e x y recur =
+  let myas = elf_oir g x y
+  in match List.hd myas with 
+     | Some ((Goblin (h,p,i,a)),x2,y2) -> let g2 = attack g x y x2 y2
+                                          in recur g2
+     | _ -> let mv = cdirs (moveElf g e x y)
+            in match mv with
+               | Stay -> g 
+               | Left -> let g2 = moveLeft g x y  in roundElf2 g2 (Grid.get g2 (x-1) y) (x-1) y recur
+               | Right -> let g2 = moveRight g x y in roundElf2 g2 (Grid.get g2 (x+1) y) (x+1) y recur
+               | Up -> let g2 = moveUp g x y in roundElf2 g2 (Grid.get g2 x (y-1)) x (y-1) recur
+               | Down -> let g2 = moveDown g x y in roundElf2 g2 (Grid.get g2 x (y+1)) x (y+1) recur ;;
 
 
+exception RecurException;;
 
-(*
-
-
-                             let opp = elf_oir g x y
-                             in match opp with
-                                | [] -> (* move + attack ? *) g
-                                |  o :: t2  -> (* attack o ;
-                                                   set this goblin to false ;
-                                                   round changed g *)
-                                                   g ;;
-
-                                                   
-  
-                       let opp = goblin_oir g x y
-                       in match opp with
-                          | [] -> let dir = moveGoblin g e x y
-                                  and newg = ref g
-                                  in let _ = match dir with
-                                       | Stay -> () 
-                                       | Left -> newg := moveLeft g x y ; ()
-                                       | Right -> newg := moveRight g x y ; ()
-                                       | Up -> newg := moveUp g x y ; ()
-                                       | Down -> newg := moveDown g x y ; ()
-                                     in let g = !newg
-                                        in g
-                          |  o :: t2  -> (* attack o ;
-                                          set this goblin to false ;
-                                          round changed g *)
-                             g
+let awaken g = 
+  let g2 = gridCopy g
+  in let foo x y z = match z with
+       | (Goblin(h,p,i,a)) -> Grid.set g2 x y (Goblin(h,p,i,true)) ; ()
+       | (Elf(h,p,i,a)) -> Grid.set g2 x y (Elf(h,p,i,true)) ; ()
+       | _ -> () 
+     in let () = gridTraverseXY g2 foo
+        in g2 ;;
+     
 
 
-let ts = [1;2;3] in
-    match ts with
-    | [] -> true
-    | h :: t -> false ;;
+(* main purpose of round is to ensure all parties are re-awakened and enabled*)
+let round g2 =
+  let rec recur g =
+    (* let () = Grid.show2 g in  *)
+    let lex = lexi g in
+    match lex with
+    | [] -> g 
+    | (h,x,y) :: _  -> if isElf h then roundElf g h x y recur
+                       else roundGoblin g h x y recur 
+  in recur (awaken g2) ;;
 
- *)
+
+let rec cont n lim g xs =
+  if n = 0 then (Stdio.printf "Initial grid \n" ;
+                 Grid.show2 g ;
+                 cont (n+1) lim g xs)
+  else if n > lim then xs
+  else let gout = round g
+       in Stdio.printf "<after round %d > \n" n ;
+          Stdio.printf "<elfFloods> \n" ;
+          List.map (elfFloods g) Grid.show2 ;
+          Stdio.printf "after round - the map itself  %d\n" n ;
+          Grid.show2 gout ;
+          let nxs = ("round" , n , gout) :: xs
+          in
+          cont (n + 1) lim gout nxs;;
+
+(* do a run *)
+let run = cont 0 48 g6 [];;
+
+
+List.drop run 30 ;;
+
+(* debug the thing *)
+List.map (List.rev run) ~f:(fun (s,n,x) -> Stdio.printf "round %d\n" n ; Grid.show2 x  ) ;;
