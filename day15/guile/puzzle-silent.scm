@@ -1134,8 +1134,10 @@ begins search on each square can reach vertically or horizontally
 		       (show-array2 out)
 		       (set! xs (cons (list n out) xs))
 		       (cond
-			((< n lim) (loop out (+ n 1)))
-			(#t (reverse xs)))))))
+			((or (null? (find-elfs out))
+			     (null? (find-goblins out)))
+			 (reverse xs))
+			(#t (loop out (+ n 1))))))))
       (loop arr 1))))
 
 
@@ -1158,6 +1160,9 @@ begins search on each square can reach vertically or horizontally
 	     (format #t "~%")))
 	 xs)
     #t))
+
+
+
 
 
 
