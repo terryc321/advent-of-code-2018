@@ -568,7 +568,7 @@ begins search on each square can reach vertically or horizontally
      (#t (let ((ups    (filter (lambda (x) (eq? 'up (fourth x))) elfs))
 	       (downs  (filter (lambda (x) (eq? 'down (fourth x))) elfs))
 	       (lefts  (filter (lambda (x) (eq? 'left (fourth x))) elfs))
-	       (rights (filter (lambda (x) (eq? 'up (fourth x))) elfs)))
+	       (rights (filter (lambda (x) (eq? 'right (fourth x))) elfs)))
 	   (format #t "phase one goblin : ups ~a : downs ~a : lefts ~a : rights ~a ~%"  ups downs lefts rights)
 	   (cond
 	    ((not (null? ups))
@@ -742,7 +742,7 @@ begins search on each square can reach vertically or horizontally
      (#t (let ((ups (filter (lambda (x) (eq? 'up (fourth x))) elfs))
 	       (downs (filter (lambda (x) (eq? 'down (fourth x))) elfs))
 	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) elfs))
-	       (rights (filter (lambda (x) (eq? 'up (fourth x))) elfs)))
+	       (rights (filter (lambda (x) (eq? 'right (fourth x))) elfs)))
 	   (cond
 	    (ups (let* ((entity-xydir2 (car ups))
 			(entity2 (car entity-xydir2))
@@ -807,7 +807,6 @@ begins search on each square can reach vertically or horizontally
     (filter (lambda (x) (not (eq? x 'none))) result)))
 
 
-
 ;; phase one must return a usable array
 (define (move-elf-phase-one arr entity x y)
   (format #t "phase one elf {~a}~%" (entity 'as-string))
@@ -818,12 +817,12 @@ begins search on each square can reach vertically or horizontally
     (format #t "phase-one elf : there are ~a goblins in the neighbourhood~%" (length gobs))
     
     ;; sort by weakest elf
-    (set! gobs (sort gobs (lambda (x y) (< (elf-hits (car x)) (elf-hits (car y))))))
+    (set! gobs (sort gobs (lambda (x y) (< (goblin-hits (car x)) (goblin-hits (car y))))))
     (format #t "phase-one elf : there are ~a sorted goblins ~%" (length gobs))
-    (format #t "phase-one elf : their strengths are ~a~%" (map (lambda (elfxy) (elf-hits (car elfxy))) gobs))
+    (format #t "phase-one elf : their strengths are ~a~%" (map (lambda (gobxy) (goblin-hits (car gobxy))) gobs))
         
     ;; filter out any gobs stronger than weakest
-    (set! gobs (filter (lambda (x) (<= (elf-hits (car x)) (elf-hits (car (car gobs)))))   gobs))
+    (set! gobs (filter (lambda (x) (<= (goblin-hits (car x)) (goblin-hits (car (car gobs)))))   gobs))
     (format #t "phase-one elf : there are ~a weak goblins ~%" (length gobs))
 
     ;; pick the elf lexicographic ordering
@@ -834,8 +833,9 @@ begins search on each square can reach vertically or horizontally
      (#t (let ((ups    (filter (lambda (x) (eq? 'up (fourth x))) gobs))
 	       (downs  (filter (lambda (x) (eq? 'down (fourth x))) gobs))
 	       (lefts  (filter (lambda (x) (eq? 'left (fourth x))) gobs))
-	       (rights (filter (lambda (x) (eq? 'up (fourth x))) gobs)))
+	       (rights (filter (lambda (x) (eq? 'right (fourth x))) gobs)))
 	   (format #t "phase one elf : ups ~a : downs ~a : lefts ~a : rights ~a ~%"  ups downs lefts rights)
+	   (format #t "phase one elf : gobs => ~a ~% " gobs)
 	   (cond
 	    ((not (null? ups))
 	     (format #t "debug : ups . ~%")
@@ -995,7 +995,7 @@ begins search on each square can reach vertically or horizontally
      (#t (let ((ups (filter (lambda (x) (eq? 'up (fourth x))) elfs))
 	       (downs (filter (lambda (x) (eq? 'down (fourth x))) elfs))
 	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) elfs))
-	       (rights (filter (lambda (x) (eq? 'up (fourth x))) elfs)))
+	       (rights (filter (lambda (x) (eq? 'right (fourth x))) elfs)))
 	   (cond
 	    (ups (let* ((entity-xydir2 (car ups))
 			(entity2 (car entity-xydir2))
