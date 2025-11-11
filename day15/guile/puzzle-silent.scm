@@ -740,16 +740,30 @@ begins search on each square can reach vertically or horizontally
 (define (move-goblin-phase-three arr entity x y)
   ;; (format #t "phase three goblin {~a}~%" (entity 'as-string))
   ;; (show-array arr)
-  ;; (format #t "phase three goblin : looking for elfs around ~a ~a~%" x y)  
+  ;; (format #t "phase three goblin : looking for elfs around ~a ~a~%" x y)
+  
   ;; get all the elfs around x y
+  ;; (format #t "debug <mgp3>")
   (let ((elfs (get-elf-neighbours arr x y)))
+
+    ;; (format #t "elf neighbours => ~a ~%" elfs)
+    ;; (map (lambda (v) (format #t "~a " ((car v) 'as-string))) elfs)
+        
     ;; sort by weakest elf
     (set! elfs (sort elfs (lambda (x y) (< (elf-hits (car x))
 					   (elf-hits (car y))))))
+
+    ;; (format #t "~%sort by weakest elfs => ")
+    ;; (map (lambda (v) (format #t "~a " ((car v) 'as-string))) elfs)
+    
     ;; filter out any elfs stronger than weakest
-    (set! elfs (filter (lambda (x) (> (elf-hits (car x))
+    (set! elfs (filter (lambda (x) (<= (elf-hits (car x))
 				      (elf-hits (car (car elfs)))))
 		       elfs))
+
+    ;; (format #t "~% filter out any stronger elfs  => ")
+    ;; (map (lambda (v) (format #t "~a " ((car v) 'as-string))) elfs)
+    
     ;; pick the elf lexicographic ordering
     ;; elfs really elfs-xydir 
     (cond
@@ -761,25 +775,37 @@ begins search on each square can reach vertically or horizontally
 	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) elfs))
 	       (rights (filter (lambda (x) (eq? 'right (fourth x))) elfs)))
 	   (cond
-	    (ups (let* ((entity-xydir2 (car ups))
+	    ((not (null? ups))
+	     ;; (format #t "phase three goblin : debug ups ~%")
+
+	     (let* ((entity-xydir2 (car ups))
 			(entity2 (car entity-xydir2))
 			(x2 (second entity-xydir2))
 			(y2 (third entity-xydir2)))
 		   ;; (format #t "phase three goblin : attack on elf UP~%")
 		   (goblin-attack-elf arr entity x y entity2 x2 y2)))
-	    (lefts (let* ((entity-xydir2 (car lefts))
+	    ((not (null? lefts))
+	     ;; (format #t "phase three goblin : debug lefts ~%")
+
+	     (let* ((entity-xydir2 (car lefts))
 			(entity2 (car entity-xydir2))
 			(x2 (second entity-xydir2))
 			(y2 (third entity-xydir2)))
-		     ;; (format #t "phase three goblin : attack on elf LEFT~%")		     
+		     (format #t "phase three goblin : attack on elf LEFT~%")		     
 		     (goblin-attack-elf arr entity x y entity2 x2 y2)))
-	    (rights (let* ((entity-xydir2 (car rights))
+	    ((not (null? rights))
+	     ;; (format #t "phase three goblin : debug rights ~%")
+
+	     (let* ((entity-xydir2 (car rights))
 			   (entity2 (car entity-xydir2))
 			   (x2 (second entity-xydir2))
 			   (y2 (third entity-xydir2)))
 		      ;; (format #t "phase three goblin : attack on elf RIGHT~%")		      
 		      (goblin-attack-elf arr entity x y entity2 x2 y2)))
-	    (downs (let* ((entity-xydir2 (car downs))
+	    ((not (null? downs))
+	     ;; (format #t "phase three goblin : debug downs ~%")
+	
+	     (let* ((entity-xydir2 (car downs))
 			  (entity2 (car entity-xydir2))
 			  (x2 (second entity-xydir2))
 			  (y2 (third entity-xydir2)))
@@ -787,6 +813,7 @@ begins search on each square can reach vertically or horizontally
 		     (goblin-attack-elf arr entity x y entity2 x2 y2)))
 	    (#t (format #t "inside move-goblin-phase-three Line 722 how did we get here")
 		(error "move-goblin-phase-three lost at sea"))))))))
+
 
 
 ;; the 3 phase attack plan
@@ -1000,7 +1027,7 @@ begins search on each square can reach vertically or horizontally
     (set! elfs (sort elfs (lambda (x y) (< (elf-hits (car x))
 					   (elf-hits (car y))))))
     ;; filter out any elfs stronger than weakest
-    (set! elfs (filter (lambda (x) (> (elf-hits (car x))
+    (set! elfs (filter (lambda (x) (<= (elf-hits (car x))
 				      (elf-hits (car (car elfs)))))
 		       elfs))
     ;; pick the elf lexicographic ordering
@@ -1014,32 +1041,36 @@ begins search on each square can reach vertically or horizontally
 	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) elfs))
 	       (rights (filter (lambda (x) (eq? 'right (fourth x))) elfs)))
 	   (cond
-	    (ups (let* ((entity-xydir2 (car ups))
+	    ((not (null? ups)) (let* ((entity-xydir2 (car ups))
 			(entity2 (car entity-xydir2))
 			(x2 (second entity-xydir2))
 			(y2 (third entity-xydir2)))
 		   ;; (format #t "phase three elf : attack on elf UP~%")
 		   (elf-attack-goblin arr entity x y entity2 x2 y2)))
-	    (lefts (let* ((entity-xydir2 (car lefts))
+	    ((not (null? lefts))
+	     (let* ((entity-xydir2 (car lefts))
 			(entity2 (car entity-xydir2))
 			(x2 (second entity-xydir2))
 			(y2 (third entity-xydir2)))
 		     ;; (format #t "phase three elf : attack on elf LEFT~%")		     
 		     (elf-attack-goblin arr entity x y entity2 x2 y2)))
-	    (rights (let* ((entity-xydir2 (car rights))
+	    ((not (null? rights))
+	     (let* ((entity-xydir2 (car rights))
 			   (entity2 (car entity-xydir2))
 			   (x2 (second entity-xydir2))
 			   (y2 (third entity-xydir2)))
 		      ;; (format #t "phase three elf : attack on elf RIGHT~%")		      
 		      (elf-attack-goblin arr entity x y entity2 x2 y2)))
-	    (downs (let* ((entity-xydir2 (car downs))
-			  (entity2 (car entity-xydir2))
-			  (x2 (second entity-xydir2))
-			  (y2 (third entity-xydir2)))
-		     ;; (format #t "phase three elf : attack on elf DOWN~%")		     
-		     (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    ((not (null? downs))
+	     (let* ((entity-xydir2 (car downs))
+		    (entity2 (car entity-xydir2))
+		    (x2 (second entity-xydir2))
+		    (y2 (third entity-xydir2)))
+	       ;; (format #t "phase three elf : attack on elf DOWN~%")		     
+	       (elf-attack-goblin arr entity x y entity2 x2 y2)))
 	    (#t (format #t "inside move-elf-phase-three Line 722 how did we get here")
 		(error "move-elf-phase-three lost at sea"))))))))
+
 
 
 
@@ -1108,9 +1139,8 @@ begins search on each square can reach vertically or horizontally
       (loop arr 1))))
 
 
-
 (define (go)
-  (let ((xs (run arr 50)))
+  (let ((xs (run arr 999999))) ;; keep going until we break
     (format #t "displaying results of the run ~%")
     (format #t "the length of xs is ~a ~%" (length xs))
     (map (lambda (x)
