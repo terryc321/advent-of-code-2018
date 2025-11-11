@@ -772,11 +772,259 @@ begins search on each square can reach vertically or horizontally
 		(error "move-goblin-phase-three lost at sea"))))))))
 
 
+;; the 3 phase attack plan
+;; phase-one   : attack if possible otherwise move to phase two
+;; phase-two   : move nearer to an elf if possible
+;; phase-three : attack if possible
+		      
+;; should we check that entity2 is an elf at x2 y2 ?
+(define (elf-attack-goblin arr entity x y entity2 x2 y2)
+  (format #t "< elf-attack-goblin > ~%")
+  (let ((arr2 (array-copy arr)))
+    (let* ((hits (goblin-hits entity2))
+	   (id (goblin-id entity2))
+	   (after (- hits 3)))
+      (format #t "< elf-attack-goblin : hits ~a : id ~a : after ~a > ~%" hits id after)
+      (cond
+       ((<= after 0) (array-set! arr2 (make-cave) x2 y2))
+       (#t (array-set! arr2 (make-goblin after id) x2 y2)))
+      arr2)))
+
+
+(define (get-goblin-neighbours arr x y)
+  (let ((result (list (let ((dx (- x 1))(dy y))
+			(if (and (onboard? dx dy arr) (goblin? (array-ref arr dx dy)))
+			    (list (array-ref arr dx dy) dx dy 'left)  'none))
+		      (let ((dx (+ x 1))(dy y))
+			(if (and (onboard? dx dy arr) (goblin? (array-ref arr dx dy)))
+			    (list (array-ref arr dx dy) dx dy 'right)  'none))
+		      (let ((dx x) (dy (- y 1)))
+			(if (and (onboard? dx dy arr) (goblin? (array-ref arr dx dy)))
+			    (list (array-ref arr dx dy) dx dy 'up)  'none))
+		      (let ((dx x) (dy (+ y 1)))
+			(if (and (onboard? dx dy arr) (goblin? (array-ref arr dx dy)))
+			    (list (array-ref arr dx dy) dx dy 'down)  'none)))))
+    (filter (lambda (x) (not (eq? x 'none))) result)))
+
+
 
 ;; phase one must return a usable array
 (define (move-elf-phase-one arr entity x y)
-  (format #t "phase one elf {~a}~%" entity)
-  arr)
+  (format #t "phase one elf {~a}~%" (entity 'as-string))
+  (show-array arr)
+  (format #t "phase one elf : looking for goblins around ~a ~a~%" x y)    
+  ;; get all the goblins around x y
+  (let ((gobs (get-goblin-neighbours arr x y)))
+    (format #t "phase-one elf : there are ~a goblins in the neighbourhood~%" (length gobs))
+    
+    ;; sort by weakest elf
+    (set! gobs (sort gobs (lambda (x y) (< (elf-hits (car x)) (elf-hits (car y))))))
+    (format #t "phase-one elf : there are ~a sorted goblins ~%" (length gobs))
+    (format #t "phase-one elf : their strengths are ~a~%" (map (lambda (elfxy) (elf-hits (car elfxy))) gobs))
+        
+    ;; filter out any gobs stronger than weakest
+    (set! gobs (filter (lambda (x) (<= (elf-hits (car x)) (elf-hits (car (car gobs)))))   gobs))
+    (format #t "phase-one elf : there are ~a weak goblins ~%" (length gobs))
+
+    ;; pick the elf lexicographic ordering
+    (cond
+     ((null? gobs)
+      (format #t "phase one elf : no goblins found in vicinity of ~a ~a ~%" x y)
+      (move-elf-phase-two arr entity x y))
+     (#t (let ((ups    (filter (lambda (x) (eq? 'up (fourth x))) gobs))
+	       (downs  (filter (lambda (x) (eq? 'down (fourth x))) gobs))
+	       (lefts  (filter (lambda (x) (eq? 'left (fourth x))) gobs))
+	       (rights (filter (lambda (x) (eq? 'up (fourth x))) gobs)))
+	   (format #t "phase one elf : ups ~a : downs ~a : lefts ~a : rights ~a ~%"  ups downs lefts rights)
+	   (cond
+	    ((not (null? ups))
+	     (format #t "debug : ups . ~%")
+	     (let* ((entity-xydir2 (car ups))
+		    (entity2 (car entity-xydir2))
+		    (x2 (second entity-xydir2))
+		    (y2 (third entity-xydir2)))
+	       (format #t "debug : ups II . ~%")	     
+	       (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    
+	    ((not (null? lefts))
+	     (format #t "debug : lefts . ~%")
+	     (let* ((entity-xydir2 (car lefts))
+		    (entity2 (car entity-xydir2))
+		    (x2 (second entity-xydir2))
+		    (y2 (third entity-xydir2)))
+	       (format #t "debug : lefts II . ~%")	     
+	       (elf-attack-goblin arr entity x y entity2 x2 y2)))
+
+	    ((not (null? rights))
+	     (format #t "debug : rights . ~%")
+	     (let* ((entity-xydir2 (car rights))
+		    (entity2 (car entity-xydir2))
+		    (x2 (second entity-xydir2))
+		    (y2 (third entity-xydir2)))
+	       (format #t "debug : rights II . ~%")	       
+	       (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    
+	    ((not (null? downs))
+	     (format #t "debug : downs . ~%")
+	     (let* ((entity-xydir2 (car downs))
+		    (entity2 (car entity-xydir2))
+		    (x2 (second entity-xydir2))
+		    (y2 (third entity-xydir2)))
+	       (format #t "debug : downs II . ~%")	     	       
+	       (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    (#t (format #t "inside move-elf-phase-one Line 536 how did we get here")
+		(error "move-elf-phase-one lost at sea"))))))))
+
+
+
+;; phase two must return a usable array 
+(define (move-elf-phase-two arr entity x y)
+  (format #t "phase two elf {~a}~%" (entity 'as-string))
+  (show-array arr)
+  (format #t "phase two elf : proceeding with flood~%")    
+  (let ((gobsxy (find-goblins arr)))
+    (format #t "got gobsxy as ~%")
+    (pp gobsxy)
+    (format #t "proceeding to flood fill demonstration~%")
+    ;; for each goblin location do a flood fill and determine what is best direction to move
+    (let ((left #f)(right #f)(up #f)(down #f))
+      (map (lambda (elemxy)	     
+	     (let ((elem (first elemxy))
+		   (x2 (second elemxy))
+		   (y2 (third elemxy)))
+	       (let ((arr2 (breadth-first-label-caves arr x2 y2)))
+		 (format #t "numbered for elf at ~a ~a ~%" x2 y2)
+		 (show-array arr2)
+		 (format #t "~%")
+		 ;; LEFT
+		 (when (onboard? (- x 1) y arr)
+		   (let ((estar (array-ref arr2 (- x 1) y)))
+		     (when (integer? estar)
+		       (cond
+			((not left) (set! left estar))
+			((< estar left) (set! left estar))))))
+		 ;;RIGHT
+		 (when (onboard? (+ x 1) y arr)
+		   (let ((estar (array-ref arr2 (+ x 1) y)))
+		     (when (integer? estar)
+		       (cond
+			((not right) (set! right estar))
+			((< estar right) (set! right estar))))))
+		 ;; UP
+		 (when (onboard? x (- y 1) arr)
+		   (let ((estar (array-ref arr2 x (- y 1))))
+		     (when (integer? estar)
+		       (cond
+			((not up) (set! up estar))
+			((< estar up) (set! up estar))))))
+		 ;; DOWN
+		 (when (onboard? x (+ y 1) arr)
+		   (let ((estar (array-ref arr2 x (+ y 1))))
+		     (when (integer? estar)
+		       (cond
+			((not down) (set! down estar))
+			((< estar down) (set! down estar))))))
+		 ;; present findings 
+		 (format #t "flood data : left ~a : right ~a : up ~a : down ~a ~%~%"left right up down)
+		 )))
+	   gobsxy)
+      (let ((dirs `((left ,left)(right ,right)(down ,down)(up ,up))))
+	;; remove any #f symbols from dirs
+	(set! dirs (filter (lambda (x) (not (eq? #f (second x)))) dirs))
+	;; sort based on how close elf is to elf
+	(set! dirs (sort dirs (lambda (x y) (< (second x)(second y)))))
+	;; sort based on same as best found in terms of distance
+	(set! dirs (filter (lambda (x) (= (second x) (second (first dirs)))) dirs))
+	(let ((lefts (filter (lambda (x) (eq? (first x) 'left)) dirs))
+	      (rights (filter (lambda (x) (eq? (first x) 'right)) dirs))
+	      (ups (filter (lambda (x) (eq? (first x) 'up)) dirs))
+	      (downs (filter (lambda (x) (eq? (first x) 'down)) dirs)))
+	  ;; CAREFUL only apply array-set! to ARR2 not original ARR  !!!
+	  (cond ;; did not move and no enemy in reach 
+	   ((null? dirs)
+	    (format #t "elf did not MOVE ~%")
+	    (move-elf-phase-three arr entity x y))
+	   ((not (null? ups)) ;; go up -
+	    (format #t "elf moved UP ~%")
+	    (let ((arr2 (array-copy arr)))
+	      (array-set! arr2 entity x (- y 1))
+	      (array-set! arr2 (make-cave) x y)
+	      (move-elf-phase-three arr2 entity x (- y 1))))
+	   ((not (null? lefts)) ;; go left
+	    (format #t "elf moved LEFT ~%")
+	    (let ((arr2 (array-copy arr)))
+	      (array-set! arr2 entity (- x 1) y)
+	      (array-set! arr2 (make-cave) x y)
+	      (move-elf-phase-three arr2 entity (- x 1) y)))
+	   ((not (null? rights)) ;; go right
+	    (format #t "elf moved RIGHT ~%")
+	    (let ((arr2 (array-copy arr)))
+	      (array-set! arr2 entity (+ x 1) y)
+	      (array-set! arr2 (make-cave) x y)
+	      (move-elf-phase-three arr2 entity (+ x 1) y)))
+	   ((not (null? downs)) ;; go down
+	    (format #t "elf moved DOWN ~%")
+	    (let ((arr2 (array-copy arr)))
+	      (array-set! arr2 entity x (+ y 1))
+	      (array-set! arr2 (make-cave) x y)
+	      (move-elf-phase-three arr2 entity x (+ y 1))))
+	   (#t (error "HUH???"))))))))
+
+
+
+;; phase three must return a usable array
+(define (move-elf-phase-three arr entity x y)
+  (format #t "phase three elf {~a}~%" (entity 'as-string))
+  (show-array arr)
+  (format #t "phase three elf : looking for elfs around ~a ~a~%" x y)  
+  ;; get all the elfs around x y
+  (let ((elfs (get-elf-neighbours arr x y)))
+    ;; sort by weakest elf
+    (set! elfs (sort elfs (lambda (x y) (< (elf-hits (car x))
+					   (elf-hits (car y))))))
+    ;; filter out any elfs stronger than weakest
+    (set! elfs (filter (lambda (x) (> (elf-hits (car x))
+				      (elf-hits (car (car elfs)))))
+		       elfs))
+    ;; pick the elf lexicographic ordering
+    ;; elfs really elfs-xydir 
+    (cond
+     ((null? elfs)
+      (format #t "phase three elf : no elfs in sight !~%")
+      arr)     ;; we have moved elf - no elf in range
+     (#t (let ((ups (filter (lambda (x) (eq? 'up (fourth x))) elfs))
+	       (downs (filter (lambda (x) (eq? 'down (fourth x))) elfs))
+	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) elfs))
+	       (rights (filter (lambda (x) (eq? 'up (fourth x))) elfs)))
+	   (cond
+	    (ups (let* ((entity-xydir2 (car ups))
+			(entity2 (car entity-xydir2))
+			(x2 (second entity-xydir2))
+			(y2 (third entity-xydir2)))
+		   (format #t "phase three elf : attack on elf UP~%")
+		   (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    (lefts (let* ((entity-xydir2 (car lefts))
+			(entity2 (car entity-xydir2))
+			(x2 (second entity-xydir2))
+			(y2 (third entity-xydir2)))
+		     (format #t "phase three elf : attack on elf LEFT~%")		     
+		     (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    (rights (let* ((entity-xydir2 (car rights))
+			   (entity2 (car entity-xydir2))
+			   (x2 (second entity-xydir2))
+			   (y2 (third entity-xydir2)))
+		      (format #t "phase three elf : attack on elf RIGHT~%")		      
+		      (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    (downs (let* ((entity-xydir2 (car downs))
+			  (entity2 (car entity-xydir2))
+			  (x2 (second entity-xydir2))
+			  (y2 (third entity-xydir2)))
+		     (format #t "phase three elf : attack on elf DOWN~%")		     
+		     (elf-attack-goblin arr entity x y entity2 x2 y2)))
+	    (#t (format #t "inside move-elf-phase-three Line 722 how did we get here")
+		(error "move-elf-phase-three lost at sea"))))))))
+
+
 
 
 ;; if doing it in order , an entity may be killed , but then should generate a new array arr
