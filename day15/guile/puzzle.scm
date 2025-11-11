@@ -1106,7 +1106,6 @@ begins search on each square can reach vertically or horizontally
 
 
 
-
 (define (go)
   (let ((xs (run arr 50)))
     (format #t "displaying results of the run ~%")
@@ -1121,11 +1120,12 @@ begins search on each square can reach vertically or horizontally
 	     ;;(format #t "arr = ~a ~%" myarr)
 	     ;; (format #t "array? = ~a ~%" (array? myarr))	     
 	     (format #t "~%**********************************~%")
-	     (format #t "ROUND ~a ~%" n)
+	     (format #t "AFTER ROUND ~a ~%" n)
 	     (show-array arr)
 	     (format #t "~%")))
 	 xs)
     #t))
+
 
 
 
