@@ -1,0 +1,9 @@
+
+(define (factorial n)
+  (cond
+   ((< n 2) n)
+   (#t (* n (factorial (- n 1))))))
+
+
+   
+   

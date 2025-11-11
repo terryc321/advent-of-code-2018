@@ -1,0 +1,12 @@
+
+
+
+;; load a grid from a file
+(define example (grid-load "../example.txt"))
+
+(define input (grid-load "../input.txt"))
+
+(format #t "hello world~%")
+(format #t "grid example has size ~a ~a ~%" (grid-width example) (grid-height example))
+
+

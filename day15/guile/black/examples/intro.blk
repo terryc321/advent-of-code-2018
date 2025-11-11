@@ -1,0 +1,10 @@
+
+
+;; here we replace the evaluator at the meta level - please explain
+(exec-at-metalevel
+ (let ((old-eval base-eval))
+   (set! base-eval (lambda (exp env cont)
+                     (write 'trace:) (write exp) (newline)
+                     (old-eval exp env cont)))))
+
+

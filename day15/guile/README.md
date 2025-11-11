@@ -1,5 +1,1550 @@
 
-# Puzzle
+# Organisation
+
+```
+puzzle.scm - read in a grid / elfs / goblins 
+```
+
+
+
+# Creating a language to solve the problem 
+
+guile scheme has a terrible debugging experience so we will create a language to solve a language problem.
+
+advantages can leverage guile libraries and code , write code , also instrument code without changing 
+original code as we have access to the interpreter and have unlimited freedom to change it to our will
+
+dynamically insert watchers and remove watchers as please 
+does it run interactively ?
+how does emacs do this ?
+
+```
+(load "foo.scm")
+```
+
+
+```
+;;foo.scm
+(let ((cur-dir (getcwd)))
+  (chdir "black")
+  (load "guile.scm")
+  (chdir cur-dir))
+```
+
+
+```
+;;; intro.blk instruments evaluator to print trace : whenever a form is evaluated 
+scheme@(guile-user)> (black)
+New level loaded.
+New level loaded.
+New level loaded.
+0-0: start
+0-1> (load "black/examples/intro.blk")
+New level loaded.
+0-1: done
+0-2> (load "black/examples/factorial.blk")
+trace:(load "black/examples/factorial.blk")
+trace:(define (factorial n) (cond ((< n 2) n) (#t (* n (factorial (- n 1))))))
+trace:(lambda (n) (cond ((< n 2) n) (#t (* n (factorial (- n 1))))))
+0-2: done
+0-3> (factorial 100)
+trace:(factorial 100)
+trace:factorial
+trace:100
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:#t
+trace:(* n (factorial (- n 1)))
+trace:*
+trace:n
+trace:(factorial (- n 1))
+trace:factorial
+trace:(- n 1)
+trace:-
+trace:n
+trace:1
+trace:(cond ((< n 2) n) (#t (* n (factorial (- n 1)))))
+trace:(< n 2)
+trace:<
+trace:n
+trace:2
+trace:n
+0-3: 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000
+```
+
 
 ```
 fun.scm -- guile solution (well if we ever get it to work that is)

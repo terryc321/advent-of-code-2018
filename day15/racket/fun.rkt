@@ -1,4 +1,4 @@
-;; -*- geiser-scheme-implementation: guile -*-
+;; -*- geiser-scheme-implementation: racket -*-
 
 #|
 
