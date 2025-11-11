@@ -315,6 +315,23 @@
 		  (#t (format #f " ~a" x))))))
 		  
 ;; abstracted out iterating over the array with ARRAY-LOOP macro 
+(define* (show-array3 arr #:optional (port #t))
+  (define xlim (array-width arr))
+  (define foo (lambda (ar x y)
+		(let ((elem (array-ref arr x y)))
+		  (cond
+		   ((wall? elem) (format port "~a" (pad #\#)))
+		   ((cave? elem) (format port "~a" (pad #\.)))
+		   ((elf? elem) (format port "~a" (elem 'as-string)))
+		   ((goblin? elem) (format port "~a" (elem 'as-string)))
+		   ((integer? elem) (format port "~a" (pad elem)))
+		   (#t (error "bad symbol")))
+		  ;; end of line
+		  (when (= x xlim)
+		    (format port "~%")))))
+  (array-loop arr foo))
+
+
 (define* (show-array arr #:optional (port #t))
   (define xlim (array-width arr))
   (define foo (lambda (ar x y)
@@ -1033,8 +1050,8 @@ begins search on each square can reach vertically or horizontally
 ;; or if no movement we can return original
 ;; we have to be careful if we mutate the array 
 
-(define (task a)
-  (let loop ((order (lexicographic arr)) (arr (array-copy a)))
+(define (task a)  
+  (let loop ((order (lexicographic a)) (arr (array-copy a)))
     (cond
      ((null? order) arr)
      (#t
@@ -1060,9 +1077,66 @@ begins search on each square can reach vertically or horizontally
 		 (loop (cdr order) arr))))
 	   (#t
 	    (format #t "TASK : processing : GENERIC-ID mis match with CACHED entity~%")
-	    (error "TASK : GENERIC-ID check failed ~%")))))))))
+	    (format #t "cached identity ~a " (generic-id entity))
+	    (format #t " : array ref identity ~a " (generic-id entity2))
+	    ;; probably a cave - respond identity 0
+	    ;; possibly another entity ??
+	    ;; the only reason may be entity died
+	    (loop (cdr order) arr)))))))))
+
+
+;; debugging experience overall 
+;; interesting experiment to dump it out as an org mode document where can see 
+;; then it can get rendered to webpage for future examination
+
+
+;; task == a round
+;; keep applying task until we run out of changes ??
+(define (run arr lim)
+  (let ((xs (list (list 0 arr))))    
+    (letrec ((loop (lambda (arr n)
+		     (let ((out (task arr)))
+		       (format #t "AFTER <ROUND ~a> ~%" n)
+		       (show-array out)
+		       (set! xs (cons (list n out) xs))
+		       (cond
+			((< n lim) (loop out (+ n 1)))
+			(#t (reverse xs)))))))
+      (loop arr 1))))
 
 
 
-     
+
+(define (go)
+  (let ((xs (run arr 50)))
+    (format #t "displaying results of the run ~%")
+    (format #t "the length of xs is ~a ~%" (length xs))
+    (map (lambda (x)
+	   (format #t "expecting x is a pair ? ~a~%" (pair? x))
+	   (format #t "expecting cdr.x is a pair ? ~a~%" (pair? (cdr x)))
+	   (format #t "length of x is ~a ~%" (length x))
+	   (let ((n (car x))
+		 (arr (car (cdr x))))
+	     (format #t "n = ~a ~%" n)
+	     ;;(format #t "arr = ~a ~%" myarr)
+	     ;; (format #t "array? = ~a ~%" (array? myarr))	     
+	     (format #t "~%**********************************~%")
+	     (format #t "ROUND ~a ~%" n)
+	     (show-array arr)
+	     (format #t "~%")))
+	 xs)
+    #t))
+
+
+
+
+
+
+
+
+		     
+
+
+
+
 
