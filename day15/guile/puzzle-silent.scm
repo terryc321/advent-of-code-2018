@@ -333,9 +333,10 @@
 
 
 (define* (show-array arr #:optional (port #t))
-  (define xlim (array-width arr))
+  (define xlim (array-width arr))  
   (define foo (lambda (ar x y)
 		(let ((elem (array-ref arr x y)))
+		  (when (= x 1) (format port "~a :: " y))
 		  (cond
 		   ((wall? elem) (format port "~a" (pad #\#)))
 		   ((cave? elem) (format port "~a" (pad #\.)))
@@ -346,6 +347,13 @@
 		  ;; end of line
 		  (when (= x xlim)
 		    (format port "~%")))))
+  ;; should give me good X Y on display of board
+  (format port "~%     ")
+  (let loop ((x 1))
+    (when (<= x xlim)
+      (format port "~a" (pad x))
+      (loop (+ x 1))))
+  (format port "~%")
   (array-loop arr foo))
 
 
@@ -823,7 +831,11 @@ begins search on each square can reach vertically or horizontally
 		      
 ;; should we check that entity2 is an elf at x2 y2 ?
 (define (elf-attack-goblin arr entity x y entity2 x2 y2)
-  ;; (format #t "< elf-attack-goblin > ~%")
+  (when (and (= x 18)(= y 22)(= x2 19)(= y2 22))
+    (format #t "~%Debug elf-attack-goblin Line 835 > ~%")
+    (show-array arr)
+    (format #t "elf should be at ~a ~a ~a ~%" x y (entity 'as-string))
+    (format #t "goblin should be at ~a ~a ~a ~%" x2 y2 (entity2 'as-string)))
   (let ((arr2 (array-copy arr)))
     (let* ((hits (goblin-hits entity2))
 	   (id (goblin-id entity2))
@@ -850,12 +862,16 @@ begins search on each square can reach vertically or horizontally
 			    (list (array-ref arr dx dy) dx dy 'down)  'none)))))
     (filter (lambda (x) (not (eq? x 'none))) result)))
 
+(define DB #f)
 
 ;; phase one must return a usable array
 (define (move-elf-phase-one arr entity x y)
-  ;; (format #t "phase one elf {~a}~%" (entity 'as-string))
-  ;; (show-array arr)
-  ;; (format #t "phase one elf : looking for goblins around ~a ~a~%" x y)    
+  ;; (when (and (= x 18)(= y 22))
+  ;;   (format #t "phase one elf {~a} at x = 18 y =22  Debug Line 869 ~%" (entity 'as-string))
+  ;;   (show-array arr)
+  ;;   (set! DB arr)
+  ;;   (format #t "phase one elf : looking for goblins around ~a ~a~%" x y)
+  ;;   )
   ;; get all the goblins around x y
   (let ((gobs (get-goblin-neighbours arr x y)))
     ;; (format #t "phase-one elf : there are ~a goblins in the neighbourhood~%" (length gobs))
@@ -1020,26 +1036,26 @@ begins search on each square can reach vertically or horizontally
 (define (move-elf-phase-three arr entity x y)
   ;; (format #t "phase three elf {~a}~%" (entity 'as-string))
   ;; (show-array arr)
-  ;; (format #t "phase three elf : looking for elfs around ~a ~a~%" x y)  
-  ;; get all the elfs around x y
-  (let ((elfs (get-elf-neighbours arr x y)))
+  ;; (format #t "phase three elf : looking for gobs around ~a ~a~%" x y)  
+  ;; get all the gobs around x y
+  (let ((gobs (get-goblin-neighbours arr x y)))
     ;; sort by weakest elf
-    (set! elfs (sort elfs (lambda (x y) (< (elf-hits (car x))
-					   (elf-hits (car y))))))
-    ;; filter out any elfs stronger than weakest
-    (set! elfs (filter (lambda (x) (<= (elf-hits (car x))
-				      (elf-hits (car (car elfs)))))
-		       elfs))
+    (set! gobs (sort gobs (lambda (x y) (< (goblin-hits (car x))
+					   (goblin-hits (car y))))))
+    ;; filter out any gobs stronger than weakest
+    (set! gobs (filter (lambda (x) (<= (goblin-hits (car x))
+				       (goblin-hits (car (car gobs)))))
+		       gobs))
     ;; pick the elf lexicographic ordering
-    ;; elfs really elfs-xydir 
+    ;; gobs really gobs-xydir 
     (cond
-     ((null? elfs)
-      ;; (format #t "phase three elf : no elfs in sight !~%")
+     ((null? gobs)
+      ;; (format #t "phase three elf : no gobs in sight !~%")
       arr)     ;; we have moved elf - no elf in range
-     (#t (let ((ups (filter (lambda (x) (eq? 'up (fourth x))) elfs))
-	       (downs (filter (lambda (x) (eq? 'down (fourth x))) elfs))
-	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) elfs))
-	       (rights (filter (lambda (x) (eq? 'right (fourth x))) elfs)))
+     (#t (let ((ups (filter (lambda (x) (eq? 'up (fourth x))) gobs))
+	       (downs (filter (lambda (x) (eq? 'down (fourth x))) gobs))
+	       (lefts (filter (lambda (x) (eq? 'left (fourth x))) gobs))
+	       (rights (filter (lambda (x) (eq? 'right (fourth x))) gobs)))
 	   (cond
 	    ((not (null? ups)) (let* ((entity-xydir2 (car ups))
 			(entity2 (car entity-xydir2))
