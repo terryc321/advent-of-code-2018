@@ -1,5 +1,18 @@
 ;; -*- geiser-scheme-implementation: guile -*-
 
+;; part 2 of the puzzle
+;; *elf-damage* is going to be slowly turned up until all elves survive
+;;
+;; we set up a continuation as soon as an elf dies on the battlefield 
+;; the continuation is triggered and we get time warped to try next solution - 
+;; increment *elf-damage* by 1 
+;;
+;; we could also try a more sophisticated perhaps exponential increase , then divide by two 
+;; approach to see where it worked / did not work !
+;;
+;;
+;;
+
 ;;
 ;;
 ;; each elf goblin has 200 hits
@@ -55,6 +68,9 @@
 (define (array-width arr) (second (first (array-shape arr))))
 (define (array-height arr) (second (second (array-shape arr))))
 
+(define *elf-power* 3) 
+
+(define *elf-continuation* #f)
 
 ;; assertions ?
 (define assert
@@ -647,7 +663,14 @@ begins search on each square can reach vertically or horizontally
 	   (after (- hits 3)))
       ;; (format #t "< goblin-attack-elf : hits ~a : id ~a : after ~a > ~%" hits id after)
       (cond
-       ((<= after 0) (array-set! arr2 (make-cave) x2 y2))
+       ((<= after 0)
+	;; woopsie -- an elf has died -- activate time warp
+	(format #t "WOOPSIE ... an ELF has DIED ... TIMEWARP engaged ...~%")
+	;; pass any value to *elf-continuation* which will take us back
+	;; but because we have side effects - *elf-power* should now keep increasing on every timewarp
+	(*elf-continuation* #t)
+	;; we never get here - ever - ever --
+	(array-set! arr2 (make-cave) x2 y2))
        (#t (array-set! arr2 (make-elf after id) x2 y2)))
       arr2)))
 
@@ -834,15 +857,15 @@ begins search on each square can reach vertically or horizontally
 		      
 ;; should we check that entity2 is an elf at x2 y2 ?
 (define (elf-attack-goblin arr entity x y entity2 x2 y2)
-  (when (and (= x 18)(= y 22)(= x2 19)(= y2 22))
-    (format #t "~%Debug elf-attack-goblin Line 835 > ~%")
-    (show-array arr)
-    (format #t "elf should be at ~a ~a ~a ~%" x y (entity 'as-string))
-    (format #t "goblin should be at ~a ~a ~a ~%" x2 y2 (entity2 'as-string)))
+  ;; (when (and (= x 18)(= y 22)(= x2 19)(= y2 22))
+  ;;   (format #t "~%Debug elf-attack-goblin Line 835 > ~%")
+  ;;   (show-array arr)
+  ;;   (format #t "elf should be at ~a ~a ~a ~%" x y (entity 'as-string))
+  ;;   (format #t "goblin should be at ~a ~a ~a ~%" x2 y2 (entity2 'as-string)))
   (let ((arr2 (array-copy arr)))
     (let* ((hits (goblin-hits entity2))
 	   (id (goblin-id entity2))
-	   (after (- hits 3)))
+	   (after (- hits *elf-power*)))
       ;; (format #t "< elf-attack-goblin : hits ~a : id ~a : after ~a > ~%" hits id after)
       (cond
        ((<= after 0) (array-set! arr2 (make-cave) x2 y2))
@@ -1142,6 +1165,7 @@ begins search on each square can reach vertically or horizontally
 ;; interesting experiment to dump it out as an org mode document where can see 
 ;; then it can get rendered to webpage for future examination
 
+(define *round* 0)
 
 ;; task == a round
 ;; keep applying task until we run out of changes ??
@@ -1150,67 +1174,59 @@ begins search on each square can reach vertically or horizontally
     (letrec ((loop (lambda (arr n)
 		     (let ((out (task arr)))
 		       (format #t "~% *********** AFTER <ROUND ~a> ************** ~%" n)
-		       (show-array2 out)
-		       (set! xs (cons (list n out) xs))
+		       (set! *round* n)
+		       ;; (show-array2 out)
+		       ;; (set! xs (cons (list n out) xs))
 		       (cond
 			((or (null? (find-elfs out))
 			     (null? (find-goblins out)))			 
-			 (reverse xs))
+			 out)
 			(#t (loop out (+ n 1))))))))
       (loop arr 1))))
 
+(define *elf-number* (length (find-elfs arr)))
+(format #t "there are ~a elfs in this grid~%" *elf-number*)
+
+(set! *elf-power* 3) 
 
 (define (go)
-  (let ((xs (run arr 999999))) ;; keep going until we break
-    (format #t "displaying results of the run ~%")
-    (format #t "the length of xs is ~a ~%" (length xs))
-    (map (lambda (x)
-	   (format #t "expecting x is a pair ? ~a~%" (pair? x))
-	   (format #t "expecting cdr.x is a pair ? ~a~%" (pair? (cdr x)))
-	   (format #t "length of x is ~a ~%" (length x))
-	   (let ((n (car x))
-		 (arr (car (cdr x))))
-	     (format #t "n = ~a ~%" n)
-	     ;;(format #t "arr = ~a ~%" myarr)
-	     ;; (format #t "array? = ~a ~%" (array? myarr))	     
-	     (format #t "~%**********************************~%")
-	     (format #t "AFTER ROUND ~a ~%" n)
-	     (show-array arr)
-	     (cond
-	      ((null? (find-elfs arr))
-	       (let ((tot 0))
-		 (format #t " the goblins won !~%")
-		 (map (lambda (x) (let ((h ((car x) 'hits))
-					(px (second x))
-					(py (third x)))
-				    (format #t "goblin at ~a ~a has ~a hits ~%" px py h)
-				    (set! tot (+ tot h))))
-		      (find-goblins arr))
-		 (format #t "total hits ~a : " tot)
-		 (format #t "round ended on ~a ~%" n )
-		 (format #t "proposed answer ~a ~%" (* tot n))))
-	      ((null? (find-goblins arr))
-	       (let ((tot 0))
-		 (format #t " the elves won !~%")
-		 (map (lambda (x) (let ((h ((car x) 'hits))
-					(px (second x))
-					(py (third x)))
-				    (format #t "elf at ~a ~a has ~a hits ~%" px py h)
-				    (set! tot (+ tot h))))
-		      (find-elfs arr))
-		 (format #t "total hits ~a : " tot)
-		 (format #t "round ended on ~a ~%" n )
-		 (format #t "proposed answer ~a ~%" (* tot n)))))
-	     (format #t "~%")))
-	 xs)
-    #t))
-
-
-
-
+  (format #t "TRYING on ELF power of ~a ~%" *elf-power*)
+  (call/cc (lambda (restart)
+	     (set! *elf-continuation* restart)
+	     #t))
+  ;; when restart is activated - elf power will be incremented
+  (set! *elf-power* (+ 1 *elf-power*))
+  (format #t "ELF POWER is now ~a ~%" *elf-power*)
+  
+  (let ((out (run arr 999999)))
+    (cond
+     ((and (null? (find-goblins out))
+	   (= (length (find-elfs out)) *elf-number*))
+      ;; all elves survived
+      (let ((tot 0))
+	(format #t " the elves won with damage power of ~a !~%" *elf-power*)
+	(map (lambda (x) (let ((h ((car x) 'hits))
+			       (px (second x))
+			       (py (third x)))
+			   (format #t "elf at ~a ~a has ~a hits ~%" px py h)
+			   (set! tot (+ tot h))))
+	     (find-elfs out))
+	(format #t "total hits ~a : " tot)
+	(format #t "round ended on ~a ~%" *round* )
+	(format #t "proposed answer ~a ~%" (* tot *round*))
+	(format #t "proposed answer (no 2) ~a ~%" (* tot (- *round* 1)))
+	(format #t "~%~%")))
+     (#t
+      
+      (go)))))
 
 
 #|
+
+< PART 2 > 
+
+====================== COPY PASTA =====================================
+< PART 1 >
 
 goblin at 13 22 has 200 hits 
 goblin at 9 21 has 200 hits 
@@ -1229,7 +1245,11 @@ but hits of goblins would not change since no elfs to damage them .
 scheme@(guile-user)> (* 2606 82)
 $9 = 213692
 
+THAT is a RelIeF !
+
 *** COPY PASTA ==== ACCEPTED ANSWER WOOP WOOP ======== COPY PASTA *** 
+
+
 
 |#
 
