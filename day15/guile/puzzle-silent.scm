@@ -1100,7 +1100,7 @@ begins search on each square can reach vertically or horizontally
     (letrec ((loop (lambda (arr n)
 		     (let ((out (task arr)))
 		       (format #t "~% *********** AFTER <ROUND ~a> ************** ~%" n)
-		       (show-array out)
+		       (show-array2 out)
 		       (set! xs (cons (list n out) xs))
 		       (cond
 			((< n lim) (loop out (+ n 1)))
