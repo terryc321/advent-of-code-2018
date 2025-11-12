@@ -1225,6 +1225,32 @@ begins search on each square can reach vertically or horizontally
 
 < PART 2 > 
 
+ *********** AFTER <ROUND 34> ************** 
+
+ *********** AFTER <ROUND 35> ************** 
+
+ *********** AFTER <ROUND 36> ************** 
+
+ *********** AFTER <ROUND 37> ************** 
+
+ *********** AFTER <ROUND 38> ************** 
+ the elves won with damage power of 23 !
+elf at 10 19 has 200 hits 
+elf at 10 18 has 200 hits 
+elf at 11 16 has 161 hits 
+elf at 10 15 has 32 hits 
+elf at 10 14 has 185 hits 
+elf at 11 13 has 200 hits 
+elf at 19 12 has 80 hits 
+elf at 12 12 has 29 hits 
+elf at 11 12 has 179 hits 
+elf at 20 11 has 158 hits 
+total hits 1424 : round ended on 38 
+proposed answer 54112 
+proposed answer (no 2) 52688 
+
+answer ACCEPTED .... phew ....
+
 ====================== COPY PASTA =====================================
 < PART 1 >
 
