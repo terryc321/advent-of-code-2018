@@ -133,14 +133,18 @@
 				 :max-y max-y)))
 	  result)))))
 
+(defparameter g-example (process example))
+(defparameter g-input   (process input))
 
 
 
+;; (show-grid (process example))
+;; (show-grid (process input))
 (defun show-grid (g)
   (let ((data (grid-data g))
 	(min-x (grid-min-x g))
 	(max-x (grid-max-x g))
-	(min-y (grid-min-y g))
+	(min-y (grid-min-y g)) ;; min y is zero 0 where sprinkler located 
 	(max-y (grid-max-y g)))
     (format t "~%")
     ;; (loop for y from (- min-y 3) to (+ max-y 3) do
@@ -172,6 +176,8 @@
 ;; .............
 ;; .......x.....
 ;;
+;; (on-grid g-example 500 0) => nil - thats the sprinkler location , ok.
+;; (on-grid g-example 500 1) => t 
 
 (defun on-grid (g x y)
   (let ((min-x (grid-min-x g))
@@ -183,6 +189,8 @@
     (and (>= x min-x) (<= x max-x)
 	 (>= y min-y) (<= y max-y))))
 
+;; (at g-example 500 6) => #\.
+;; (at g-example 500 7) => #\# 
 (defun at (g x y)
   (cond
     ((on-grid g x y)
@@ -191,6 +199,15 @@
 	 (val val) ;; either #\# clay or #\~ water 
 	 (t #\.)))) ;; sand otherwise 
     (t nil)))
+
+;; put
+(defun put (g x y z)  
+  (cond
+    ((not (or (eq z #\.) (eq z #\~))) (error "cannot put anything other than ~  water ~ here or clear air ."))
+    ((on-grid g x y)
+     (setf (gethash (list x y) (grid-data g) ) z))
+    (t (error "put - not on grid"))))
+
 
 
 ;; ;; is there anything underneath the sprinkler
@@ -249,6 +266,7 @@
 	   (when (and (not (null R)) (listp R))
 	     (destructuring-bind (ign x2 y2) R (vertical g x2 y2))))
 	  (t (overflow g x (- y 1))))))))
+
 
 
 (defun left (g x y)
