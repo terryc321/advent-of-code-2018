@@ -83,6 +83,14 @@
 (define example (fix "../example.txt"))
 (define puzzle (fix "../puzzle1.txt"))
 
+;; =========== input example puzzle ==== appear to be a list of points =================
+;; so far so good
+;;
+;; (find-limits input) => (404 628 1 1631)
+;; (find-limits example) => (404 628 1 1631)
+;;
+;; =====================================================================================
+
 (define clay-hash #f)
 
 (define make-clay
