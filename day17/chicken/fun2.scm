@@ -111,18 +111,23 @@
 ;; min x for example is 495 to max-x 506
 ;; min-y 0= the sprinkler  ... y=13 
 (define find-limits
-  (let ((min-x #f)(max-x #f)
-	(min-y #f)(max-y #f))
     (lambda (points)
-      (cond
-       ((null? points) (list min-x max-x min-y max-y))
-       (#t (let ((point (car points)))
-	     (bind (x y) point
-		   (when (or (not min-x) (< x min-x)) (set! min-x x))
-		   (when (or (not max-x) (> x max-x)) (set! max-x x))
-		   (when (or (not min-y) (< y min-y)) (set! min-y y))
-		   (when (or (not max-y) (> y max-y)) (set! max-y y))
-		   (find-limits (cdr points)))))))))
+      (let ((min-x #f)(max-x #f)
+	    (min-y #f)(max-y #f))
+	(letrec ((recur (lambda (pts)
+			  (cond
+			   ((null? pts) (list min-x max-x min-y max-y))
+			   (#t (let ((point (car pts)))
+				 (bind (x y) point
+				       (when (or (not min-x) (< x min-x)) (set! min-x x))
+				       (when (or (not max-x) (> x max-x)) (set! max-x x))
+				       (when (or (not min-y) (< y min-y)) (set! min-y y))
+				       (when (or (not max-y) (> y max-y)) (set! max-y y))
+				       (recur (cdr pts)))))))))
+	  (recur points)))))
+
+
+
 
 ;;==========================================================================================
 ;; how are we going to represent the grid ?
@@ -176,5 +181,230 @@ but both structurally exactly the same lists ? so how could it fail integrity ?
 #;649> 
 |#
 
+;; ========= a flat list is just too slow ===========
+;; lets try srfi-69 hash table
+
+(define input-hash (make-hash-table #:test equal?))
+(define example-hash (make-hash-table #:test equal?))
+
+(define (hashify-grid g hash)
+  (cond
+   ((null? g) hash)
+   (#t (let ((a (car g)))
+	 (bind (x y) a
+	       (hash-table-set! hash a #\#)
+	       (hashify-grid (cdr g) hash))))))
+
+(hashify-grid input input-hash)
+(hashify-grid example example-hash)
+
+(hash-table-set! input-hash 'limits (find-limits input))
+(hash-table-set! example-hash 'limits (find-limits example))
+
+;; dont forget sprinkler !
+(hash-table-set! input-hash '(500 0) #\+)
+(hash-table-set! example-hash '(500 0) #\+)
+
+
+(define (show-grid hash)
+  (bind (x1 x2 y1 y2)	(hash-table-ref hash 'limits)
+	(let loop ((x x1)(y 0))
+	  (cond
+	   ((> y y2) #f)
+	   ((> x x2)
+	    (format #t "~%")
+	    (loop x1 (+ y 1)))
+	   (#t
+	    (let ((ch (hash-table-ref/default hash (list x y) #f)))
+	      (cond
+	       ((not ch) (format #t "."))
+	       ((char=? ch #\+) (format #t "+"))
+	       ((char=? ch #\#) (format #t "#"))
+	       ((char=? ch #\~)  (format #t "~"))
+	       (#t (error "show-grid")))
+	      (loop (+ x 1) y)))))))
+
+
+;; water starts falling from 500 0
+;; vertically down (increasing y direction)
+;; until it hits a wall #
+
+;;
+;;      ~
+;;      ~
+;;      ~
+;;      #  aha ! hit a wall  --->  search left and right 
+;; case 1 : wall both sides - in which case - fill both sides up and go up
+;; case 2 : wall on left but not wall on right .. waterfall to right 
+;; case 3 : wall on right but not wall on left .. waterfall to left
+;;
+;; once in waterfall - do we ever return ?
+;;
+
+
+;; no need to use hash here 
+(define (hash-too-far? y ylim) ;;hash x y ylim)
+   (> y ylim))
+
+
+(define (hash-sand? hash x y ylim)
+  (cond
+   ((> y ylim) #f)
+   (#t (let ((ch (hash-table-ref/default hash (list x y) #f)))
+	 (cond
+	  ((not ch) #t)
+	  ((char=? ch #\~) #f)
+	  ((char=? ch #\#) #f)
+	  ((char=? ch #\s) #t)	  
+	  (#t #f))))))
+
+
+
+(define (hash-empty? hash x y ylim)
+  (cond
+   ((> y ylim) #f)
+   (#t (let ((ch (hash-table-ref/default hash (list x y) #f)))
+	 (cond
+	  ((not ch) #t)
+	  (#t #f))))))
+
+
+(define (hash-wall? hash x y ylim)
+  (cond
+   ((> y ylim) #f)
+   (#t (let ((ch (hash-table-ref/default hash (list x y) #f)))
+	 (cond
+	  ((not ch) #f)
+	  ((char=? ch #\#) #t)
+	  (#t #f))))))
+
+(define (hash-water! hash x y ylim)
+  (cond
+   ((> y ylim) #f)
+   (#t (let ((ch (hash-table-ref/default hash (list x y) #f)))
+	 (cond
+	  ((not ch) (hash-table-set! hash (list x y) #\~))
+	  ((char=? ch #\#) (error "water! cannot put water where wall is!")))))))
    
-		
+
+(define (hash-waterfall! hash x y ylim)
+  (cond
+   ((> y ylim) #f)
+   (#t (let ((ch (hash-table-ref/default hash (list x y) #f)))
+	 (cond
+	  ((not ch) (hash-table-set! hash (list x y) #\|))
+	  ((char=? ch #\#) (error "water! cannot put waterfall where wall is!")))))))
+   
+
+;; do we need more information ?
+;; have a think ?
+;; see what works 
+;;
+
+(define (move hash)
+  (let ((limits (hash-table-ref hash 'limits))
+	(counter -1))
+    (bind (x1 x2 y1 ylim) limits
+	  (format #t "limits were ~a ~%" limits)
+	  
+	  (letrec ((water! (lambda (x y) (hash-water! hash x y ylim)))
+		   (wall? (lambda (x y) (hash-wall? hash x y ylim)))
+		   (empty? (lambda (x y) (hash-empty? hash x y ylim)))
+		   (sand? (lambda (x y) (hash-sand? hash x y ylim)))		   
+		   (too-far? (lambda (x y) (hash-too-far? y ylim)))
+		   (go-down   (lambda (x y)
+				;; (format #t "counter ~a~%" (begin (set! counter(+ counter 1))
+				;; 				 counter))
+				;; (format #t "go-down ~a ~a~%" x y)
+				;; (show-grid hash)
+				;; (format #t "~%~%")
+				(cond
+				 ((too-far? x y) #f)
+				 ((empty? x y)
+				  (waterfall! x y)
+				  (go-down x (+ y 1)))
+				 ((wall? x y)
+				  (go-left x (- y 1) x (- y 1)))
+				 ((sand? x y)
+				  (go-left (- x 1) y x (- y 1)))
+				 (#t
+				  (error "go down case not handled")))))				 			
+		   (go-left   (lambda (x y ox oy)
+				;; (format #t "counter ~a~%" (begin (set! counter(+ counter 1))
+				;; 				 counter))
+				;; (format #t "go-left ~a ~a ~a ~a~% " x y ox oy)
+				;; (show-grid hash)
+				;; (format #t "~%~%")
+				
+				(cond
+				 ((and (empty? x y) (empty? x (+ y 1))) ;; waterfall
+				  (waterfall! x y)
+				  (go-down x y) ;; once we finally return
+				  (go-right (+ x 1) y ox oy 'waterfall))
+				 ((and (empty? x y) (empty? x (+ y 1))) ;; on water
+				  (water! x y)
+				  (go-left (- x 1) y ox oy)
+				  )				 
+				 ((wall? x y)
+				  (go-right (+ x 1) y ox oy 'wall))
+				 ((empty? x y) ;; floor underneath ok
+				  (water! x y)
+				  (go-left (- x 1) y ox oy))
+				 (#t (error "go-left case not handled")))))
+		   (go-right (lambda (x y ox oy hist)
+				;; (format #t "counter ~a~%" (begin (set! counter(+ counter 1))
+				;; 				 counter))
+   			        ;; (format #t "go-right ~a ~a ~a ~a ~a~% " x y ox oy hist)
+				;; (show-grid hash)
+				;; (format #t "~%~%")
+			       (cond
+				 ((and (empty? x y) (empty? x (+ y 1))) ;; waterfall
+				  (water! x y)
+				  (go-down x y) ;; once we finally return - done
+				  )
+				 ((and (empty? x y) (empty? x (+ y 1))) ;; on water
+				  (water! x y)
+				  (go-right (+ x 1) y ox oy hist)
+				  )				 
+				 ((wall? x y)
+				  (cond
+				   ((eq? hist 'wall)
+				    ;; (format #t "was wall both sides -> going up ~%")
+				    (water! ox (- oy 1))
+				    (go-left (- ox 1) (- oy 1) ox (- oy 1)))
+				   ((eq? hist 'waterfall) ;; we are done 
+				    #t)
+				   (#t (error "go right case not handled neither wall nor waterfall"))))
+				 ((empty? x y) ;; floor underneath ok
+				  (water! x y)
+				  (go-right (+ x 1) y ox oy hist))
+				 (#t (error "go-right case not handled")))))
+		   )
+	       ;; start at sprinkler
+	    (go-down 500 1)
+	    (format #t "the amount of water excluding sprinkler is ~a~%" (count-water hash))
+	    ))))
+
+
+
+;; count water #\~ and #\+ sprinkler
+(define (count-water hash)
+  (let ((n 0))
+    (hash-table-for-each hash (lambda (k v)
+				(cond
+				 ((char? v)
+				  (cond
+				   ((char=? v #\~) (set! n (+ n 1)))
+				   ;; ((char=? v #\+) (set! n (+ n 1)))
+				   )))))
+    n))
+
+
+
+;; Part One - AOC 2018 - Day 17 
+;; #;681> (move input-hash)
+;; limits were (404 628 6 1631) 
+;; the amount of water excluding sprinkler is 280960
+;; #;686> 
+	  
+;; BOOO answer rejected - answer is too high 		
