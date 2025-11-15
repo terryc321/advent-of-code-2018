@@ -1,0 +1,1 @@
+﻿Morph subclass: #Day17Morph	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: 'AdventCode2018'!!Day17Morph methodsFor: 'as yet unclassified' stamp: 'tc 11/15/2025 12:13'!click: anEvent Transcript show: 'mouse click ' ; show: anEvent ; cr .  ^ true! !

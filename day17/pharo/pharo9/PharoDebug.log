@@ -1,0 +1,2216 @@
+THERE_BE_DRAGONS_HERE
+Message not understood: ByteSymbol >> #asParser
+13 November 2025 7:20:40.510428 pm
+
+VM: unix - x86_64 - linux-gnu - CoInterpreter VMMaker-tonel.1 uuid: 547c88ba-09f3-0d00-b124-98680be5cca3 Jun  3 2025
+StackToRegisterMappingCogit VMMaker-tonel.1 uuid: 547c88ba-09f3-0d00-b124-98680be5cca3 Jun  3 2025
+v10.3.5+0.be20a02 - Commit: be20a02 - Date: 2025-06-03 11:15:04 +0200
+
+Image: Pharo13.1.0SNAPSHOT [Build information: Pharo-13.1.0+SNAPSHOT.build.697.sha.af10a2ce70915e5076b7c9664f7851b9f7d95376 (64 Bit)]
+
+ByteSymbol(Object)>>doesNotUnderstand: #asParser
+	Receiver: #digit
+	Arguments and temporary variables: 
+		aMessage: 	asParser
+		exception: 	Instance of ByteSymbol did not understand #asParser
+		resumeValue: 	nil
+	Receiver's instance variables: 
+#digit
+
+Day17>>parse:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+		firstLine: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 [..]
+		xP: 	nil
+		intP: 	nil
+		yP: 	nil
+		result: 	nil
+		tmp: 	nil
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+[ :line | 
+	res add: (self parse: line).
+	 ] in Day17>>parseLines:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		res: 	an OrderedCollection()
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+		line: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y 2 [..]
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+OrderedCollection>>do:
+	Receiver: an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $[..]
+	Arguments and temporary variables: 
+		aBlock: 	[ :line | 
+	res add: (self parse: line).
+	 ]
+		index: 	1
+	Receiver's instance variables: 
+		array: 	#(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y[..]
+		firstIndex: 	1
+		lastIndex: 	1
+
+
+Day17>>parseLines:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		res: 	an OrderedCollection()
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+Day17Test>>testParseLines
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		day: 	a Day17
+		pLines: 	nil
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+Day17Test(TestCase)>>performTest
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[
+		self setUp.
+		self performTest ] in [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [
+		self setUp.
+		self performTest ]
+	Arguments and temporary variables: 
+		aBlock: 	[ self tearDown ]
+		handler: 	[ self tearDown ]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tear[..]
+		compiledBlock: 	a CompiledBlock: [
+		self setUp.
+		self performTest ]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ]
+	Arguments and temporary variables: 
+		aBlock: 	[ self cleanUpInstanceVariables ]
+		handler: 	[ self cleanUpInstanceVariables ]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	Day17Test(TestCase)>>runCase
+		compiledBlock: 	a CompiledBlock: [ [
+		self setUp.
+		self performTest ]
+			e[..]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[aTestCase runCase] in [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [aTestCase runCase]
+	Arguments and temporary variables: 
+		aBlock: 	[
+			"Terminated test is not considered as completed (user just clo[..]
+		handler: 	[
+			"Terminated test is not considered as completed (user just cl[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not [..]
+		compiledBlock: 	a CompiledBlock: [aTestCase runCase]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>on:do:
+	Receiver: [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed ([..]
+	Arguments and temporary variables: 
+		exception: 	Exception
+		handlerAction: 	[ :err |
+			self handleException: err
+	]
+	Receiver's instance variables: 
+		outerContext: 	TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+		compiledBlock: 	a CompiledBlock: [
+		[aTestCase runCase] ensure: [
+			"Termi[..]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+[self runTestCaseUnderWatchdog: aTestCase] in TestExecutionEnvironment>>runTestCase:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [self runTestCaseUnderWatchdog: aTestCase]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		testCompleted := true.
+		watchDogSemaphore signal.  "signal tha[..]
+		handler: 	[
+		testCompleted := true.
+		watchDogSemaphore signal.  "signal th[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	TestExecutionEnvironment>>runTestCase:
+		compiledBlock: 	a CompiledBlock: [self runTestCaseUnderWatchdog: aTestCase]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+TestExecutionEnvironment>>runTestCase:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+[
+		testEnv runTestCase: aTestCase] in DefaultExecutionEnvironment>>runTestCase:
+	Receiver: a DefaultExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+		testEnv: 	a TestExecutionEnvironment
+	Receiver's instance variables: 
+a DefaultExecutionEnvironment
+
+[ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ] in CurrentExecutionEnvironment class>>activate:for:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		anExecutionEnvironment: 	a TestExecutionEnvironment
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+		current: 	a DefaultExecutionEnvironment
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		self value: current.
+		anExecutionEnvironment deactivated]
+		handler: 	[
+		self value: current.
+		anExecutionEnvironment deactivated]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	CurrentExecutionEnvironment class>>activate:for:
+		compiledBlock: 	a CompiledBlock: [ self value: anExecutionEnvironment.
+	anEx[..]
+		numArgs: 	0
+		receiver: 	CurrentExecutionEnvironment
+
+
+CurrentExecutionEnvironment class>>activate:for:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		anExecutionEnvironment: 	a TestExecutionEnvironment
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+		current: 	a DefaultExecutionEnvironment
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+TestExecutionEnvironment(ExecutionEnvironment)>>beActiveDuring:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+DefaultExecutionEnvironment>>runTestCase:
+	Receiver: a DefaultExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+		testEnv: 	a TestExecutionEnvironment
+	Receiver's instance variables: 
+a DefaultExecutionEnvironment
+
+CurrentExecutionEnvironment class>>runTestCase:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+Day17Test(TestCase)>>runCaseManaged
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	aTestCase announce: TestCaseEnded  withResult: self.
+	"To not affect performance of big test suites following logic is not inside addPass: method"
+	errors remove: aTestCase ifAbsent: [].
+	failures remove: aTestCase ifAbsent: [].
+	self addPass: aTestCase] in TestResult>>runCaseForDebug:
+	Receiver: 1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 error, 0 passed unexpected
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		timeStamp: 	2025-11-13T19:20:40.47774+00:00
+		failures: 	a Set()
+		errors: 	an OrderedCollection(Day17Test>>#testParseLines)
+		passed: 	an OrderedCollection()
+		skipped: 	an OrderedCollection()
+
+
+FullBlockClosure(BlockClosure)>>on:do:
+	Receiver: [
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	a[..]
+	Arguments and temporary variables: 
+		exception: 	an ExceptionSet
+		handlerAction: 	[:ex | ex sunitAnnounce: aTestCase toResult: self. ex pass]
+	Receiver's instance variables: 
+		outerContext: 	TestResult>>runCaseForDebug:
+		compiledBlock: 	a CompiledBlock: [
+	aTestCase announce: TestCaseStarted with[..]
+		numArgs: 	0
+		receiver: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 er[..]
+
+
+TestResult>>runCaseForDebug:
+	Receiver: 1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 error, 0 passed unexpected
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		timeStamp: 	2025-11-13T19:20:40.47774+00:00
+		failures: 	a Set()
+		errors: 	an OrderedCollection(Day17Test>>#testParseLines)
+		passed: 	an OrderedCollection()
+		skipped: 	an OrderedCollection()
+
+
+[ result runCaseForDebug: self ] in Day17Test(TestCase)>>debug
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		result: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 erro[..]
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	#()
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ result runCaseForDebug: self ]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		self classForTestResource resetResources: self resources.
+		res[..]
+		handler: 	[
+		self classForTestResource resetResources: self resources.
+		re[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	Day17Test(TestCase)>>debug
+		compiledBlock: 	a CompiledBlock: [ result runCaseForDebug: self ]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+Day17Test(TestCase)>>debug
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		result: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 erro[..]
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	#()
+
+
+Day17Test class(TestCase class)>>debug:
+	Receiver: Day17Test
+	Arguments and temporary variables: 
+		aSymbol: 	#testParseLines
+	Receiver's instance variables: 
+		superclass: 	TestCase
+		methodDict: 	a MethodDictionary(#testParse1->Day17Test>>#testParse1 #testPar[..]
+		format: 	65538
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (tests) - 3 selector(s))
+		subclasses: 	nil
+		name: 	#Day17Test
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	nil
+		packageTag: 	a PackageTag(Uncategorized)
+		history: 	a Dictionary(#errors->a Set(#testParse2 #testParse1 #testParseLine[..]
+
+
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTest:of:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testSelector: 	#testParseLines
+		testClass: 	Day17Test
+		testResult: 	nil
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+[ :each |
+		self runTest: testSelector of: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testItem: 	a ClyDataSourceItem(parseLines:)
+		testSelector: 	#testParseLines
+		each: 	Day17Test
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+Array(SequenceableCollection)>>do:
+	Receiver: {Day17Test}
+	Arguments and temporary variables: 
+		aBlock: 	[ :each |
+		self runTest: testSelector of: each ]
+		index: 	1
+	Receiver's instance variables: 
+{Day17Test}
+
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testItem: 	a ClyDataSourceItem(parseLines:)
+		testSelector: 	#testParseLines
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+
+--- The full stack ---
+ByteSymbol(Object)>>doesNotUnderstand: #asParser
+Day17>>parse:
+[ :line | 
+	res add: (self parse: line).
+	 ] in Day17>>parseLines:
+OrderedCollection>>do:
+Day17>>parseLines:
+Day17Test>>testParseLines
+Day17Test(TestCase)>>performTest
+[
+		self setUp.
+		self performTest ] in [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+FullBlockClosure(BlockClosure)>>ensure:
+[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+FullBlockClosure(BlockClosure)>>ensure:
+Day17Test(TestCase)>>runCase
+[aTestCase runCase] in [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+FullBlockClosure(BlockClosure)>>ensure:
+[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+FullBlockClosure(BlockClosure)>>on:do:
+TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+[self runTestCaseUnderWatchdog: aTestCase] in TestExecutionEnvironment>>runTestCase:
+FullBlockClosure(BlockClosure)>>ensure:
+TestExecutionEnvironment>>runTestCase:
+[
+		testEnv runTestCase: aTestCase] in DefaultExecutionEnvironment>>runTestCase:
+[ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ] in CurrentExecutionEnvironment class>>activate:for:
+FullBlockClosure(BlockClosure)>>ensure:
+CurrentExecutionEnvironment class>>activate:for:
+TestExecutionEnvironment(ExecutionEnvironment)>>beActiveDuring:
+DefaultExecutionEnvironment>>runTestCase:
+CurrentExecutionEnvironment class>>runTestCase:
+Day17Test(TestCase)>>runCaseManaged
+[
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	aTestCase announce: TestCaseEnded  withResult: self.
+	"To not affect performance of big test suites following logic is not inside addPass: method"
+	errors remove: aTestCase ifAbsent: [].
+	failures remove: aTestCase ifAbsent: [].
+	self addPass: aTestCase] in TestResult>>runCaseForDebug:
+FullBlockClosure(BlockClosure)>>on:do:
+TestResult>>runCaseForDebug:
+[ result runCaseForDebug: self ] in Day17Test(TestCase)>>debug
+FullBlockClosure(BlockClosure)>>ensure:
+Day17Test(TestCase)>>debug
+Day17Test class(TestCase class)>>debug:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTest:of:
+[ :each |
+		self runTest: testSelector of: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+Array(SequenceableCollection)>>do:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+ - - - - - - - - - - - - - - -
+			- - - - - - - - - - - - - - - - - -
+[:each | self runTestItem: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>execute
+Array(SequenceableCollection)>>do:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>execute
+ClyFullBrowserMethodContext(ClySystemBrowserContext)>>executeCommand:by:
+[self prepareCommandForExecution.
+	context executeCommand: command by: self.
+	self applyCommandResult] in CmdCommandActivator>>executeCommand
+FullBlockClosure(BlockClosure)>>on:do:
+CmdCommandActivator>>executeCommand
+[target perform: actionSelector withArguments: arguments] in IconicButtonMorph(SimpleButtonMorph)>>doButtonAction
+FullBlockClosure(BlockClosure)>>ensure:
+CursorWithMask(Cursor)>>showWhile:
+IconicButtonMorph(SimpleButtonMorph)>>doButtonAction
+IconicButtonMorph(SimpleButtonMorph)>>mouseUp:
+IconicButtonMorph(Morph)>>handleMouseUp:
+MouseButtonEvent>>sentTo:
+IconicButtonMorph(Morph)>>handleEvent:
+IconicButtonMorph(Morph)>>handleFocusEvent:
+[
+		result := focusHolder handleFocusEvent: transformedEvent.
+	] in HandMorph>>sendFocusEvent:to:clear:
+FullBlockClosure(BlockClosure)>>on:do:
+WorldMorph>>becomeActiveDuring:
+HandMorph>>sendFocusEvent:to:clear:
+HandMorph>>sendEvent:focus:clear:
+HandMorph>>sendMouseEvent:
+HandMorph>>handleEvent:
+[
+		(morphicWorld activeHand isNotNil and: [ anEvent hand isNotNil ]) ifTrue: [
+			morphicWorld activeHand handleEvent: anEvent
+		]
+	] in OSWindowMorphicEventHandler>>dispatchMorphicEvent:
+WorldState>>runStepMethodsIn:
+WorldMorph>>runStepMethods
+WorldState>>doOneCycleFor:
+WorldMorph>>doOneCycleNow
+WorldMorph>>doOneCycle
+[
+		| extraWorldsToDraw |
+		extraWorldsToDraw := ExtraWorldListMutex critical: [
+			                     self extraWorldList ].
+		extraWorldsToDraw do: [ :world | world doOneCycle ].
+
+		(self currentWorld isNotNil and: [
+			 (extraWorldsToDraw includes: self currentWorld) not ]) ifTrue: [
+			self currentWorld doOneCycle ] ] in WorldMorph class>>doOneCycle
+FullBlockClosure(BlockClosure)>>ensure:
+WorldState class>>doDrawCycleWith:
+WorldMorph class>>doOneCycle
+MorphicRenderLoop>>doOneCycle
+MorphicRenderLoop>>doOneCycleWhile:
+[ MorphicRenderLoop new doOneCycleWhile: [ true ] ] in MorphicUIManager>>spawnNewProcess
+[self value.
+			"IMPORTANT: Do not step over next line of code. See method comments for details"
+			Processor terminateRealActive] in FullBlockClosure(BlockClosure)>>newProcess
+-------------------------------------------------------------------------------
+
+THERE_BE_DRAGONS_HERE
+Instances of PP2Failure are not indexable
+13 November 2025 7:27:11.184022 pm
+
+VM: unix - x86_64 - linux-gnu - CoInterpreter VMMaker-tonel.1 uuid: 547c88ba-09f3-0d00-b124-98680be5cca3 Jun  3 2025
+StackToRegisterMappingCogit VMMaker-tonel.1 uuid: 547c88ba-09f3-0d00-b124-98680be5cca3 Jun  3 2025
+v10.3.5+0.be20a02 - Commit: be20a02 - Date: 2025-06-03 11:15:04 +0200
+
+Image: Pharo13.1.0SNAPSHOT [Build information: Pharo-13.1.0+SNAPSHOT.build.697.sha.af10a2ce70915e5076b7c9664f7851b9f7d95376 (64 Bit)]
+
+PP2Failure(Object)>>error:
+	Receiver: a PP2Failure: 'literal $y expected'
+	Arguments and temporary variables: 
+		aString: 	'Instances of PP2Failure are not indexable'
+	Receiver's instance variables: 
+		position: 	0
+		message: 	'literal $y expected'
+		context: 	a PP2InMemoryContext
+		debugResult: 	nil
+		parser: 	nil
+
+
+PP2Failure(Object)>>errorNotIndexable
+	Receiver: a PP2Failure: 'literal $y expected'
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		position: 	0
+		message: 	'literal $y expected'
+		context: 	a PP2InMemoryContext
+		debugResult: 	nil
+		parser: 	nil
+
+
+PP2Failure(Object)>>at:
+	Receiver: a PP2Failure: 'literal $y expected'
+	Arguments and temporary variables: 
+		index: 	1
+	Receiver's instance variables: 
+		position: 	0
+		message: 	'literal $y expected'
+		context: 	a PP2InMemoryContext
+		debugResult: 	nil
+		parser: 	nil
+
+
+Day17>>parse:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+		firstLine: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 [..]
+		xP: 	a PP2SequenceNode#177146880
+		intP: 	a PP2FlattenNode#896620544
+		yP: 	a PP2SequenceNode#609531648
+		result: 	nil
+		tmp: 	a PP2Failure: 'literal $y expected'
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+[ :line | 
+	res add: (self parse: line).
+	 ] in Day17>>parseLines:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		res: 	an OrderedCollection()
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+		line: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y 2 [..]
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+OrderedCollection>>do:
+	Receiver: an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $[..]
+	Arguments and temporary variables: 
+		aBlock: 	[ :line | 
+	res add: (self parse: line).
+	 ]
+		index: 	1
+	Receiver's instance variables: 
+		array: 	#(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y[..]
+		firstIndex: 	1
+		lastIndex: 	1
+
+
+Day17>>parseLines:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		res: 	an OrderedCollection()
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+Day17Test>>testParseLines
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		day: 	a Day17
+		pLines: 	nil
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+Day17Test(TestCase)>>performTest
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[
+		self setUp.
+		self performTest ] in [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [
+		self setUp.
+		self performTest ]
+	Arguments and temporary variables: 
+		aBlock: 	[ self tearDown ]
+		handler: 	[ self tearDown ]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tear[..]
+		compiledBlock: 	a CompiledBlock: [
+		self setUp.
+		self performTest ]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ]
+	Arguments and temporary variables: 
+		aBlock: 	[ self cleanUpInstanceVariables ]
+		handler: 	[ self cleanUpInstanceVariables ]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	Day17Test(TestCase)>>runCase
+		compiledBlock: 	a CompiledBlock: [ [
+		self setUp.
+		self performTest ]
+			e[..]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[aTestCase runCase] in [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [aTestCase runCase]
+	Arguments and temporary variables: 
+		aBlock: 	[
+			"Terminated test is not considered as completed (user just clo[..]
+		handler: 	[
+			"Terminated test is not considered as completed (user just cl[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not [..]
+		compiledBlock: 	a CompiledBlock: [aTestCase runCase]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>on:do:
+	Receiver: [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed ([..]
+	Arguments and temporary variables: 
+		exception: 	Exception
+		handlerAction: 	[ :err |
+			self handleException: err
+	]
+	Receiver's instance variables: 
+		outerContext: 	TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+		compiledBlock: 	a CompiledBlock: [
+		[aTestCase runCase] ensure: [
+			"Termi[..]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+[self runTestCaseUnderWatchdog: aTestCase] in TestExecutionEnvironment>>runTestCase:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [self runTestCaseUnderWatchdog: aTestCase]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		testCompleted := true.
+		watchDogSemaphore signal.  "signal tha[..]
+		handler: 	[
+		testCompleted := true.
+		watchDogSemaphore signal.  "signal th[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	TestExecutionEnvironment>>runTestCase:
+		compiledBlock: 	a CompiledBlock: [self runTestCaseUnderWatchdog: aTestCase]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+TestExecutionEnvironment>>runTestCase:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+[
+		testEnv runTestCase: aTestCase] in DefaultExecutionEnvironment>>runTestCase:
+	Receiver: a DefaultExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+		testEnv: 	a TestExecutionEnvironment
+	Receiver's instance variables: 
+a DefaultExecutionEnvironment
+
+[ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ] in CurrentExecutionEnvironment class>>activate:for:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		anExecutionEnvironment: 	a TestExecutionEnvironment
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+		current: 	a DefaultExecutionEnvironment
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		self value: current.
+		anExecutionEnvironment deactivated]
+		handler: 	[
+		self value: current.
+		anExecutionEnvironment deactivated]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	CurrentExecutionEnvironment class>>activate:for:
+		compiledBlock: 	a CompiledBlock: [ self value: anExecutionEnvironment.
+	anEx[..]
+		numArgs: 	0
+		receiver: 	CurrentExecutionEnvironment
+
+
+CurrentExecutionEnvironment class>>activate:for:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		anExecutionEnvironment: 	a TestExecutionEnvironment
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+		current: 	a DefaultExecutionEnvironment
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+TestExecutionEnvironment(ExecutionEnvironment)>>beActiveDuring:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+DefaultExecutionEnvironment>>runTestCase:
+	Receiver: a DefaultExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+		testEnv: 	a TestExecutionEnvironment
+	Receiver's instance variables: 
+a DefaultExecutionEnvironment
+
+CurrentExecutionEnvironment class>>runTestCase:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+Day17Test(TestCase)>>runCaseManaged
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	aTestCase announce: TestCaseEnded  withResult: self.
+	"To not affect performance of big test suites following logic is not inside addPass: method"
+	errors remove: aTestCase ifAbsent: [].
+	failures remove: aTestCase ifAbsent: [].
+	self addPass: aTestCase] in TestResult>>runCaseForDebug:
+	Receiver: 1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 error, 0 passed unexpected
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		timeStamp: 	2025-11-13T19:27:11.152984+00:00
+		failures: 	a Set()
+		errors: 	an OrderedCollection(Day17Test>>#testParseLines)
+		passed: 	an OrderedCollection()
+		skipped: 	an OrderedCollection()
+
+
+FullBlockClosure(BlockClosure)>>on:do:
+	Receiver: [
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	a[..]
+	Arguments and temporary variables: 
+		exception: 	an ExceptionSet
+		handlerAction: 	[:ex | ex sunitAnnounce: aTestCase toResult: self. ex pass]
+	Receiver's instance variables: 
+		outerContext: 	TestResult>>runCaseForDebug:
+		compiledBlock: 	a CompiledBlock: [
+	aTestCase announce: TestCaseStarted with[..]
+		numArgs: 	0
+		receiver: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 er[..]
+
+
+TestResult>>runCaseForDebug:
+	Receiver: 1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 error, 0 passed unexpected
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		timeStamp: 	2025-11-13T19:27:11.152984+00:00
+		failures: 	a Set()
+		errors: 	an OrderedCollection(Day17Test>>#testParseLines)
+		passed: 	an OrderedCollection()
+		skipped: 	an OrderedCollection()
+
+
+[ result runCaseForDebug: self ] in Day17Test(TestCase)>>debug
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		result: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 erro[..]
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	#()
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ result runCaseForDebug: self ]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		self classForTestResource resetResources: self resources.
+		res[..]
+		handler: 	[
+		self classForTestResource resetResources: self resources.
+		re[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	Day17Test(TestCase)>>debug
+		compiledBlock: 	a CompiledBlock: [ result runCaseForDebug: self ]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+Day17Test(TestCase)>>debug
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		result: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 erro[..]
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	#()
+
+
+Day17Test class(TestCase class)>>debug:
+	Receiver: Day17Test
+	Arguments and temporary variables: 
+		aSymbol: 	#testParseLines
+	Receiver's instance variables: 
+		superclass: 	TestCase
+		methodDict: 	a MethodDictionary(#testParse1->Day17Test>>#testParse1 #testPar[..]
+		format: 	65538
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (tests) - 3 selector(s))
+		subclasses: 	nil
+		name: 	#Day17Test
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	nil
+		packageTag: 	a PackageTag(Uncategorized)
+		history: 	a Dictionary(#errors->a Set(#testParseLines) #failures->a Set() #p[..]
+
+
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTest:of:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testSelector: 	#testParseLines
+		testClass: 	Day17Test
+		testResult: 	nil
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+[ :each |
+		self runTest: testSelector of: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testItem: 	a ClyDataSourceItem(parseLines:)
+		testSelector: 	#testParseLines
+		each: 	Day17Test
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+
+--- The full stack ---
+PP2Failure(Object)>>error:
+PP2Failure(Object)>>errorNotIndexable
+PP2Failure(Object)>>at:
+Day17>>parse:
+[ :line | 
+	res add: (self parse: line).
+	 ] in Day17>>parseLines:
+OrderedCollection>>do:
+Day17>>parseLines:
+Day17Test>>testParseLines
+Day17Test(TestCase)>>performTest
+[
+		self setUp.
+		self performTest ] in [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+FullBlockClosure(BlockClosure)>>ensure:
+[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+FullBlockClosure(BlockClosure)>>ensure:
+Day17Test(TestCase)>>runCase
+[aTestCase runCase] in [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+FullBlockClosure(BlockClosure)>>ensure:
+[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+FullBlockClosure(BlockClosure)>>on:do:
+TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+[self runTestCaseUnderWatchdog: aTestCase] in TestExecutionEnvironment>>runTestCase:
+FullBlockClosure(BlockClosure)>>ensure:
+TestExecutionEnvironment>>runTestCase:
+[
+		testEnv runTestCase: aTestCase] in DefaultExecutionEnvironment>>runTestCase:
+[ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ] in CurrentExecutionEnvironment class>>activate:for:
+FullBlockClosure(BlockClosure)>>ensure:
+CurrentExecutionEnvironment class>>activate:for:
+TestExecutionEnvironment(ExecutionEnvironment)>>beActiveDuring:
+DefaultExecutionEnvironment>>runTestCase:
+CurrentExecutionEnvironment class>>runTestCase:
+Day17Test(TestCase)>>runCaseManaged
+[
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	aTestCase announce: TestCaseEnded  withResult: self.
+	"To not affect performance of big test suites following logic is not inside addPass: method"
+	errors remove: aTestCase ifAbsent: [].
+	failures remove: aTestCase ifAbsent: [].
+	self addPass: aTestCase] in TestResult>>runCaseForDebug:
+FullBlockClosure(BlockClosure)>>on:do:
+TestResult>>runCaseForDebug:
+[ result runCaseForDebug: self ] in Day17Test(TestCase)>>debug
+FullBlockClosure(BlockClosure)>>ensure:
+Day17Test(TestCase)>>debug
+Day17Test class(TestCase class)>>debug:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTest:of:
+[ :each |
+		self runTest: testSelector of: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+ - - - - - - - - - - - - - - -
+			- - - - - - - - - - - - - - - - - -
+Array(SequenceableCollection)>>do:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+[:each | self runTestItem: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>execute
+Array(SequenceableCollection)>>do:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>execute
+ClyFullBrowserMethodContext(ClySystemBrowserContext)>>executeCommand:by:
+[self prepareCommandForExecution.
+	context executeCommand: command by: self.
+	self applyCommandResult] in CmdCommandActivator>>executeCommand
+FullBlockClosure(BlockClosure)>>on:do:
+CmdCommandActivator>>executeCommand
+[target perform: actionSelector withArguments: arguments] in IconicButtonMorph(SimpleButtonMorph)>>doButtonAction
+FullBlockClosure(BlockClosure)>>ensure:
+CursorWithMask(Cursor)>>showWhile:
+IconicButtonMorph(SimpleButtonMorph)>>doButtonAction
+IconicButtonMorph(SimpleButtonMorph)>>mouseUp:
+IconicButtonMorph(Morph)>>handleMouseUp:
+MouseButtonEvent>>sentTo:
+IconicButtonMorph(Morph)>>handleEvent:
+IconicButtonMorph(Morph)>>handleFocusEvent:
+[
+		result := focusHolder handleFocusEvent: transformedEvent.
+	] in HandMorph>>sendFocusEvent:to:clear:
+FullBlockClosure(BlockClosure)>>on:do:
+WorldMorph>>becomeActiveDuring:
+HandMorph>>sendFocusEvent:to:clear:
+HandMorph>>sendEvent:focus:clear:
+HandMorph>>sendMouseEvent:
+HandMorph>>handleEvent:
+[
+		(morphicWorld activeHand isNotNil and: [ anEvent hand isNotNil ]) ifTrue: [
+			morphicWorld activeHand handleEvent: anEvent
+		]
+	] in OSWindowMorphicEventHandler>>dispatchMorphicEvent:
+WorldState>>runStepMethodsIn:
+WorldMorph>>runStepMethods
+WorldState>>doOneCycleFor:
+WorldMorph>>doOneCycleNow
+WorldMorph>>doOneCycle
+[
+		| extraWorldsToDraw |
+		extraWorldsToDraw := ExtraWorldListMutex critical: [
+			                     self extraWorldList ].
+		extraWorldsToDraw do: [ :world | world doOneCycle ].
+
+		(self currentWorld isNotNil and: [
+			 (extraWorldsToDraw includes: self currentWorld) not ]) ifTrue: [
+			self currentWorld doOneCycle ] ] in WorldMorph class>>doOneCycle
+FullBlockClosure(BlockClosure)>>ensure:
+WorldState class>>doDrawCycleWith:
+WorldMorph class>>doOneCycle
+MorphicRenderLoop>>doOneCycle
+MorphicRenderLoop>>doOneCycleWhile:
+[ MorphicRenderLoop new doOneCycleWhile: [ true ] ] in MorphicUIManager>>spawnNewProcess
+[self value.
+			"IMPORTANT: Do not step over next line of code. See method comments for details"
+			Processor terminateRealActive] in FullBlockClosure(BlockClosure)>>newProcess
+-------------------------------------------------------------------------------
+
+THERE_BE_DRAGONS_HERE
+Instances of PP2Failure are not indexable
+13 November 2025 7:27:31.228739 pm
+
+VM: unix - x86_64 - linux-gnu - CoInterpreter VMMaker-tonel.1 uuid: 547c88ba-09f3-0d00-b124-98680be5cca3 Jun  3 2025
+StackToRegisterMappingCogit VMMaker-tonel.1 uuid: 547c88ba-09f3-0d00-b124-98680be5cca3 Jun  3 2025
+v10.3.5+0.be20a02 - Commit: be20a02 - Date: 2025-06-03 11:15:04 +0200
+
+Image: Pharo13.1.0SNAPSHOT [Build information: Pharo-13.1.0+SNAPSHOT.build.697.sha.af10a2ce70915e5076b7c9664f7851b9f7d95376 (64 Bit)]
+
+PP2Failure(Object)>>error:
+	Receiver: a PP2Failure: 'literal $y expected'
+	Arguments and temporary variables: 
+		aString: 	'Instances of PP2Failure are not indexable'
+	Receiver's instance variables: 
+		position: 	0
+		message: 	'literal $y expected'
+		context: 	a PP2InMemoryContext
+		debugResult: 	nil
+		parser: 	nil
+
+
+PP2Failure(Object)>>errorNotIndexable
+	Receiver: a PP2Failure: 'literal $y expected'
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		position: 	0
+		message: 	'literal $y expected'
+		context: 	a PP2InMemoryContext
+		debugResult: 	nil
+		parser: 	nil
+
+
+PP2Failure(Object)>>at:
+	Receiver: a PP2Failure: 'literal $y expected'
+	Arguments and temporary variables: 
+		index: 	1
+	Receiver's instance variables: 
+		position: 	0
+		message: 	'literal $y expected'
+		context: 	a PP2InMemoryContext
+		debugResult: 	nil
+		parser: 	nil
+
+
+Day17>>parse:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+		firstLine: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 [..]
+		xP: 	a PP2SequenceNode#431989248
+		intP: 	a PP2FlattenNode#876163584
+		yP: 	a PP2SequenceNode#386788608
+		result: 	nil
+		tmp: 	a PP2Failure: 'literal $y expected'
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+[ :line | 
+	res add: (self parse: line).
+	 ] in Day17>>parseLines:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		res: 	an OrderedCollection()
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+		line: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y 2 [..]
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+OrderedCollection>>do:
+	Receiver: an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $[..]
+	Arguments and temporary variables: 
+		aBlock: 	[ :line | 
+	res add: (self parse: line).
+	 ]
+		index: 	1
+	Receiver's instance variables: 
+		array: 	#(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y[..]
+		firstIndex: 	1
+		lastIndex: 	1
+
+
+Day17>>parseLines:
+	Receiver: a Day17
+	Arguments and temporary variables: 
+		aInput: 	#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 $y 3 7) #($x 498 $y [..]
+		res: 	an OrderedCollection()
+		lines: 	an OrderedCollection(#(#($x 495 $y 2 7) #($y 7 $x 495 501) #($x 501 [..]
+	Receiver's instance variables: 
+		pArray: 	nil
+		min_x: 	nil
+		max_x: 	nil
+		min_y: 	nil
+		max_y: 	nil
+		points: 	nil
+
+
+Day17Test>>testParseLines
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		day: 	a Day17
+		pLines: 	nil
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+Day17Test(TestCase)>>performTest
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[
+		self setUp.
+		self performTest ] in [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [
+		self setUp.
+		self performTest ]
+	Arguments and temporary variables: 
+		aBlock: 	[ self tearDown ]
+		handler: 	[ self tearDown ]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tear[..]
+		compiledBlock: 	a CompiledBlock: [
+		self setUp.
+		self performTest ]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ]
+	Arguments and temporary variables: 
+		aBlock: 	[ self cleanUpInstanceVariables ]
+		handler: 	[ self cleanUpInstanceVariables ]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	Day17Test(TestCase)>>runCase
+		compiledBlock: 	a CompiledBlock: [ [
+		self setUp.
+		self performTest ]
+			e[..]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+Day17Test(TestCase)>>runCase
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[aTestCase runCase] in [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [aTestCase runCase]
+	Arguments and temporary variables: 
+		aBlock: 	[
+			"Terminated test is not considered as completed (user just clo[..]
+		handler: 	[
+			"Terminated test is not considered as completed (user just cl[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not [..]
+		compiledBlock: 	a CompiledBlock: [aTestCase runCase]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>on:do:
+	Receiver: [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed ([..]
+	Arguments and temporary variables: 
+		exception: 	Exception
+		handlerAction: 	[ :err |
+			self handleException: err
+	]
+	Receiver's instance variables: 
+		outerContext: 	TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+		compiledBlock: 	a CompiledBlock: [
+		[aTestCase runCase] ensure: [
+			"Termi[..]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+[self runTestCaseUnderWatchdog: aTestCase] in TestExecutionEnvironment>>runTestCase:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [self runTestCaseUnderWatchdog: aTestCase]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		testCompleted := true.
+		watchDogSemaphore signal.  "signal tha[..]
+		handler: 	[
+		testCompleted := true.
+		watchDogSemaphore signal.  "signal th[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	TestExecutionEnvironment>>runTestCase:
+		compiledBlock: 	a CompiledBlock: [self runTestCaseUnderWatchdog: aTestCase]
+		numArgs: 	0
+		receiver: 	a TestExecutionEnvironment
+
+
+TestExecutionEnvironment>>runTestCase:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+[
+		testEnv runTestCase: aTestCase] in DefaultExecutionEnvironment>>runTestCase:
+	Receiver: a DefaultExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+		testEnv: 	a TestExecutionEnvironment
+	Receiver's instance variables: 
+a DefaultExecutionEnvironment
+
+[ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ] in CurrentExecutionEnvironment class>>activate:for:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		anExecutionEnvironment: 	a TestExecutionEnvironment
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+		current: 	a DefaultExecutionEnvironment
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		self value: current.
+		anExecutionEnvironment deactivated]
+		handler: 	[
+		self value: current.
+		anExecutionEnvironment deactivated]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	CurrentExecutionEnvironment class>>activate:for:
+		compiledBlock: 	a CompiledBlock: [ self value: anExecutionEnvironment.
+	anEx[..]
+		numArgs: 	0
+		receiver: 	CurrentExecutionEnvironment
+
+
+CurrentExecutionEnvironment class>>activate:for:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		anExecutionEnvironment: 	a TestExecutionEnvironment
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+		current: 	a DefaultExecutionEnvironment
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+TestExecutionEnvironment(ExecutionEnvironment)>>beActiveDuring:
+	Receiver: a TestExecutionEnvironment
+	Arguments and temporary variables: 
+		aBlock: 	[
+		testEnv runTestCase: aTestCase]
+	Receiver's instance variables: 
+		watchDogProcess: 	a Process in [self schedule.
+	"It is critical that the fol[..]
+		watchDogSemaphore: 	a Semaphore(a Process in [self schedule.
+	"It is critica[..]
+		testCase: 	Day17Test>>#testParseLines
+		maxTimeForTest: 	0:00:00:10
+		testCompleted: 	false
+		services: 	an OrderedCollection(a ProcessMonitorTestService)
+		mainTestProcess: 	a Process in nil
+
+
+DefaultExecutionEnvironment>>runTestCase:
+	Receiver: a DefaultExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+		testEnv: 	a TestExecutionEnvironment
+	Receiver's instance variables: 
+a DefaultExecutionEnvironment
+
+CurrentExecutionEnvironment class>>runTestCase:
+	Receiver: CurrentExecutionEnvironment
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		superclass: 	ProcessLocalVariable
+		methodDict: 	a MethodDictionary(#default->CurrentExecutionEnvironment>>#defa[..]
+		format: 	65537
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (accessing) - 1 selector(s) Protocol (inheriti[..]
+		subclasses: 	nil
+		name: 	#CurrentExecutionEnvironment
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	12805146
+		packageTag: 	a PackageTag(Processes)
+		soleInstance: 	a CurrentExecutionEnvironment
+
+
+Day17Test(TestCase)>>runCaseManaged
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+x
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	nil
+
+
+[
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	aTestCase announce: TestCaseEnded  withResult: self.
+	"To not affect performance of big test suites following logic is not inside addPass: method"
+	errors remove: aTestCase ifAbsent: [].
+	failures remove: aTestCase ifAbsent: [].
+	self addPass: aTestCase] in TestResult>>runCaseForDebug:
+	Receiver: 1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 error, 0 passed unexpected
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		timeStamp: 	2025-11-13T19:27:31.207287+00:00
+		failures: 	a Set()
+		errors: 	an OrderedCollection(Day17Test>>#testParseLines)
+		passed: 	an OrderedCollection()
+		skipped: 	an OrderedCollection()
+
+
+FullBlockClosure(BlockClosure)>>on:do:
+	Receiver: [
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	a[..]
+	Arguments and temporary variables: 
+		exception: 	an ExceptionSet
+		handlerAction: 	[:ex | ex sunitAnnounce: aTestCase toResult: self. ex pass]
+	Receiver's instance variables: 
+		outerContext: 	TestResult>>runCaseForDebug:
+		compiledBlock: 	a CompiledBlock: [
+	aTestCase announce: TestCaseStarted with[..]
+		numArgs: 	0
+		receiver: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 er[..]
+
+
+TestResult>>runCaseForDebug:
+	Receiver: 1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 error, 0 passed unexpected
+	Arguments and temporary variables: 
+		aTestCase: 	Day17Test>>#testParseLines
+	Receiver's instance variables: 
+		timeStamp: 	2025-11-13T19:27:31.207287+00:00
+		failures: 	a Set()
+		errors: 	an OrderedCollection(Day17Test>>#testParseLines)
+		passed: 	an OrderedCollection()
+		skipped: 	an OrderedCollection()
+
+
+[ result runCaseForDebug: self ] in Day17Test(TestCase)>>debug
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		result: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 erro[..]
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	#()
+
+
+FullBlockClosure(BlockClosure)>>ensure:
+	Receiver: [ result runCaseForDebug: self ]
+	Arguments and temporary variables: 
+		aBlock: 	[
+		self classForTestResource resetResources: self resources.
+		res[..]
+		handler: 	[
+		self classForTestResource resetResources: self resources.
+		re[..]
+		complete: 	nil
+		returnValue: 	nil
+	Receiver's instance variables: 
+		outerContext: 	Day17Test(TestCase)>>debug
+		compiledBlock: 	a CompiledBlock: [ result runCaseForDebug: self ]
+		numArgs: 	0
+		receiver: 	Day17Test>>#testParseLines
+
+
+Day17Test(TestCase)>>debug
+	Receiver: Day17Test>>#testParseLines
+	Arguments and temporary variables: 
+		result: 	1 ran, 0 passed, 0 skipped, 0 expected failures, 0 failures, 1 erro[..]
+	Receiver's instance variables: 
+		testSelector: 	#testParseLines
+		expectedFails: 	#()
+
+
+Day17Test class(TestCase class)>>debug:
+	Receiver: Day17Test
+	Arguments and temporary variables: 
+		aSymbol: 	#testParseLines
+	Receiver's instance variables: 
+		superclass: 	TestCase
+		methodDict: 	a MethodDictionary(#testParse1->Day17Test>>#testParse1 #testPar[..]
+		format: 	65538
+		layout: 	a FixedLayout
+		protocols: 	an Array(Protocol (tests) - 3 selector(s))
+		subclasses: 	nil
+		name: 	#Day17Test
+		classPool: 	nil
+		sharedPools: 	an OrderedCollection()
+		environment: 	a SystemEnvironment(lots of globals)
+		commentSourcePointer: 	nil
+		packageTag: 	a PackageTag(Uncategorized)
+		history: 	a Dictionary(#errors->a Set(#testParseLines) #failures->a Set() #p[..]
+
+
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTest:of:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testSelector: 	#testParseLines
+		testClass: 	Day17Test
+		testResult: 	nil
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+[ :each |
+		self runTest: testSelector of: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+	Receiver: a ClyRunCoveringTestMethodsCommand
+	Arguments and temporary variables: 
+		testItem: 	a ClyDataSourceItem(parseLines:)
+		testSelector: 	#testParseLines
+		each: 	Day17Test
+	Receiver's instance variables: 
+		testItems: 	an Array(a ClyDataSourceItem(parseLines:))
+		runTestCases: 	{Day17}
+
+
+
+--- The full stack ---
+PP2Failure(Object)>>error:
+PP2Failure(Object)>>errorNotIndexable
+PP2Failure(Object)>>at:
+Day17>>parse:
+[ :line | 
+	res add: (self parse: line).
+	 ] in Day17>>parseLines:
+OrderedCollection>>do:
+Day17>>parseLines:
+Day17Test>>testParseLines
+Day17Test(TestCase)>>performTest
+[
+		self setUp.
+		self performTest ] in [ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+FullBlockClosure(BlockClosure)>>ensure:
+[ [
+		self setUp.
+		self performTest ]
+			ensure: [ self tearDown ] ] in Day17Test(TestCase)>>runCase
+FullBlockClosure(BlockClosure)>>ensure:
+Day17Test(TestCase)>>runCase
+[aTestCase runCase] in [
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+FullBlockClosure(BlockClosure)>>ensure:
+[
+		[aTestCase runCase] ensure: [
+			"Terminated test is not considered as completed (user just closed a debugger for example)"
+			mainTestProcess isTerminating ifFalse: [
+				self handleCompletedTest ]]
+	] in TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+FullBlockClosure(BlockClosure)>>on:do:
+TestExecutionEnvironment>>runTestCaseUnderWatchdog:
+[self runTestCaseUnderWatchdog: aTestCase] in TestExecutionEnvironment>>runTestCase:
+FullBlockClosure(BlockClosure)>>ensure:
+TestExecutionEnvironment>>runTestCase:
+[
+		testEnv runTestCase: aTestCase] in DefaultExecutionEnvironment>>runTestCase:
+[ self value: anExecutionEnvironment.
+	anExecutionEnvironment activated.
+	aBlock value  ] in CurrentExecutionEnvironment class>>activate:for:
+FullBlockClosure(BlockClosure)>>ensure:
+CurrentExecutionEnvironment class>>activate:for:
+TestExecutionEnvironment(ExecutionEnvironment)>>beActiveDuring:
+DefaultExecutionEnvironment>>runTestCase:
+CurrentExecutionEnvironment class>>runTestCase:
+Day17Test(TestCase)>>runCaseManaged
+[
+	aTestCase announce: TestCaseStarted withResult: self.
+	aTestCase runCaseManaged.
+	aTestCase announce: TestCaseEnded  withResult: self.
+	"To not affect performance of big test suites following logic is not inside addPass: method"
+	errors remove: aTestCase ifAbsent: [].
+	failures remove: aTestCase ifAbsent: [].
+	self addPass: aTestCase] in TestResult>>runCaseForDebug:
+FullBlockClosure(BlockClosure)>>on:do:
+TestResult>>runCaseForDebug:
+[ result runCaseForDebug: self ] in Day17Test(TestCase)>>debug
+FullBlockClosure(BlockClosure)>>ensure:
+Day17Test(TestCase)>>debug
+Day17Test class(TestCase class)>>debug:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTest:of:
+[ :each |
+		self runTest: testSelector of: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+ - - - - - - - - - - - - - - -
+			- - - - - - - - - - - - - - - - - -
+Array(SequenceableCollection)>>do:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>runTestItem:
+[:each | self runTestItem: each ] in ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>execute
+Array(SequenceableCollection)>>do:
+ClyRunCoveringTestMethodsCommand(ClyRunTestsFromMethodsCommand)>>execute
+ClyFullBrowserMethodContext(ClySystemBrowserContext)>>executeCommand:by:
+[self prepareCommandForExecution.
+	context executeCommand: command by: self.
+	self applyCommandResult] in CmdCommandActivator>>executeCommand
+FullBlockClosure(BlockClosure)>>on:do:
+CmdCommandActivator>>executeCommand
+[target perform: actionSelector withArguments: arguments] in IconicButtonMorph(SimpleButtonMorph)>>doButtonAction
+FullBlockClosure(BlockClosure)>>ensure:
+CursorWithMask(Cursor)>>showWhile:
+IconicButtonMorph(SimpleButtonMorph)>>doButtonAction
+IconicButtonMorph(SimpleButtonMorph)>>mouseUp:
+IconicButtonMorph(Morph)>>handleMouseUp:
+MouseButtonEvent>>sentTo:
+IconicButtonMorph(Morph)>>handleEvent:
+IconicButtonMorph(Morph)>>handleFocusEvent:
+[
+		result := focusHolder handleFocusEvent: transformedEvent.
+	] in HandMorph>>sendFocusEvent:to:clear:
+FullBlockClosure(BlockClosure)>>on:do:
+WorldMorph>>becomeActiveDuring:
+HandMorph>>sendFocusEvent:to:clear:
+HandMorph>>sendEvent:focus:clear:
+HandMorph>>sendMouseEvent:
+HandMorph>>handleEvent:
+[
+		(morphicWorld activeHand isNotNil and: [ anEvent hand isNotNil ]) ifTrue: [
+			morphicWorld activeHand handleEvent: anEvent
+		]
+	] in OSWindowMorphicEventHandler>>dispatchMorphicEvent:
+WorldState>>runStepMethodsIn:
+WorldMorph>>runStepMethods
+WorldState>>doOneCycleFor:
+WorldMorph>>doOneCycleNow
+WorldMorph>>doOneCycle
+[
+		| extraWorldsToDraw |
+		extraWorldsToDraw := ExtraWorldListMutex critical: [
+			                     self extraWorldList ].
+		extraWorldsToDraw do: [ :world | world doOneCycle ].
+
+		(self currentWorld isNotNil and: [
+			 (extraWorldsToDraw includes: self currentWorld) not ]) ifTrue: [
+			self currentWorld doOneCycle ] ] in WorldMorph class>>doOneCycle
+FullBlockClosure(BlockClosure)>>ensure:
+WorldState class>>doDrawCycleWith:
+WorldMorph class>>doOneCycle
+MorphicRenderLoop>>doOneCycle
+MorphicRenderLoop>>doOneCycleWhile:
+[ MorphicRenderLoop new doOneCycleWhile: [ true ] ] in MorphicUIManager>>spawnNewProcess
+[self value.
+			"IMPORTANT: Do not step over next line of code. See method comments for details"
+			Processor terminateRealActive] in FullBlockClosure(BlockClosure)>>newProcess
+-------------------------------------------------------------------------------
+
