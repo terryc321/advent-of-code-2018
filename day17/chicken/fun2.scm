@@ -266,6 +266,7 @@ but both structurally exactly the same lists ? so how could it fail integrity ?
    (#t (let ((ch (hash-table-ref/default hash (list x y) #f)))
 	 (cond
 	  ((not ch) #t)
+	  ((char=? ch #\~) #t)
 	  (#t #f))))))
 
 
@@ -298,9 +299,12 @@ but both structurally exactly the same lists ? so how could it fail integrity ?
 
 ;; do we need more information ?
 ;; have a think ?
-;; see what works 
+;; see what works
 ;;
-
+;;
+;; (move input-hash) ... => 
+;; (move example-hash) ... => 
+;;
 (define (move hash)
   (let ((limits (hash-table-ref hash 'limits))
 	(counter -1))
@@ -321,7 +325,7 @@ but both structurally exactly the same lists ? so how could it fail integrity ?
 				(cond
 				 ((too-far? x y) #f)
 				 ((empty? x y)
-				  (waterfall! x y)
+				  (water! x y)
 				  (go-down x (+ y 1)))
 				 ((wall? x y)
 				  (go-left x (- y 1) x (- y 1)))
@@ -338,7 +342,7 @@ but both structurally exactly the same lists ? so how could it fail integrity ?
 				
 				(cond
 				 ((and (empty? x y) (empty? x (+ y 1))) ;; waterfall
-				  (waterfall! x y)
+				  (water! x y)
 				  (go-down x y) ;; once we finally return
 				  (go-right (+ x 1) y ox oy 'waterfall))
 				 ((and (empty? x y) (empty? x (+ y 1))) ;; on water
