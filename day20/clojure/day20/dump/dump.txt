@@ -1,0 +1,35 @@
+
+where good code comes to die 
+(parser "1 + 2 * 3")
+
+
+;; slurp file ?
+(def input (slurp "../../example.txt"))
+(def string-lines (clojure.string/split-lines input))
+(def data (map parser string-lines))
+
+(defn decode [filename]
+  (let [in (slurp filename)
+        string-lines (clojure.string/split-lines in)    
+        data (map parser string-lines)
+        data2 (map (fn [d] (let [[_ v1 s1 _ _ v2 s2 _ _ s3] d]
+                             (list ((fn [s] (cond (= s "x=") :x
+                                                  (= s "y=") :y
+                                                  true (throw "not found")))
+                                                    v1)
+                                   (Integer/parseInt s1)
+                                   ((fn [s] (cond (= s "x=") :x
+                                                  (= s "y=") :y
+                                                  true (throw "not found"))) v2)
+                                   (Integer/parseInt s2)
+                                   (Integer/parseInt s3)
+                                   ))) data)
+        ]
+    data2))
+
+
+(defn -main
+  "I don't do a whole lot ... yet."
+  [& args]
+  (println "Hello, World!"))
+

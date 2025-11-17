@@ -14,6 +14,7 @@ ip=6 [6, 5, 6, 0, 0, 0] seti 9 0 5 [6, 5, 6, 0, 0, 9]
 |#
 
 (import srfi-1)
+(import srfi-12)
 (import (chicken format))
 (import (chicken pretty-print))
 
@@ -121,10 +122,9 @@ b
 ;; anyways
 ;;
 
-(define (sim-real p *ip-bound*)
-  (let* ((pvec (list->vector p))
-	 (state (make-state))
-	 (lasti (vector-length pvec))
+(define (sim-real p *ip-bound* state)
+  (let* ((pvec (list->vector p))	 
+	 (lasti (- (vector-length pvec) 1))
 	 (exit #f)
 	 (ip 0)
 	 (last-state-index 5) ;; 6 item array zero index 0 1 2 - 3 4 5
@@ -139,7 +139,7 @@ b
 	       (during (lambda ()
 			 (leave (lambda () (or (< ip 0)(> ip lasti))))			 
 			 (let ((ins (vector-ref pvec ip)))
-			   (format #t " ~a " ins)
+			   ;; (format #t " ~a " ins)
 			   (if 
 			    (eq? (first ins) 'ip)
 			    (begin
@@ -191,22 +191,31 @@ b
 				     )))))))))
 	(call/cc (lambda (escape)
 		   (set! exit escape)
-		   (format #t "state => ~a " state)
+		   ;; (format #t "state => ~a " state)
 		   (before)
 		   (during)
 		   (after)
-		   (format #t "state => ~a ~%" state)		   
+		   ;; (format #t "state => ~a ~%" state)		   
 		   (loop)))))))
 
 	
 
 
 (define (run)    
-  (sim-real (cdr (example)) 0))
+  (let ((state (make-state)))
+    (sim-real (cdr (example)) 0 state)))
 
 
-(define (run2)    
-  (sim-real (cdr (input)) 2))
+
+(define (run2)
+  (let ((state (make-state)))
+    (call/cc (lambda (k)
+	       (with-exception-handler (lambda (x)
+					 (let ((out (vector-ref state 0)))
+					   (format #t "~%the value left in register 0 is : [ ~%a ] ~%" out)
+					   (k '())))
+				       (lambda () 
+					 (sim-real (cdr (input)) 2 state)))))))
 
 
 	      

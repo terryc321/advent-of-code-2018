@@ -1,0 +1,1 @@
+Object subclass: #Day20	instanceVariableNames: ''	classVariableNames: ''	package: 'Advent-Of-Code-2018'!Day20 class	instanceVariableNames: ''!
