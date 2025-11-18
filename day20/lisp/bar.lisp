@@ -19,9 +19,13 @@
 ;; (a|b|)  <- a / b / empty-slot!
 ;;
 
+;; input.txt - almost original
 ;; cropped version drop initial ^hat and $dollar ending and newlines
+;; adjusted.txt - translated |) => |?) using text editor
+;;
+
 (defparameter *input* 
-  (with-open-file (stream "cropped.txt")
+  (with-open-file (stream "adjusted.txt")
     (uiop:read-file-string stream)))
 
 ;; replaces |) with |?)
@@ -97,11 +101,12 @@
     ((eq (car (car xs)) 'char) (compress-chars-active xs (list (car xs))))
     (t (cons (car xs) (compress-chars (cdr xs))))))
 
+;;??
 (defun compress-chars-active (xs rv)
   (cond
     ((null xs) (list (list 'compress-chars (reverse rv))))
     ((eq (car (car xs)) 'char) (compress-chars-active xs (cons (car xs) rv)))
-    (t (cons (list 'compress-chars (compress-chars (cons (car xs) (compress-chars (cdr xs))))))
+    (t (cons (list 'compress-chars (compress-chars (cons (car xs) (compress-chars (cdr xs)))))))))
   
 
 
