@@ -16,13 +16,21 @@
 (require ['clj-antlr.core :as 'antlr])
 
 (def myparse (antlr/parser "grammars/Day20.g4"))
-;;(def myparse (antlr/parser "grammars/Day17.g4"))
+#_(def myparse (antlr/parser "grammars/Day17.g4"))
 
 ;; map myparse over list of inputs seems to quash the compiler in compiler mode
-(print (myparse "NSEW"))
-(def t (map myparse (list "NS(NSE|WSE)")))
+(myparse "NSEW")
+(myparse "NS(NSE|WSE)")
 
 (def s 3)
+
+(def input (slurp "../../input.txt"))
+;; removed |) to ) using text editor
+;;(def input (slurp "../../adjusted.txt"))
+
+
+(def pinput (myparse input))
+
 
 ;;(def s2 (myparse "x=581, y=396..399"))
 

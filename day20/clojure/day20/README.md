@@ -1,6 +1,22 @@
 # day20
 
-FIXME: description
+first task parse input
+
+realised if replace string on |) to ) simplified input
+then realised if replace | with blank space 
+and put ( ) at beginning and end 
+s expression with symbols that just need to be split apart into individual N S E W 
+
+OR  CAN we ?
+
+how difficult is it to write a parser ?
+```
+N S E W 
+   | 
+  a b  
+```
+
+
 
 ## Installation
 
