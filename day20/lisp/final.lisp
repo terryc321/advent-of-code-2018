@@ -344,6 +344,11 @@
 (defun save()
   (with-open-file (stream "output/tree.lisp" :direction :output :if-exists :supersede)
     (let ((*standard-output* stream))
+      (format t "~a~%" (car *output*)))))
+
+(defun save-gen()
+  (with-open-file (stream "output/generated.lisp" :direction :output :if-exists :supersede)
+    (let ((*standard-output* stream))
       (gen (car *output*))
       (format t "~%"))))
 
