@@ -19,8 +19,15 @@
 #_(def myparse (antlr/parser "grammars/Day17.g4"))
 
 ;; map myparse over list of inputs seems to quash the compiler in compiler mode
+(myparse "N")
+
+(myparse "N|E")
 (myparse "NSEW")
+(myparse "N(SEW)")
+
 (myparse "NS(NSE|WSE)")
+
+(myparse "N")
 
 (def s 3)
 
