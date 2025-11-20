@@ -59,34 +59,51 @@
 ;;      ((null? elems) nil)
 ;;      (#t (seq tree elems) ??))))
 
-  
 
+(define demo '(SEQ a (ALT (ALT b c) d) e))
 
 
 (define trav
-  (lambda (tree)
+  (lambda (t)
     (cond
-     ((symbol? tree)
+     ((symbol? t)
       (cond
-       ((eq? tree '?) (k pr))
-       (#t (k (cons tree pr)))))
-     ((pair? tree)
-      (let ((op (car tree)))
+       ((eq? t '?) "")
+       (#t (format #f "~a" t))))
+     ((pair? t)
+      (let ((op (car t)))
 	(cond
-	 ((equal? op 'SEQ)
-	  (format #t "sequence .~%")
-	  (trav-seq tree pr k))
-	 ((equal? op 'ALT)
-	  (format #t "alternate .~%")
-	  (trav-alt tree pr k))
+	 ((equal? op 'SEQ)	  
+	  (trav-seq t))
+	 ((equal? op 'ALT)	  
+	  (trav-alt t))
 	 (#t (error "unknwon")))))
      (#t (error "not symbol or pair .")))))
 
 
+(define (trav-seq t)  
+  (let ((es (cdr t))
+	(res '()))
+    (let loop ((es es))
+      (cond
+       ((null? es) (reverse res))
+       (#t (let ((e (car es)))
+	     (set! res (cons (trav e) res))
+	     (loop (cdr es))))))))
+	
 
+(define (trav-alt t)  
+  (let ((es (cdr t))
+	(res '()))
+    (let loop ((es es))
+      (cond
+       ((null? es) (reverse res))
+       (#t (let ((e (car es)))
+	     (set! res (cons (trav e) res))
+	     (loop (cdr es))))))))
+	
 
-
-
+(trav demo)
 
 
 
