@@ -1,6 +1,11 @@
+;; csc -O3 -o traverse traverse.scm
+;;
+;;
+;; chicken scheme
+(import (chicken format)) ;; format 
 
 (define (path)
-  (with-input-from-file "output/tree.lisp"
+  (with-input-from-file "tree.lisp"
     (lambda ()
       (read))))
 
@@ -110,44 +115,57 @@
 
 (define callbacks '())
 
-;; alternate path does not have an accumulator
+;; ;; alternate path does not have an accumulator
+;; (define (trav-alt t r k next)
+;;   ;; (format #t "alt: ~a " t)  
+;;   (let ((es (cdr t)))
+;;     (trav-alt2 es r k (lambda () #f))))
+;; (define (trav-alt2 es r k next)
+;;   ;; (format #t "alt2: ~a " es)
+;;   (cond
+;;    ((null? es) #f) 
+;;    (#t (let ((e (car es)))
+;; 	 (format #t "meeting => ~a ~%" e)	 
+;; 	 (trav e r 
+;; 	       (lambda (r2 next) ; ignore ? case for now
+;; 		     ;; handle ? case - empty string
+;; 		     (cond
+;; 		      ((and (pair? r2) (string? (car r2)) (string=? "" (car r2))) (k r))
+;; 		      (#t (k (append r r2) next))))
+;; 	       next)))))
+
 (define (trav-alt t r k next)
-  ;; (format #t "alt: ~a " t)  
-  (let ((es (cdr t)))
-    (trav-alt2 es r k next)))
+  (let loop ((alts (cdr t)))
+      (cond
+       ((null? alts) #f)
+       (#t (let ((alt (car alts)))
+	     ;; (format #t "trav-alt => {~a} : alts => {~a}~%" alt alts)
+	     (trav alt r (lambda (r2 next)
+			   (cond
+			    ((and (string? alt) (string=? "" (car alt)))
+			     (k r next))
+			    (#t
+			     (k (append r r2) next))))
+		   next)
+	     (loop (cdr alts)))))))
 
 
+    ;; ;; add this location onto callbacks
+    ;; (call/cc (lambda (return)
+    ;; 	       (set! callbacks (cons return callbacks))))
 
-(define (trav-alt2 es r k next)
-  ;; (format #t "alt2: ~a " es)
-  (cond
-   ((null? es) #f) 
-   (#t (let ((e (car es)))
-	 (trav e r
-	       (lambda (r2 next) ; ignore ? case for now
-		     ;; handle ? case - empty string
-		     (cond
-		      ((and (pair? r2) (string? (car r2)) (string=? "" (car r2))) (k r next))
-		      (#t (k (append r r2) next)))
-		     ;; (call/cc (lambda (next)
-		     ;; 		(k (append r r2))
-		     ;; 		(set! callbacks (cons next callbacks))))
-		     ;; (format #t "we resume here => ~%")
-		     (trav-alt2 (cdr es) r k next))
-	       next)
-	 ))))
 
+			     
 
 
 
 (define (run d)
-  ;;(format #t "input => ~a ~%" d)
-  ;;(set! callbacks '())
+  ;; (format #t "input => ~a ~%" d)
+  (set! callbacks '())
   (let ((tot 0))
     (trav d '() (lambda (r next)
-		  (format #t "r => ~a ~%" r)
 		  (set! tot (+ tot 1))
-		  (next))
+		  (format #t "r {~a} => ~a ~%" tot r))
 	  (lambda ()
 	    ;;(format #t "we are next !~%")
 	    #t
@@ -155,6 +173,15 @@
     ;;(format #t "there are ~a callbacks ~%" (length callbacks))
     (format #t "there were ~a in total ~%" tot)))
 
+
+(define (next)
+  (cond
+   ((null? callbacks) #f)
+   (#t (let ((top (car callbacks)))
+	 (set! callbacks (cdr callbacks))
+	 (cond
+	  ((procedure? top) (top #t))
+	  (#t (format #t "callback not a procedure!")))))))
 
 
   
@@ -175,7 +202,11 @@
 ;; (run demo2)
 ;; (run demo)
 
-#+(compile (run input))
+;; conditional 
+(run input)
+
+
+
 
 
 

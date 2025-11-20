@@ -17,3 +17,7 @@ traverse.scm - see if can produce a trace of each traversal
  chatgpt saying union for alternate clauses 
  
  
+traverse-k.scm
+
+traverse-k2.scm
+
