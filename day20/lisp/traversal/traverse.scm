@@ -15,6 +15,11 @@
 ;; as one alt route may lead down multiple alt routes 
 ;; 
 
+(define output-vector #f)
+
+(define (write-string s i)
+  (let ((n (+ i (string-length s))))
+    n))
 
 (define stack '())
 ;; (define (push! s x) (set! stack (cons x stack)))
@@ -74,6 +79,8 @@
 (define demo8 '(SEQ (ALT (ALT a b c) (ALT d e f)) (ALT g h) (ALT i ?)))
 (define demo9 '(ALT (ALT a) (ALT d)))
 (define demo10 '(SEQ (ALT (ALT a b) (ALT c d))))
+(define demo11 '(ALT ? a))
+(define demo12 '(SEQ A (ALT ? a) B))
 
 
 
@@ -154,8 +161,7 @@
     ;; (call/cc (lambda (return)
     ;; 	       (set! callbacks (cons return callbacks))))
 
-
-			     
+		     
 
 
 
@@ -164,8 +170,8 @@
   (set! callbacks '())
   (let ((tot 0))
     (trav d '() (lambda (r next)
-		  (set! tot (+ tot 1))
-		  (format #t "r {~a} => ~a ~%" tot r))
+		  (set! tot (+ tot 1))		  
+		    (format #t "r {~a} => {~a} ~% " tot r))
 	  (lambda ()
 	    ;;(format #t "we are next !~%")
 	    #t
@@ -203,7 +209,7 @@
 ;; (run demo)
 
 ;; conditional 
-(run input)
+;;(run input)
 
 
 

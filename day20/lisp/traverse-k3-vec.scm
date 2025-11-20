@@ -174,16 +174,22 @@
   (format #t "input => ~a ~%" d)
   (set! callbacks '())
   (let ((tot 0)
-	(i 0))
+	(i 0)
+	(db #t) ;;debug flag
+	)
     (trav d i (lambda (r next)
-		  (set! tot (+ tot 1))		  
-		    (format #t "r {~a} => {~a} ~% " tot r))
+		(set! tot (+ tot 1))
+		(cond
+		 (db (when (zero? (modulo tot 1000000))
+		       (format #t "r {~a} => {~a} ~% " tot r)))
+		 ((not db) #f)))
 	  (lambda ()
 	    ;;(format #t "we are next !~%")
 	    #t
 	    ))
     ;;(format #t "there are ~a callbacks ~%" (length callbacks))
     (format #t "there were ~a in total ~%" tot)))
+
 
 
 (define (next)

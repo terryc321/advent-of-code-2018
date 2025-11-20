@@ -1,6 +1,21 @@
 
 # Day20 Aoc2018
 
+# well ...
+
+parse tree is large for sure. 
+
+tried enumerating each path , just never stops ...
+
+furthest path ? and how many doors do need to get there . 
+
+keep track of locations reached.
+
+how determine furthest point if cant enumerate them all ; choose longest ?
+
+is most of this now getting to point of guessing ? rather than reasoning ?
+
+
 # Using the parse tree
 
 "?" meaning character does not move at all
