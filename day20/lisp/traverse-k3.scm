@@ -82,7 +82,7 @@
 (define demo11 '(ALT ? a))
 (define demo12 '(SEQ A (ALT ? a) B))
 
-
+(define example4 '(SEQ ENNWSWW (ALT NEWS ?) SSSEEN (ALT WNSE ?)EE( ALT SWEN ?) NNN ))
 
 
 
@@ -161,9 +161,14 @@
     ;; (call/cc (lambda (return)
     ;; 	       (set! callbacks (cons return callbacks))))
 
-		     
+
+(define (concat xs)
+  (let ((r ""))
+    (map (lambda (x) (set! r (string-append r (format #f "~a" x)))) xs)
+    r))
 
 
+(define *matches* '())
 
 (define (run d)
   (format #t "input => ~a ~%" d)
@@ -171,13 +176,32 @@
   (let ((tot 0))
     (trav d '() (lambda (r next)
 		  (set! tot (+ tot 1))		  
-		    (format #t "r {~a} => {~a} ~% " tot r))
+		  (format #t "r {~a} => {~a} ~% " tot (let ((conc (concat r)))
+							(set! *matches* (cons conc *matches*))
+							conc)))
 	  (lambda ()
 	    ;;(format #t "we are next !~%")
 	    #t
 	    ))
     ;;(format #t "there are ~a callbacks ~%" (length callbacks))
     (format #t "there were ~a in total ~%" tot)))
+
+
+(define (check-example-4)
+  (let ((puzzle '(SEQ ENNWSWW (ALT NEWS ?) SSSEEN (ALT WNSE ?) EE (ALT SWEN ?) NNN))
+	(proposed (list "ENNWSWWSSSEENEENNN"
+			"ENNWSWWNEWSSSSEENEENNN"
+			"ENNWSWWNEWSSSSEENEESWENNNN"
+			"ENNWSWWSSSEENWNSEEENNN")))
+    (run puzzle)
+    ;; *matches mutates*
+    (map (lambda (p) (if (member p *matches*) #t #f)) proposed)))
+
+
+
+    
+
+
 
 
 (define (next)
