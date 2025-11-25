@@ -4,6 +4,7 @@
 (import (chicken format)) ;; format 
 (import (chicken pretty-print)) 
 (import srfi-1)
+(import srfi-69)
 ;;(import bind)
 (import bindings) ;; destructuring
 
@@ -29,6 +30,66 @@
 ;; (defparameter *t4132* (seq *t1* *t2*))
 ;;
 ;;
+
+
+
+;; lack of control over record type unfortunate
+;; -- need the open doors +plus+ the final end points 
+;; (open-door! x y)
+;; (make-union)
+;; (union-points union)
+;; (union-add union pts)
+
+(define-record-type union
+  (make-union ht)
+  union?
+  (ht union-ht))
+
+;; (define (make-union)
+;;   (make-union (make-hash-table)))
+;; -
+
+(define (union-add un pts)
+  (let ((ht (union-ht un)))
+    (let loop ((pts pts))
+      (cond
+       ((null? pts) un)
+       (#t (let* ((pt (car pts))
+		  (found (hash-table-ref/default ht pt #f)))
+	     (cond
+	      (found #f)
+	      (#t (hash-table-set! ht pt #t))))
+	   (loop (cdr pts)))))))
+
+(define (union-points un)
+  (let ((ht (union-ht un)))
+    (hash-table-map ht (lambda (k v) k))))
+
+
+(define-record-printer (union rt out)
+  (fprintf out "#,(union ~s)"  (union-points rt)))
+
+
+#|
+
+(define foo (make-union (make-hash-table)))
+(set! union (union-add foo (list (make-point 1 2)(make-point 3 4)(make-point 5 6))))
+union
+(set! union (union-add foo (list (make-point 1 2)(make-point 3 4)(make-point 5 6))))
+union
+(union-points union)
+
+|#
+
+
+;; current no open doors 
+(define *doors* (make-hash-table))
+
+;; inserts key into *doors* hash table
+(define (open-door! x y)
+  (hash-table-set! *doors* (make-point x y) #t))
+
+
 
 (define-record-type point
   (make-point x y)
@@ -144,8 +205,10 @@
 	 (sym (string->symbol (format #f "t~a" id))))
 
     ;; ensure s is a string
-    
-    (format *stdout* "~%(set! ~a (lambda (pts) (map (lambda (pt) ~%" sym)
+    (format *stdout* "~%(loading)~%")
+    (format *stdout* "~%(set! ~a (lambda (pts) ~%" sym)
+    (format *stdout* "(report)~%")    
+    (format *stdout* " (map (lambda (pt) ~%" sym)
     (format *stdout* " (let ((x (point-x pt))(y (point-y pt))) ~%" sym)    
     (cond
      ((string=? s "?")  (format *stdout* ";; ? : nop ~%") #f)
@@ -154,10 +217,10 @@
 	(when (< i slen) ;; slen-1 is last character (0 indexing
 	(let ((ch (string-ref s i)))
 	  (cond
-	   ((char=? ch #\N) (format *stdout* "   (set! y (+ y 1)) (open-door x y) (set! y (+ y 1));; north ~%") (loop (+ i 1)))
-	   ((char=? ch #\S) (format *stdout* "   (set! y (- y 1)) (open-door x y) (set! y (- y 1));; south ~%") (loop (+ i 1)))
-	   ((char=? ch #\W) (format *stdout* "   (set! x (- x 1)) (open-door x y) (set! x (- x 1));; west ~%") (loop (+ i 1)))
-	   ((char=? ch #\E) (format *stdout* "   (set! x (+ x 1)) (open-door x y) (set! x (+ x 1));; east ~%") (loop (+ i 1)))
+	   ((char=? ch #\N) (format *stdout* "   (set! y (+ y 1)) (open-door! x y) (set! y (+ y 1));; north ~%") (loop (+ i 1)))
+	   ((char=? ch #\S) (format *stdout* "   (set! y (- y 1)) (open-door! x y) (set! y (- y 1));; south ~%") (loop (+ i 1)))
+	   ((char=? ch #\W) (format *stdout* "   (set! x (- x 1)) (open-door! x y) (set! x (- x 1));; west ~%") (loop (+ i 1)))
+	   ((char=? ch #\E) (format *stdout* "   (set! x (+ x 1)) (open-door! x y) (set! x (+ x 1));; east ~%") (loop (+ i 1)))
 	   (#t (error (format #f "trav2-str ch=~a error" ch)))))))))
     (format *stdout* "  (make-point x y))) pts)))~%")))
 
@@ -174,8 +237,10 @@
 	     (let ((out (trav2 elem)))
 	       (loop (cdr elems)))))))
     ;; 
+    (format *stdout* "~%(loading)~%")
     (format *stdout* "~%(set! ~a (lambda (pts) ~%" sym)
-    (format *stdout* " ;; seq node - iterative until sequence complete  ~%" sym)    
+    (format *stdout* " ;; seq node - iterative until sequence complete  ~%" sym)
+    (format *stdout* "(report)~%")    
     (let loop ((elems (node-leafs t)))
       (cond
        ((null? elems) #f)
@@ -195,21 +260,24 @@
 	     (let ((out (trav2 elem)))
 	       (loop (cdr elems)))))))
     ;; 
+    (format *stdout* "~%(loading)~%")
     (format *stdout* "~%(set! ~a (lambda (pts) ~%" sym)
     (format *stdout* " ;; alt node - union of generated points  ~%" sym)    
-    (format *stdout* "(let ((new-pts (make-union))) ~%" sym)
+    (format *stdout* "(report)~%")    
+    (format *stdout* "(let ((new-pts (make-union (make-hash-table)))) ~%" sym)
     (let loop ((elems (node-leafs t)))
       (cond
        ((null? elems) #f)
        (#t (let ((elem (car elems)))
 	     (format *stdout* " (set! new-pts (union-add new-pts (t~a pts)))~%" (node-id elem))
 	       (loop (cdr elems))))))
-    (format *stdout* " new-pts)))~%")))
+    (format *stdout* " (union-points new-pts))))~%")))
 
-
-  
-  
-
+;; -- need the open doors +plus+ the final end points 
+;; (open-door! x y)
+;; (make-union)
+;; (union-points union)
+;; (union-add union pts)
 ;; ===================================================================================
   
 ;; (define (go)
@@ -227,13 +295,20 @@
 
 (define (run)
   (set! *root* (trav input))
+    
   (let loop ((i 0))
     (format *stdout* "(define t~a #f)~%" i)
     (when (<= i *max-count*)
       (loop (+ i 1))))
-  (format *stdout* "(define open-door (lambda (x y) #t))~%")  
   (trav2 *root*))
 
+
+(define (go)
+  (call-with-output-file "lisp2-out.scm"
+    (lambda (port)
+      (set! *stdout* port)
+      (run)
+      (set! *stdout* #t))))
 
 
 

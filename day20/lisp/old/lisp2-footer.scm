@@ -1,0 +1,29 @@
+
+;; just run it - get idea of run time
+(run)
+
+;; report all open doors
+(call-with-output-file "lisp2-prog-open-doors.scm"
+  (lambda (port)
+    (format port "(define *open-doors* '("
+    (hash-table-for-each *doors* (lambda (k v)
+				   (format port "(~a ~a)~%" (point-x k) (point-y k))))
+    (format port "))~%"))))
+
+(format #t "recorded *open-doors* in lisp2-prog-open-doors.scm~%")
+
+;; 
+(call-with-output-file "lisp2-prog-end-points.scm"
+  (lambda (port)
+    (format port "(define *endpoints* '("
+	    (let loop ((pts *endpoints*))
+	      (cond
+	       ((null? pts) #f)
+	       (#t (let ((pt (car pts)))
+		     (format port "(~a ~a)~%" (point-x pt) (point-y pt))
+		     (loop (cdr pts)))))))
+    (format port "))~%")))
+
+(format #t "recorded *endpoints* in lisp2-prog-end-points.scm~%")
+
+    
