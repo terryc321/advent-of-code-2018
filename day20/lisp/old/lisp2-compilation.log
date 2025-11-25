@@ -1,0 +1,11 @@
+ (main) ~/code/advent-code/advent-of-code-2018/day20/lisp/old$ time bash build-lisp2-prog.sh
+compiling lisp2-prog
+(don't worry - still compiling...)
+compiled - now run lisp2-prog
+
+real    7m49.751s
+user    7m46.519s
+sys     0m2.878s
+ (main) ~/code/advent-code/advent-of-code-2018/day20/lisp/old$ 
+
+
