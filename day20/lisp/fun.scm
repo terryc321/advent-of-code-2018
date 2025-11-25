@@ -109,10 +109,39 @@
       (vector-set! v i (make-vector cols init)))))
 
 (define (array-ref2 a i j)
-  (vector-ref (vector-ref a i) j))
+  (vector-ref (vector-ref a (- j 1)) (- i 1)))
 
 (define (array-set2! a i j val)
-  (vector-set! (vector-ref a i) j val))
+  (vector-set! (vector-ref a (- j 1)) (- i 1) val))
+
+(define a (make-2d-array 3 4 #f))
+
+(array-set2! a 1 1 '(1 1))
+
+a
+
+(array-set2! a 3 4 '(3 4))
+
+a
+
+(array-set2! a 2 3 '(2 3))
+
+a
+
+
+(array-set2! a 2 1 '(2 1))
+
+a
+
+(array-set2! a 3 1 '(3 1))
+
+a
+
+(array-set2! a 3 2 '(3 2))
+
+a
+
+
 
 ;; ;; Interval from (1,1) to (10,10)
 ;; (define iv (make-interval '#(1 1) '#(11 11)))
@@ -126,26 +155,42 @@
 ;; (define a_ (array-getter a))
 ;; (define a! (array-setter a))
 
-(define *board-min-x* (second (assoc 'min-x *board-endpoints*)))
+(define *board-min-x*
+  (min (second (assoc 'min-x *board-endpoints*))
+       (second (assoc 'min-x *board-doors*))))
 
-(define *board-min-y* (second (assoc 'min-y *board-endpoints*)))
+(define *board-min-y*
+  (min (second (assoc 'min-y *board-endpoints*))
+       (second (assoc 'min-y *board-doors*))))
   
 
-(define *board-width* (+ 6 (abs (- (second (assoc 'min-x *board-endpoints*))
-				   (second (assoc 'max-x *board-endpoints*))))))
+(define *board-width* (+ 1 (max (abs (- (second (assoc 'min-x *board-endpoints*))
+					(second (assoc 'max-x *board-endpoints*))))
+				(abs (- (second (assoc 'min-x *board-doors*))
+					(second (assoc 'max-x *board-doors*)))))))
+				
 
-(define *board-height* (+ 6 (abs (- (second (assoc 'max-y *board-endpoints*))
-				    (second (assoc 'min-y *board-endpoints*))))))
+(define *board-height* (+ 1 (max (abs (- (second (assoc 'max-y *board-endpoints*))
+					 (second (assoc 'min-y *board-endpoints*))))
+				 (abs (- (second (assoc 'max-y *board-doors*))
+					 (second (assoc 'min-y *board-doors*)))))))
+			  			  
 
 
 ;; default to wall
 (define *board* (make-2d-array *board-width* *board-height* #\#))
+(define *board2* (make-2d-array *board-width* *board-height* #f))
+
+
 
 ;; translate any position (x,y) into zero based board coordinate (0,0) to (*board-width* - 1,*board-height* - 1)
-(define (translate-x x)  (+ x (abs *board-min-x*)))
+(define (translate-x x)  (+ 1 (+ x (abs *board-min-x*))))
 
-(define (translate-y y)  (+ y (abs *board-min-y*)))
+(define (translate-y y)  (+ 1 (+ y (abs *board-min-y*))))
 
+;; (* *board-width* *board-height*)
+;; 4967912
+;; ~ approx 5 million squares 
 
 ;; 0 0 start square is empty . - ie not a wall
 ;; walls # ... represented by #\#
@@ -168,38 +213,116 @@
 
 
 (define (populate-end-points)
+  (format #t "end points ... populating ...~%")      
   (letrec ((foo (lambda (xs)
 		  (cond
 		   ((null? xs) #f)
 		   (#t (let* ((pt (car xs))
 			      (x1 (first pt))
 			      (y1 (second pt))
-			      (x (translate-x x1))
-			      (y (translate-y y1)))
-			 (handle-exceptions exn (begin (format #t "pop end point ~a ~a failed : ~a ~a : ~a ~%" x1 y1 x y pt))
-			   (array-set2! *board* x y #\E)
-			   (foo (cdr xs)))))))))
-    (foo *endpoints*)))
+			      (x2 (translate-x x1))
+			      (y2 (translate-y y1)))
+			 ;; (handle-exceptions exn (begin (format #t "pop end point ~a ~a failed : ~a ~a : ~a ~%" x1 y1 x2 y2 pt))
+			 ;;(format #t "populating end point : x2 ~a : y2 ~a <= x1 ~a : y1 ~a ~%" x2 y2 x1 y1)
+			 (array-set2! *board* x2 y2 #\E)
+			 (foo (cdr xs))))))))
+    (foo *endpoints*)
+    (format #t "end points ... populated .~%").    
+    ))
+
+
 
 
 
 (define (populate-open-doors)
+  (format #t "open doors ... populating ...~%")      
   (letrec ((foo (lambda (xs)
 		  (cond
 		   ((null? xs) #f)
 		   (#t (let* ((pt (car xs))
-			      (x (translate-x (first pt)))
-			      (y (translate-y (second pt))))
-			 (handle-exceptions exn (begin (format #t "pop open doors ~a ~a failed ~%" x y))
-			   (array-set2! *board* x y #\_)
-			   (foo (cdr xs)))))))))
-    (foo *open-doors*)))
+			      (x1 (first pt))
+			      (y1 (second pt))
+			      (x2 (translate-x x1))
+			      (y2 (translate-y y1)))
+			 ;; (handle-exceptions exn (begin (format #t "pop open doors ~a ~a failed ~%" x y))
+			 ;;(format #t "populating open door point : x2 ~a : y2 ~a <= x1 ~a : y1 ~a ~%" x2 y2 x1 y1)
+			 (array-set2! *board* x2 y2 #\_)
+			 (foo (cdr xs))))))))
+    (foo *open-doors*)
+    (format #t "open doors ... populated .~%").
+    ))
 
 
 (populate-end-points)
 (populate-open-doors)
 
 *board*
+
+(define (sanity-check)
+  (let ((bd (make-2d-array *board-width* *board-height* #\#)))
+    (array-ref2 bd 2250 2204)))
+
+
+(define (sanity-check2)
+  (let ((bd (make-2d-array 4  5  #\#)))
+    (array-ref2 bd 3 4)))
+
+
+(define (show-all-board)
+  (format #t "~%~%")
+  (do ((y *board-min-y* (+ y 1)))
+      ((>= y (+ *board-min-y* (- *board-height* 3))) #f)
+    (format #t "~%")
+    (do ((x *board-min-x* (+ x 1)))
+	((>= x (+ *board-min-x* (- *board-width* 3))) #f)
+      (let* ((tx (translate-x x))
+	     (ty (translate-y y))
+	     (e (array-ref2 *board* tx ty)))
+	(cond
+	 ((and (= x 0) (= y 0)) (format #t "S"))
+	 (#t (format #t "~a" e))))))
+  (format #t "~%~%"))
+
+
+(define (show-board from-x wid from-y hgt)
+  (format #t "~%~%")
+  (do ((y from-y (+ y 1)))
+      ((>= y (+ from-y hgt)) #f)
+    (format #t "~%")
+    (do ((x from-x (+ x 1)))
+	((>= x (+ from-x wid)) #f)
+      (let* ((tx (translate-x x))
+	     (ty (translate-y y))
+	     (e (array-ref2 *board* tx ty)))
+	(cond
+	 ((and (= x 0) (= y 0)) (format #t "S"))
+	 (#t (format #t "~a" e))))))
+  (format #t "~%~%"))
+
+
+;; we can show a sub-region -- here we note that (0,0) is marked as the start position
+;; (show-board 0 5 0 5)
+;;
+;; S_E_E
+;; _#_#_
+;; E_E_E
+;; _#_#_
+;; E_E_E
+
+
+(define (copy-all-board!)
+  (do ((y (+ 1 *board-min-y*) (+ y 1)))
+      ((>= y (+ *board-min-y* (- *board-height* 2))) #f)
+    (do ((x (+ 1 *board-min-x*) (+ x 1)))
+	((>= x (+ *board-min-x* (- *board-width* 2))) #f)
+      (let* ((tx (translate-x x))
+	     (ty (translate-y y))
+	     (e (array-ref2 *board* tx ty)))
+	(array-set2! *board2* tx ty e)))))
+
+
+;; *board2* from *board*
+(copy-all-board!)
 
 
 
