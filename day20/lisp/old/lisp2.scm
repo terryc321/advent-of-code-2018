@@ -83,11 +83,16 @@ union
 
 
 ;; current no open doors 
-(define *doors* (make-hash-table))
+(define *side-doors* (make-hash-table))
+(define *trap-doors* (make-hash-table))
 
-;; inserts key into *doors* hash table
-(define (open-door! x y)
-  (hash-table-set! *doors* (make-point x y) #t))
+
+(define (open-side-door! x y)
+  (hash-table-set! *side-doors* (make-point x y) #t))
+
+(define (open-trap-door! x y)
+  (hash-table-set! *trap-doors* (make-point x y) #t))
+
 
 
 
@@ -217,10 +222,10 @@ union
 	(when (< i slen) ;; slen-1 is last character (0 indexing
 	(let ((ch (string-ref s i)))
 	  (cond
-	   ((char=? ch #\N) (format *stdout* "   (set! y (+ y 1)) (open-door! x y) (set! y (+ y 1));; north ~%") (loop (+ i 1)))
-	   ((char=? ch #\S) (format *stdout* "   (set! y (- y 1)) (open-door! x y) (set! y (- y 1));; south ~%") (loop (+ i 1)))
-	   ((char=? ch #\W) (format *stdout* "   (set! x (- x 1)) (open-door! x y) (set! x (- x 1));; west ~%") (loop (+ i 1)))
-	   ((char=? ch #\E) (format *stdout* "   (set! x (+ x 1)) (open-door! x y) (set! x (+ x 1));; east ~%") (loop (+ i 1)))
+	   ((char=? ch #\N) (format *stdout* "   (set! y (+ y 1)) (open-trap-door! x y) (set! y (+ y 1));; north ~%") (loop (+ i 1)))
+	   ((char=? ch #\S) (format *stdout* "   (set! y (- y 1)) (open-trap-door! x y) (set! y (- y 1));; south ~%") (loop (+ i 1)))
+	   ((char=? ch #\W) (format *stdout* "   (set! x (- x 1)) (open-side-door! x y) (set! x (- x 1));; west ~%") (loop (+ i 1)))
+	   ((char=? ch #\E) (format *stdout* "   (set! x (+ x 1)) (open-side-door! x y) (set! x (+ x 1));; east ~%") (loop (+ i 1)))
 	   (#t (error (format #f "trav2-str ch=~a error" ch)))))))))
     (format *stdout* "  (make-point x y))) pts)))~%")))
 
@@ -309,6 +314,13 @@ union
       (set! *stdout* port)
       (run)
       (set! *stdout* #t))))
+
+
+;; load lisp2.scm into chicken scheme
+;; (go)
+;; exit to shell
+;; bash build-lisp2-prog.sh
+;;  .... compilation takes about 10 minutes ...
 
 
 

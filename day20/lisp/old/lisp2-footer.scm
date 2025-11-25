@@ -3,14 +3,26 @@
 (run)
 
 ;; report all open doors
-(call-with-output-file "lisp2-prog-open-doors.scm"
+(call-with-output-file "lisp2-prog-side-doors.scm"
   (lambda (port)
-    (format port "(define *open-doors* '("
+    (format port "(define *side-doors* '(")
     (hash-table-for-each *doors* (lambda (k v)
 				   (format port "(~a ~a)~%" (point-x k) (point-y k))))
-    (format port "))~%"))))
+    (format port "))~%")))
 
-(format #t "recorded *open-doors* in lisp2-prog-open-doors.scm~%")
+(format #t "recorded *side-doors* in lisp2-prog-open-doors.scm~%")
+
+
+(call-with-output-file "lisp2-prog-trap-doors.scm"
+  (lambda (port)
+    (format port "(define *trap-doors* '(")
+    (hash-table-for-each *doors* (lambda (k v)
+				   (format port "(~a ~a)~%" (point-x k) (point-y k))))
+    (format port "))~%")))
+
+(format #t "recorded *trap-doors* in lisp2-prog-trap-doors.scm~%")
+
+
 
 ;; 
 (call-with-output-file "lisp2-prog-end-points.scm"

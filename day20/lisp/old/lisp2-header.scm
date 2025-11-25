@@ -25,13 +25,15 @@
 
 
 ;; current no open doors 
-(define *doors* (make-hash-table))
+(define *side-doors* (make-hash-table))
+(define *trap-doors* (make-hash-table))
 
-;; inserts key into *doors* hash table
-(define (open-door! x y)
-  ;; (format #t "door at ~a ~a is now open. ~%" x y)
-  (hash-table-set! *doors* (make-point x y) #t))
 
+(define (open-side-door! x y)
+  (hash-table-set! *side-doors* (make-point x y) #t))
+
+(define (open-trap-door! x y)
+  (hash-table-set! *trap-doors* (make-point x y) #t))
 
 
 (define-record-type point
