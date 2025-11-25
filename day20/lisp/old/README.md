@@ -21,3 +21,4 @@ traverse-k.scm
 
 traverse-k2.scm
 
+traverse-k4-linear.scm  - see if we can 

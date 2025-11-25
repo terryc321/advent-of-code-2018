@@ -14,6 +14,10 @@ traverse-k4-alt-count.scm there are 2054 alternative paths
 
 so that computation is not finishing any time soon
 
+presumably must be the longest path , 
+
+(ALT node) ultimately will become set of choices { XXX YYY ZZZ } ... 
+nest alts will be 
 
 # well ...
 
