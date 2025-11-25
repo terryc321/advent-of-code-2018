@@ -1,6 +1,12 @@
 
 # Day20 Aoc2018
 
+# progress
+
+overall picture of doors and end points - where can eventually end up - looks like a large oval , could be
+circle but we imaged it on emacs so may be some text distortion .
+
+
 # are we asking right questions 
 
 are we looking for the longest possible path ?

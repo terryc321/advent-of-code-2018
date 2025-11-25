@@ -40,18 +40,15 @@
 (defparameter *input*
   (concatenate 'string
 	       "("
-	       (let* ((str  (with-open-file (stream "adjusted.txt")
+	       (let* ((str  (with-open-file (stream "old/adjusted.txt")
 			      (uiop:read-file-string stream)))
 		      (len (length str)))
 		 (subseq str 0 (- len 2)))
 	       "))"))
 
-
-  
+ 
 
 ;; replaces |) with |?) so we have a token to get hold of 
-
-
 
 ;; (defun get-input()
 ;;   (with-
@@ -316,7 +313,7 @@
 
 
 (defun check-gen()
-  (with-open-file (stream "output/generated.txt" :direction :output :if-exists :supersede)
+  (with-open-file (stream "old/output/generated.txt" :direction :output :if-exists :supersede)
     (let ((*standard-output* stream))
       (gen (car *output*))
       (format t "~%"))))
@@ -326,8 +323,8 @@
   (let ((i 0)
 	(good 0)
 	(bad 0))
-    (with-open-file (stream "output/adjusted.txt" :direction :input)
-      (with-open-file (stream2 "output/generated.txt" :direction :input)
+    (with-open-file (stream "old/output/adjusted.txt" :direction :input)
+      (with-open-file (stream2 "old/output/generated.txt" :direction :input)
 	(loop while t do
 	  (let ((a (read-char stream))
 		(b (read-char stream2)))
@@ -342,7 +339,7 @@
 
 
 (defun save()
-  (with-open-file (stream "output/tree.lisp" :direction :output :if-exists :supersede)
+  (with-open-file (stream "old/output/tree.lisp" :direction :output :if-exists :supersede)
     (let ((*standard-output* stream))
       (gen (car *output*))
       (format t "~%"))))
@@ -358,17 +355,37 @@
     ;; 	      (let ((elem (nth i tree)))
     ;; 		(gen elem))))
     ;; 	   (t "what is this ==> ~a ?? ~%" (car tree)))))))
-
-
-
-
-;;(gen (run *input*))
-
-
-			      
+;;(gen (run *input*))	      
 ;;(map 'list (lambda (x) (format t "x = ~a ~%" (* x 2)) (* x 2)) '(1 2 3))		     
 
 
+#|
+1 - remove ^ and $ from start and end of regex
+2 - wrap examples in an implied sequence bracket set ( REGEX )
+3 - parse using own hand crafted recursive descent parser
+4 - dump out expression
+
+
+
+^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))$
+(run "(ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE))))")
+>>
+((SEQ "ESSWWN"
+  (SEQ (ALT "E" "NNENN")
+   (SEQ "EESS" (SEQ (ALT "WNSE" NIL)) (ALT "SSS" "WWWSSSSE")
+    (SEQ (ALT "SW" "NNNE"))))))
+
+
+
+^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$
+(run "WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))")
+>> 
+'((SEQ (ALT "S" "NENNEEEENN")
+      (SEQ "ESSSSW" (ALT (SEQ (ALT "NWSW" "SSEN")) "WSWWN")
+	   (SEQ (ALT "E" "WWS") (SEQ (ALT "E" "SS")))))
+ "WSSEESWWWNW")
+
+|#
 
 
 
