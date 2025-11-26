@@ -15,33 +15,44 @@
     (lambda (port)
       (second (third (read port))))))
 
-(define *open-doors*
-  (call-with-input-file "output/open-doors.scm"
+(define *side-doors*
+  (call-with-input-file "output/side-doors.scm"
     (lambda (port)
       (second (third (read port))))))
 
 
+(define *trap-doors*
+  (call-with-input-file "output/trap-doors.scm"
+    (lambda (port)
+      (second (third (read port))))))
+
+
+(define *min-x* 0)
+(define *max-x* 0)
+(define *min-y* 0)
+(define *max-y* 0)
+
 (define min-max
-  (let ((min-x 0)(max-x 0)(min-y 0)(max-y 0))
     (lambda (xs)
       (cond
-       ((null? xs) `((min-x ,min-x)
-		     (max-x ,max-x)
-		     (min-y ,min-y)
-		     (max-y ,max-y)))
+       ((null? xs) `((min-x ,*min-x*)
+		     (max-x ,*max-x*)
+		     (min-y ,*min-y*)
+		     (max-y ,*max-y*)))
        (#t (let* ((pt (car xs))
 		  (x (first pt))
 		  (y (second pt)))
-	     (when (< x min-x) (set! min-x x))
-	     (when (> x max-x) (set! max-x x))
-	     (when (< y min-y) (set! min-y y))
-	     (when (> y max-y) (set! max-y y))
-	     (min-max (cdr xs))))))))
+	     (when (< x *min-x*) (set! *min-x* x))
+	     (when (> x *max-x*) (set! *max-x* x))
+	     (when (< y *min-y*) (set! *min-y* y))
+	     (when (> y *max-y*) (set! *max-y* y))
+	     (min-max (cdr xs)))))))
 
 
 (define *board-endpoints* (min-max *endpoints*))
 
-(define *board-doors* (min-max *open-doors*))
+(define *board-side-doors* (min-max *side-doors*))
+(define *board-trap-doors* (min-max *trap-doors*))
 
 
 ;; electric-indent-mode disable
@@ -81,7 +92,7 @@
 ;;
 ;; > *board-endpoints*
 ;; (min-x=> -1166 max-x=> 1080 min-y=> -1030 max-y=> 1170)
-;; > *board-doors*
+;; > *board-side-doors*
 ;; (min-x=> -1166 max-x=> 1080 min-y=> -1032 max-y=> 1170)
 ;;
 ;; round down/up to nearest even square
@@ -159,24 +170,33 @@ a
 (define *board-min-x*
   (+ -1
      (min (second (assoc 'min-x *board-endpoints*))
-	  (second (assoc 'min-x *board-doors*)))))
+	  (second (assoc 'min-x *board-side-doors*))
+	  (second (assoc 'min-x *board-trap-doors*))
+	  )))
 
 (define *board-min-y*
   (+ -1 
      (min (second (assoc 'min-y *board-endpoints*))
-	  (second (assoc 'min-y *board-doors*)))))
+	  (second (assoc 'min-y *board-side-doors*))
+	  (second (assoc 'min-y *board-trap-doors*))
+	  )))
   
 
 (define *board-width* (+ 2 (max (abs (- (second (assoc 'min-x *board-endpoints*))
 					(second (assoc 'max-x *board-endpoints*))))
-				(abs (- (second (assoc 'min-x *board-doors*))
-					(second (assoc 'max-x *board-doors*)))))))
+				(abs (- (second (assoc 'min-x *board-side-doors*))
+					(second (assoc 'max-x *board-side-doors*))))
+				(abs (- (second (assoc 'min-x *board-trap-doors*))
+					(second (assoc 'max-x *board-trap-doors*)))))))
 				
 
 (define *board-height* (+ 2 (max (abs (- (second (assoc 'max-y *board-endpoints*))
 					 (second (assoc 'min-y *board-endpoints*))))
-				 (abs (- (second (assoc 'max-y *board-doors*))
-					 (second (assoc 'min-y *board-doors*)))))))
+				 (abs (- (second (assoc 'max-y *board-side-doors*))
+					 (second (assoc 'min-y *board-side-doors*))))
+				 (abs (- (second (assoc 'max-y *board-trap-doors*))
+					 (second (assoc 'min-y *board-trap-doors*)))))))
+
 			  			  
 (define *board-max-x* (+ -1 *board-min-x* *board-width*))
 (define *board-max-y* (+ -1 *board-min-y* *board-height*))
@@ -244,8 +264,8 @@ a
 
 
 
-(define (populate-open-doors)
-  (format #t "open doors ... populating ...~%")      
+(define (populate-trap-doors)
+  (format #t "trap doors ... populating ...~%")      
   (letrec ((foo (lambda (xs)
 		  (cond
 		   ((null? xs) #f)
@@ -258,13 +278,37 @@ a
 			 ;;(format #t "populating open door point : x2 ~a : y2 ~a <= x1 ~a : y1 ~a ~%" x2 y2 x1 y1)
 			 (array-set2! *board* x2 y2 #\_)
 			 (foo (cdr xs))))))))
-    (foo *open-doors*)
-    (format #t "open doors ... populated .~%").
+    (foo *trap-doors*)
+    (format #t "trap doors ... populated .~%")
+    ))
+
+(define (populate-side-doors)
+  (format #t "side doors ... populating ...~%")      
+  (letrec ((foo (lambda (xs)
+		  (cond
+		   ((null? xs) #f)
+		   (#t (let* ((pt (car xs))
+			      (x1 (first pt))
+			      (y1 (second pt))
+			      (x2 (translate-x x1))
+			      (y2 (translate-y y1)))
+			 ;; (handle-exceptions exn (begin (format #t "pop open doors ~a ~a failed ~%" x y))
+			 ;;(format #t "populating open door point : x2 ~a : y2 ~a <= x1 ~a : y1 ~a ~%" x2 y2 x1 y1)
+			 (cond
+			  ((equal? (array-ref2 *board* x2 y2) #\_ ) (format #t "collision trap doors + side doors at ~a ~a~%" x2 y2))
+			  (#t (array-set2! *board* x2 y2 #\| )))
+			 (foo (cdr xs))))))))
+    (foo *side-doors*)
+    (format #t "side doors ... populated .~%")
     ))
 
 
+
+
 (populate-end-points)
-(populate-open-doors)
+(populate-trap-doors)
+(populate-side-doors)
+
 
 *board*
 
@@ -289,9 +333,11 @@ a
 	     (ty (translate-y y))
 	     (e (array-ref2 bd tx ty)))
 	(cond
-	 ((and (= x 0) (= y 0)) (format #t "S"))
+	 ((and (= x 0) (= y 0)) (format #t "X"))
 	 (#t (format #t "~a" e))))))
   (format #t "~%~%"))
+
+
 
 
 (define (show-board bd from-x wid from-y hgt)
@@ -305,7 +351,7 @@ a
 	     (ty (translate-y y))
 	     (e (array-ref2 bd tx ty)))
 	(cond
-	 ((and (= x 0) (= y 0)) (format #t "S"))
+	 ((and (= x 0) (= y 0)) (format #t "X"))
 	 (#t (format #t "~a" e))))))
   (format #t "~%~%"))
 
@@ -504,6 +550,22 @@ a
 ;; 1706 ??
 ;; still too low
 
+;; count number of E's endpoints in the *board*
+
+(define (count-endpoints bd)
+  (let ((ecount 0))
+    (do ((y *board-min-y* (+ y 1)))
+	((>= y (+ *board-min-y* *board-height*)) #f)
+      (do ((x *board-min-x* (+ x 1)))
+	  ((>= x (+ *board-min-x* *board-width*)) #f)
+	(let* ((tx (translate-x x))
+	       (ty (translate-y y))
+	       (e (array-ref2 bd tx ty)))
+	  (cond
+	   ((and (= x 0) (= y 0)) (format #t "X"))
+	   ((equal? e #\E) (set! ecount (+ 1 ecount)))
+	   (#t #f)))))
+    ecount))
 
 
 
