@@ -1,4 +1,20 @@
 
+# Increment step counter from start position X 
+
+global *step-counter* initially 0
+
+every letter we consume - increase step counter 
+the coordinate we reach - compared to global hash table for that location 
+and the optimum step counter is entered
+
+this will then track every square we ever went over
+
+so we do not explicitly need to track the location of the doors , 
+but since we already have that functionality it 
+
+
+
+
 # Generate trap-doors side-doors data
 
 ```

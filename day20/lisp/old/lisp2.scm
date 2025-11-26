@@ -222,10 +222,10 @@ union
 	(when (< i slen) ;; slen-1 is last character (0 indexing
 	(let ((ch (string-ref s i)))
 	  (cond
-	   ((char=? ch #\N) (format *stdout* "   (set! y (+ y 1)) (open-trap-door! x y) (set! y (+ y 1));; north ~%") (loop (+ i 1)))
-	   ((char=? ch #\S) (format *stdout* "   (set! y (- y 1)) (open-trap-door! x y) (set! y (- y 1));; south ~%") (loop (+ i 1)))
-	   ((char=? ch #\W) (format *stdout* "   (set! x (- x 1)) (open-side-door! x y) (set! x (- x 1));; west ~%") (loop (+ i 1)))
-	   ((char=? ch #\E) (format *stdout* "   (set! x (+ x 1)) (open-side-door! x y) (set! x (+ x 1));; east ~%") (loop (+ i 1)))
+	   ((char=? ch #\N) (format *stdout* "   (set! y (+ y 1)) (open-trap-door! x y) (set! y (+ y 1)) (set! *step-count* (+ 1 *step-count*)) (mark-square! x y *step-count*)    ;; north ~%") (loop (+ i 1)))
+	   ((char=? ch #\S) (format *stdout* "   (set! y (- y 1)) (open-trap-door! x y) (set! y (- y 1)) (set! *step-count* (+ 1 *step-count*)) (mark-square! x y *step-count*)    ;; south ~%") (loop (+ i 1)))
+	   ((char=? ch #\W) (format *stdout* "   (set! x (- x 1)) (open-side-door! x y) (set! x (- x 1)) (set! *step-count* (+ 1 *step-count*)) (mark-square! x y *step-count*)    ;; west ~%") (loop (+ i 1)))
+	   ((char=? ch #\E) (format *stdout* "   (set! x (+ x 1)) (open-side-door! x y) (set! x (+ x 1)) (set! *step-count* (+ 1 *step-count*)) (mark-square! x y *step-count*)    ;; east ~%") (loop (+ i 1)))
 	   (#t (error (format #f "trav2-str ch=~a error" ch)))))))))
     (format *stdout* "  (make-point x y))) pts)))~%")))
 
@@ -245,6 +245,7 @@ union
     (format *stdout* "~%(loading)~%")
     (format *stdout* "~%(set! ~a (lambda (pts) ~%" sym)
     (format *stdout* " ;; seq node - iterative until sequence complete  ~%" sym)
+    (format *stdout* " ;; simply leave *step-count* to increment at its own volition  ~%")    
     (format *stdout* "(report)~%")    
     (let loop ((elems (node-leafs t)))
       (cond
@@ -267,15 +268,18 @@ union
     ;; 
     (format *stdout* "~%(loading)~%")
     (format *stdout* "~%(set! ~a (lambda (pts) ~%" sym)
-    (format *stdout* " ;; alt node - union of generated points  ~%" sym)    
+    (format *stdout* " ;; alt node - union of generated points  ~%" sym)
+    (format *stdout* " ;; we need to record global *step-count* and reset it to original value every alternate leg we explore ~%")    
     (format *stdout* "(report)~%")    
-    (format *stdout* "(let ((new-pts (make-union (make-hash-table)))) ~%" sym)
+    (format *stdout* "(let ((new-pts (make-union (make-hash-table))) ~%" sym)
+    (format *stdout* "      (original-step-count *step-count*))~%")    
     (let loop ((elems (node-leafs t)))
       (cond
        ((null? elems) #f)
        (#t (let ((elem (car elems)))
+	     (format *stdout* " (set! *step-count* original-step-count)~%")
 	     (format *stdout* " (set! new-pts (union-add new-pts (t~a pts)))~%" (node-id elem))
-	       (loop (cdr elems))))))
+	     (loop (cdr elems))))))
     (format *stdout* " (union-points new-pts))))~%")))
 
 ;; -- need the open doors +plus+ the final end points 

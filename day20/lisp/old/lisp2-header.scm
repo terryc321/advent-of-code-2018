@@ -24,6 +24,24 @@
   (format #t "running node ~a / ~a ~%" (begin (set! *run-count* (+ 1 *run-count*)) *run-count*) *max-count*))
 
 
+;; each step we take gets entered into this hash table
+;; initially at start position - we have taken no steps
+;; the coordinate uses aoc 2 step for movement - then we can record the door
+;; orientation .
+;; checked after compilation that there is indeed no door that is orientated
+;; in both directions.
+(define *step-count* 0) 
+(define *step-hash* (make-hash-table))
+
+;; if we find a lower value n at x y - mark this square - otherwise continue nop
+(define (mark-square! x y n)
+  (let ((out (hash-table-ref/default *step-hash* (list x y) #f)))
+    (when
+	(or (not out)
+	    (and (integer? out) (< n out)))
+      (hash-table-set! *step-hash* (list x y) n))))
+
+
 ;; current no open doors 
 (define *side-doors* (make-hash-table))
 (define *trap-doors* (make-hash-table))
