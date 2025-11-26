@@ -6,7 +6,7 @@
 (call-with-output-file "lisp2-prog-side-doors.scm"
   (lambda (port)
     (format port "(define *side-doors* '(")
-    (hash-table-for-each *doors* (lambda (k v)
+    (hash-table-for-each *side-doors* (lambda (k v)
 				   (format port "(~a ~a)~%" (point-x k) (point-y k))))
     (format port "))~%")))
 
@@ -16,7 +16,7 @@
 (call-with-output-file "lisp2-prog-trap-doors.scm"
   (lambda (port)
     (format port "(define *trap-doors* '(")
-    (hash-table-for-each *doors* (lambda (k v)
+    (hash-table-for-each *trap-doors* (lambda (k v)
 				   (format port "(~a ~a)~%" (point-x k) (point-y k))))
     (format port "))~%")))
 
