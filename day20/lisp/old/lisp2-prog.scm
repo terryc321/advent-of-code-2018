@@ -11,6 +11,72 @@
 (define *endpoints* #f)
 
 
+(define (make-2d-array cols rows  init)
+  (let ((v (make-vector rows)))
+    (do ((i 0 (+ i 1)))
+        ((= i rows) v)
+      (vector-set! v i (make-vector cols init)))))
+
+(define (array-ref2 a i j)
+  (vector-ref (vector-ref a (- j 1)) (- i 1)))
+
+(define (array-set2! a i j val)
+  (vector-set! (vector-ref a (- j 1)) (- i 1) val))
+
+(define *step-array* (make-2d-array 2400 2400 #f))
+
+;; each step we take gets entered into this hash table
+;; initially at start position - we have taken no steps
+;; the coordinate uses aoc 2 step for movement - then we can record the door
+;; orientation .
+;; checked after compilation that there is indeed no door that is orientated
+;; in both directions.
+(define *step-count* 0)
+;; rather *step-hash* use a literal big array - how big ?
+;; we can simply run though the 
+;; (define *step-hash* (make-hash-table))
+
+;; if we find a lower value n at x y - mark this square - otherwise continue nop
+;; hopefully we dont choke with out of bounds !
+(define (verify-step-array)
+  (format #t "*step-array* read and write test ... ")
+  (do ((y 1 (+ y 1)))
+      ((>= y 2400) #f)
+    (do ((x 1 (+ x 1)))
+	((>= x 2400) #f)
+      (let ((out (array-ref2 *step-array* x y)))
+	(array-set2! *step-array* x y #f))))
+  ;; we passed if we reach this far
+  (format #t "passed ~%"))
+
+
+;; activate the check !
+(verify-step-array)
+
+
+;; real coordinate (0,0) ...... becomes (1200,1200) in ARRAY encoding
+;;                        <<<..... decoding we need subtract 1200,1200
+(define (translate-in-x x)  (+ x 1200))
+(define (translate-in-y y)  (+ y 1200))
+(define (translate-out-x x)  (- x 1200))
+(define (translate-out-y y)  (- y 1200))
+
+
+(define (mark-square! x y n)
+  (let* ((tx (translate-in-x x))
+	 (ty (translate-in-y y))
+	 (out (array-ref2 *step-array* tx ty)))
+    (when
+	(or (not out)
+	    (and (integer? out) (< n out)))
+      ;; (format #t "marking square ~a ~a with ~a : writing array at ~a ~a ~%" x y n tx ty)
+      ;; (when (> n 30)
+      ;; 	(format #t "enter something to continue ...~%")
+      ;; 	(read))
+      (array-set2! *step-array* tx ty n))))
+
+
+
 (define id
   (let ((count 0))
     (lambda ()
@@ -23,23 +89,6 @@
 (define (report)
   (format #t "running node ~a / ~a ~%" (begin (set! *run-count* (+ 1 *run-count*)) *run-count*) *max-count*))
 
-
-;; each step we take gets entered into this hash table
-;; initially at start position - we have taken no steps
-;; the coordinate uses aoc 2 step for movement - then we can record the door
-;; orientation .
-;; checked after compilation that there is indeed no door that is orientated
-;; in both directions.
-(define *step-count* 0) 
-(define *step-hash* (make-hash-table))
-
-;; if we find a lower value n at x y - mark this square - otherwise continue nop
-(define (mark-square! x y n)
-  (let ((out (hash-table-ref/default *step-hash* (list x y) #f)))
-    (when
-	(or (not out)
-	    (and (integer? out) (< n out)))
-      (hash-table-set! *step-hash* (list x y) n))))
 
 
 ;; current no open doors 
@@ -59161,14 +59210,18 @@
 (format #t "recorded *trap-doors* in ../output/trap-doors.scm~%")
 
 
-(call-with-output-file "../output/step-hash.scm"
+(call-with-output-file "../output/step-array.scm"
   (lambda (port)
-    (format port "(define *step-hash* '(")
-    (hash-table-for-each *step-hash* (lambda (k v)
-				   (format port "(~a ~a)~%" k v)))
+    (format port "(define *step-array* '(")
+    (do ((y 0 (+ y 1)))
+	((>= y 2399) #f)
+      (do ((x 0 (+ x 1)))
+	  ((>= x 2399) #f)
+	(let ((tx (translate-out-x x))
+	      (ty (translate-out-y y)))
+	  (format port "(~a ~a ~a)~%" x y (array-ref2 *step-array* tx ty)))))
     (format port "))~%")))
-(format #t "recorded *step-hash* in ../output/step-hash.scm~%")
-
+(format #t "recorded *step-array* in ../output/step-array.scm~%")
 
  
 (call-with-output-file "../output/end-points.scm"

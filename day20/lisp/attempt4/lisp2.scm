@@ -229,7 +229,7 @@
 		 (cy (translate-out-y y)))
 	    (cond
 	     ((not val) #f) 
-	     (#t (format port "(~a ~a #\~a)~%" cx cy val))))))
+	     (#t (format port "(~a ~a ~a~a)~%" cx cy "#\\" val))))))
       (format port "))~%")))
   (format #t "board data written ...~%"))
 

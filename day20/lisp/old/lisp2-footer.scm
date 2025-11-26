@@ -21,14 +21,18 @@
 (format #t "recorded *trap-doors* in ../output/trap-doors.scm~%")
 
 
-(call-with-output-file "../output/step-hash.scm"
+(call-with-output-file "../output/step-array.scm"
   (lambda (port)
-    (format port "(define *step-hash* '(")
-    (hash-table-for-each *step-hash* (lambda (k v)
-				   (format port "(~a ~a)~%" k v)))
+    (format port "(define *step-array* '(")
+    (do ((y 0 (+ y 1)))
+	((>= y 2399) #f)
+      (do ((x 0 (+ x 1)))
+	  ((>= x 2399) #f)
+	(let ((tx (translate-out-x x))
+	      (ty (translate-out-y y)))
+	  (format port "(~a ~a ~a)~%" x y (array-ref2 *step-array* tx ty)))))
     (format port "))~%")))
-(format #t "recorded *step-hash* in ../output/step-hash.scm~%")
-
+(format #t "recorded *step-array* in ../output/step-array.scm~%")
 
  
 (call-with-output-file "../output/end-points.scm"
