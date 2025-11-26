@@ -10,7 +10,7 @@
 				   (format port "(~a ~a)~%" (point-x k) (point-y k))))
     (format port "))~%")))
 
-(format #t "recorded *side-doors* in lisp2-prog-open-doors.scm~%")
+(format #t "recorded *side-doors* in lisp2-prog-side-doors.scm~%")
 
 
 (call-with-output-file "lisp2-prog-trap-doors.scm"
