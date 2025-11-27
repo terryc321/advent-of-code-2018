@@ -221,20 +221,25 @@
 	     (set! accumulator (cons (list (+ x -2) y) accumulator))))
 	 
 	 ;; next candidate
-	 (bfs-help (cdr working) accumulator)))))
+	 (bfs-help (cdr working) accumulator step)))))
+
+
 
 
 ;; using intermediate procedure so we can report on progress to user
 (define (bfs-transition working step)
   (let ((next (+ step 1)))
-    (format #t "bfs transition to step ~a : size working list ~a ~%" next (length working))
+    (format2 #t "bfs line 232 : transition to step ~a : size working list ~a ~%" next (length working))
     (bfs-help working '() next)))
 
 
 (define (bfs)
   (let ((x 0)(y 0)(step 0))
-    (mark-board! *board* x y step)  
-    (bfs-help (list (list x y)) '() (+ step 1))))
+    (mark-board! *board* x y step)
+    (format2 #t "bfs line 239 ~%")
+    (bfs-help (list (list x y))
+	      '()
+	      (+ step 1))))
 
 
 (define (find-highest)
@@ -243,13 +248,11 @@
 	((>= y 2400) #f)
       (do ((x 1 (+ x 1)))
 	  ((>= x 2400) #f)
-	(let* ((val (array-ref2 *score* x y)))
+	(let* ((val (array-ref2 *board* x y)))
 	  (cond
-	   ((not val) #f) ;; a wall
-	   ((> val highest)
+	   ((and (integer? val) (> val highest))
 	    (set! highest val)
-	    (set! highest-pt (list x y '=> (translate-out-x x) (translate-out-y y))))
-	   (#t #f)))))
+	    (set! highest-pt (list x y '=> (translate-out-x x) (translate-out-y y))))))))
     (format2 #t "the highest was ( ~a ) and found at location ( ~a ) ~%"
 	    highest
 	    highest-pt)
