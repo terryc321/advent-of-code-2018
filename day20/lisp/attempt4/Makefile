@@ -1,10 +1,13 @@
 
 
-all:	viewer.scm
+all:	lisp3.scm
 
-	#csc -O3 viewer.scm -o viewer
-	#echo "run > time ./viewer  # to see program run"
+	csc -O2 lisp3.scm -o lisp3
+	echo "make run - to run lisp3 binary"
 
 run:
-	time ./viewer
+	time ./lisp3
+
+
+
 
