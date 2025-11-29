@@ -2,6 +2,9 @@
 
 (in-package #:day25)
 
+;;current directory
+;;(print *default-pathname-defaults*)
+
 (defun example1 ()
   '(#(0 0 0 0) #(3 0 0 0) #(0 3 0 0) #(0 0 3 0) #(0 0 0 3) #(0 0 0 6)
     #(9 0 0 0) #(12 0 0 0)))
@@ -224,6 +227,9 @@
           do (setq diff (+ diff (abs (- (aref v i) (aref v2 i))))))
     diff))
 
+
+;; how export a defstruct
+;; what procedures does a defstruct define exactly ?
 (defstruct star
   group
   point
@@ -234,23 +240,119 @@
 (defun star= (s s2)
   (equalp (star-group s) (star-group s2)))
 
-
-;; testing star = 
-(let ((s1 (make-star :group 1 :point #(4 -6 -3 1)))
-      (s2 (make-star :group 1 :point #(2 5 -5 1))))
-  (star= s1 s2))
-
-
-(let ((s1 (make-star :group 1 :point #(4 -6 -3 1)))
-      (s2 (make-star :group 2 :point #(4 -6 -3 1))))
-  (star= s1 s2))
+#|
+each star has coordinate (x1 x2 x3 x4)
+each star has group number g1
+|#
 
 
-(defun constellation (s stars)
-  (labels ((found! (v) (format t "v= ~a~%" v)))
-    (dolist (v stars)
-      (cond
-	((<= (manhattan v s) 3) (found! v))))))
+;; ;;find a group 0
+;; (defun zeros (xs)
+;;   (remove-if-not (lambda (s) (= (star-group s) 0)) xs))
+
+;; (defun foo (zs)
+;;   (cond
+;;     ((null zs) nil)
+;;     (t (let ((s (car zs)))
+;; 	 (incf *count*)
+;; 	 (setf (star-group s) *count*)
+;; 	 (find-connected s (cdr zs))))))
+
+;; (defun find-connected (s ss)  
+;;   (let ((news nil))
+;;     (dolist (v ss nil)
+;;       ;; if connects to s and group == 0 -> add it to a list
+;;     (cond
+;;       ((and (connects-p s v) (= (star-group v) 0)) ;;new star connection
+;;        (setf (star-group v) *count*)
+;;        (setq news (cons v news)))))))
+
+;; =============================================================
+
+(defparameter *count* 0)
+
+(defun f0 (xs)
+  (setq *count* 0)
+  (let ((gstars (all-stars xs)))
+    (f1 gstars)
+    (values gstars *count*)))
+
+(defun zero-star-p (v) (= (star-group v) 0))
+
+(defun all-stars (in)
+  (map 'list (lambda (v) (make-star :point v :group 0)) in))
+
+(defun connects-p (s s2)  (<= (manhattan (star-point s)
+					 (star-point s2))
+			      3))
+(defun f1 (xs)
+  (catch 'done
+    (loop while t do
+      (let ((found nil))
+	(dolist (v xs)
+	  (cond
+	    ((zero-star-p v)
+	     (setq found t)
+	     (f2 v xs))))
+	(if (not found)
+	    (throw 'done t))))))
+
+(defun f2 (v xs)
+  (incf *count*)
+  (setf (star-group v) *count*)
+  (f3 v xs))
+
+(defun f3 (v xs)
+  (dolist (v2 xs)
+    (cond
+      ((and (zero-star-p v2)
+	    (connects-p v2 v)) ;; new star
+       (setf (star-group v2) *count*)
+       (f3 v2 xs)))))
+
+
+;; ===================================================================    
+
+	 
+
+
+;; (defun all-stars (in)
+;;   (coerce (map 'list (lambda (v) (make-star :point v :group 0)) in)
+;; 	  'vector))
+
+
+;; (defun constellation (stars)
+;;   (let ((vec-group (all-stars stars)))
+;;     (let ((new-group 1))
+;;       (loop while t do      
+;; 	(loop for i from 0 to (length vec-group) do
+;; 	  (let ((gstar (aref vec-group i)))
+;; 	    (when (= (star-group gstar) 0)
+;; 	      (incf new-group)
+;; 	      (setf (star-group gstar) new-group)
+;; 	      (constellation-exhaust vec-group i))))))))
+
+
+;; (defun constellation-exhaust (gstars i)
+;;   (let ((found (list (aref gstars i))))
+;;     (loop while t do      
+;;       (loop for i from 0 to (length vec-group) do
+;; 	(let ((gstar (aref vec-group i)))
+;; 	  ;; is it already in found - its group will be nonzero
+;; 	  ;; if not is it compatible
+;; 	  (when (= (star-group gstar) 0)
+;; 	    (constellation-exhaust vec-group i)))))))
+
+
+
+
+	    
+  ;;   (constellation-loop vec-group)))
+
+  ;; (labels ((found! (v) (format t "v= ~a~%" v)))
+  ;;   (dolist (v stars)
+  ;;     (cond
+  ;; 	((<= (manhattan v s) 3) (found! v))))))
 
 
 #+nil
@@ -297,3 +399,116 @@
 ;;       (when (<= (manhattan a b) 3)
 ;; 	(setq found (cons b found))))
 ;;     found))
+
+;; ============================= Test Suite =================================
+
+;; We have a custom "file doesn't exist" condition.
+(define-condition file-not-existing-error (error)
+  ((filename :type string :initarg :filename :reader filename)))
+
+;; We have a function that tries to read a file and signals the above condition
+;; if the file doesn't exist.
+(defun read-file-as-string (filename &key (error-if-not-exists t))
+  "Read file content as string. FILENAME specifies the path of file.
+Keyword ERROR-IF-NOT-EXISTS specifies the operation to perform when the file
+is not found. T (by default) means an error will be signaled. When given NIL,
+the function will return NIL in that case."
+  (cond
+    ((uiop:file-exists-p filename)
+     (uiop:read-file-string filename))
+    (error-if-not-exists
+     (error 'file-not-existing-error :filename filename))
+    (t nil)))
+
+;; The code below defines a suite named my-system.
+;; We will use it as the root suite for the whole system.
+(fiveam:def-suite my-system
+  :description "Test my system")
+
+;; Define a suite and set it as the default for the following tests.
+(fiveam:def-suite read-file-as-string
+  :description "Test the read-file-as-string function."
+  :in my-system)
+(fiveam:in-suite read-file-as-string)
+
+;; Alternatively, the following line is a combination of the 2 lines above.
+;;(fiveam:def-suite* read-file-as-string :in my-system)
+
+;; Our first "base" case: we read a file that contains "hello".
+(fiveam:test read-file-as-string-normal-file
+  (let ((result (read-file-as-string "/tmp/hello.txt")))
+    ;; Tip: put the expected value as the first argument of = or equal, string= etc.
+    ;; FiveAM generates a more readable report following this convention.
+    (fiveam:is (string= "hello" result))))
+
+;; We read an empty file.
+(fiveam:test read-file-as-string-empty-file
+  (let ((result (read-file-as-string "/tmp/empty.txt")))
+    (fiveam:is (not (null result)))
+    ;; The reason can be used to provide formatted text.
+    (fiveam:is (= 0 (length result)))
+        "Empty string expected but got ~a" result))
+
+;; Now we test that reading a non-existing file signals our condition.
+(fiveam:test read-file-as-string-non-existing-file
+  (let ((result (read-file-as-string "/tmp/non-existing-file.txt"
+                                     :error-if-not-exists nil)))
+    (fiveam:is (null result)
+      "Reading a file should return NIL when :ERROR-IF-NOT-EXISTS is set to NIL"))
+  ;; SIGNALS accepts the unquoted name of a condition and a body to evaluate.
+  ;; Here it checks if FILE-NOT-EXISTING-ERROR is signaled.
+  (fiveam:signals file-not-existing-error
+    (read-file-as-string "/tmp/non-existing-file.txt"
+                         :error-if-not-exists t)))
+
+;; ======================================================================
+
+;; Define a suite and set it as the default for the following tests.
+(fiveam:def-suite stars
+  :description "Test the star functions"
+  :in my-system)
+(fiveam:in-suite stars)
+
+;; how run tests ?
+;; testing star = 
+;; (fiveam:test stars-equal-1
+;;   (let ((s1 (make-star :group 1 :point #(4 -6 -3 1)))
+;; 	(s2 (make-star :group 1 :point #(2 5 -5 1))))
+;;     (fiveam:is (not (star= s1 s2)))))
+
+;; (fiveam:test stars-equal-2
+;;   (let ((s1 (make-star :group 1 :point #(4 -6 -3 1)))
+;; 	(s2 (make-star :group 2 :point #(4 -6 -3 1))))
+;;     (fiveam:is (not (star= s1 s2)))))
+
+(fiveam:test stars-1
+  (fiveam:is (= 2 (multiple-value-bind (gstars n)  (f0 (example1)) n))))
+
+(fiveam:test stars-2
+  (fiveam:is (= 4 (multiple-value-bind (gstars n)  (f0 (example2)) n))))
+
+(fiveam:test stars-3
+  (fiveam:is (= 3 (multiple-value-bind (gstars n)  (f0 (example3)) n))))
+
+(fiveam:test stars-4
+  (fiveam:is (= 8 (multiple-value-bind (gstars n)  (f0 (example4)) n))))
+
+(fiveam:test stars-5
+  (fiveam:is (= 430 (multiple-value-bind (gstars n)  (f0 (input)) n))))
+
+;;
+;; DAY25> (time (f0 (input)))
+;; Evaluation took:
+;;   0.085 seconds of real time
+;;   0.084423 seconds of total run time (0.075855 user, 0.008568 system)
+;;   98.82% CPU
+;;   311,259,984 processor cycles
+;;   52,246,688 bytes consed
+;;
+;; 430 answer accepted
+;;
+;;
+
+
+(defun run-tests ()
+  (fiveam:run! 'stars))
