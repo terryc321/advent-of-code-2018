@@ -3,7 +3,10 @@ import tkinter as tk
 
 # point as a  tuple (x,y )
 bricks = {}
+sands = {}
 water = {}
+todos = []
+
 
 minX = False
 maxX = False
@@ -131,6 +134,17 @@ def isBrick(x,y):
         return True 
     return False
 
+def isWater(x,y):
+    if ((x,y) in water):
+        return True 
+    return False
+
+
+def isSand(x,y):
+    if ((x,y) in sands):
+        return True 
+    return False
+
 # say come out sprinkler moving down - increasing Y 
 def unwind(x,y):
     global minX , maxX , minY ,maxY    
@@ -147,8 +161,8 @@ def unwind(x,y):
         return 
 
     water[(x,y)] = True 
-    l = solve_left(x-1,y)
-    r = solve_right(x+1,y)
+    l = solve_left_or_right(x-1,y,0-1)
+    r = solve_left_or_right(x+1,y,0+1)
     # determine what to do 
     print("l and r =>" , [l,r])
     if (l == 1 and r == 1): 
@@ -173,12 +187,12 @@ def solve(x,y):
         print("x exceeding max X plus 3 -- possible error")
         return 
     if isBrick(x,y):
-        return 
+        return 1
 
     water[(x,y)] = True 
     if isBrick(x,y+1):        
-        l = solve_left(x-1,y)
-        r = solve_right(x+1,y)
+        l = solve_left_or_right(x-1,y , 0-1)
+        r = solve_left_or_right(x+1,y , 0+1)
         # determine what to do 
         print("l and r =>" , [l,r])
         if (l == 1 and r == 1): 
@@ -196,8 +210,8 @@ def solve(x,y):
 #        E X
 # water fall condition
 #
-def solve_left(x,y):
-    global minX , maxX , minY ,maxY    
+def solve_left_or_right(x,y,dir):
+    global minX , maxX , minY ,maxY , todos    
     if x < (minX - 3):
         print("x exceeding min X sub 3 -- possible error ")
         raise ValueError('x exceeding maxX') 
@@ -206,39 +220,17 @@ def solve_left(x,y):
         raise ValueError('x exceeding maxX')
     if isBrick(x,y):
         return 1
-    # set this to water 
-    water[(x,y)] = True         
-    if (isBrick(x,y+1) and (not isBrick(x-1,y)) and (not isBrick(x-1,y+1))):
-        # waterfall 
-        solve(x-1,y)
-        return 2
-    else:
-        return solve_left(x-1,y)
+    if isBrick(x,y+1):
+        water[(x,y)] = True 
+        return solve_left_or_right(x+dir,y,dir)
+
+    if isWater(x,y+1):
+        water[(x,y)] = True 
+        return solve_left_or_right(x+dir,y,dir)
+    # no brick and no water so must it be a new waterfall?
+    todos = todos + [(x,y)]
     
-
-def solve_right(x,y):
-    global minX , maxX , minY ,maxY    
-    if x < (minX - 3):
-        print("x exceeding min X sub 3 -- possible error ")
-        raise ValueError('x exceeding maxX') 
-    if x > (maxX + 3):
-        print("x exceeding max X plus 3 -- possible error")
-        raise ValueError('x exceeding maxX')
-    if isBrick(x,y):
-        return 1
-    # set this to water 
-    water[(x,y)] = True         
-    if (isBrick(x,y+1) and (not isBrick(x+1,y)) and (not isBrick(x+1,y+1))):
-        # waterfall 
-        solve(x+1,y)
-        return 2
-    else:
-        return solve_right(x+1,y)
-
-
-
-
-
+    
 
 class AnimationWindow:
     global minX , minY , maxX , maxY , bricks
@@ -361,7 +353,7 @@ class AnimationWindow:
 
         # Initial draw
         #self.canvas.create_text(200, event.height-20, text="Press SPACE to start/stop, Escape to quit")
-        
+        print('todos size =>' , len(todos))
         
     def on_resize(self , event):
         self.my_redraw()
@@ -373,7 +365,16 @@ class AnimationWindow:
         print ("next event!??\n")
 
     def prev(self , event):
-        print ("prev event!??\n")
+        global todos
+        #print ("prev event!??\n")
+        if todos == []:
+            return 
+        (x,y) = todos.pop()
+        solve(x,y)
+        self.my_redraw()
+
+        
+
 
 
     def toggle_animation(self, event):
