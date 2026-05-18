@@ -223,13 +223,16 @@ def solve_left_or_right(x,y,dir):
     if isBrick(x,y+1):
         water[(x,y)] = True 
         return solve_left_or_right(x+dir,y,dir)
+    if isWater(x,y):
+        # already water here
+        return 1
 
     if isWater(x,y+1):
         water[(x,y)] = True 
         return solve_left_or_right(x+dir,y,dir)
     # no brick and no water so must it be a new waterfall?
     todos = todos + [(x,y)]
-    
+
     
 
 class AnimationWindow:
