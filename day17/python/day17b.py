@@ -66,68 +66,71 @@ def get_content():
     # read input
     lines = {}
     content = ""
-    #with open('input.txt', 'r') as file:
-    with open('example.txt' , 'r') as file:
-        content = file.read()
-        lines = content.splitlines()
-        for line in lines:
-            r = threeVals(line)
-            if (line[0] == 'x'):
-                x = r[0]
-                y1 = r[1]
-                y2 = r[2]
-                # default values 
-                if (minX == False):
-                    minX = x 
-                if (maxX == False):
-                    maxX = x
-                if (minY == False):
-                    minY = y1 
-                if (maxY == False):
-                    maxY = y2                
-                for y in range(y1,y2 + 1):
-                    bricks[(x,y)] = True
-                    # maximums
-                    if (x < minX) :
+    with open('input.txt', 'r') as file:
+        with open('output.dat', 'w') as file2:        
+        #with open('example.txt' , 'r') as file:
+            content = file.read()
+            lines = content.splitlines()
+            for line in lines:
+                r = threeVals(line)
+                if (line[0] == 'x'):
+                    x = r[0]
+                    y1 = r[1]
+                    y2 = r[2]
+                    file2.write(f"(x {x} {y1} {y2})\n")
+                    # default values 
+                    if (minX == False):
                         minX = x 
-                    if (y < minY) :
-                        minY = y 
-                    if (x > maxX) :
-                        maxX = x 
-                    if (y > maxY) :
-                        maxY = y 
+                    if (maxX == False):
+                        maxX = x
+                    if (minY == False):
+                        minY = y1 
+                    if (maxY == False):
+                        maxY = y2                
+                    for y in range(y1,y2 + 1):
+                        bricks[(x,y)] = True
+                        # maximums
+                        if (x < minX) :
+                            minX = x 
+                        if (y < minY) :
+                            minY = y 
+                        if (x > maxX) :
+                            maxX = x 
+                        if (y > maxY) :
+                            maxY = y 
 
-            elif (line[0] == 'y'):
-                y = r[0]
-                x1 = r[1]
-                x2 = r[2]
-                # default values 
-                if (minX == False):
-                    minX = x1 
-                if (maxX == False):
-                    maxX = x2
-                if (minY == False):
-                    minY = y 
-                if (maxY == False):
-                    maxY = y                    
-                for x in range(x1,x2 + 1):
-                    bricks[(x,y)] = True
-                    # maximums 
-                    if (x < minX) :
-                        minX = x 
-                    if (y < minY) :
+                elif (line[0] == 'y'):
+                    y = r[0]
+                    x1 = r[1]
+                    x2 = r[2]
+                    file2.write(f"(y {y} {x1} {x2})\n")
+                    # default values 
+                    if (minX == False):
+                        minX = x1 
+                    if (maxX == False):
+                        maxX = x2
+                    if (minY == False):
                         minY = y 
-                    if (x > maxX) :
-                        maxX = x 
-                    if (y > maxY) :
-                        maxY = y 
+                    if (maxY == False):
+                        maxY = y                    
+                    for x in range(x1,x2 + 1):
+                        bricks[(x,y)] = True
+                        # maximums 
+                        if (x < minX) :
+                            minX = x 
+                        if (y < minY) :
+                            minY = y 
+                        if (x > maxX) :
+                            maxX = x 
+                        if (y > maxY) :
+                            maxY = y 
 
-            else:
-                ValueError("expected either x= or y=")
-            
-        #print(lines)
-    # parse it into x=A...y=A .. B
-    # parse it into y=A ..x=A .. B
+                else:
+                    ValueError("expected either x= or y=")
+                
+            #print(lines)
+        # parse it into x=A...y=A .. B
+        # parse it into y=A ..x=A .. B
 
 def isBrick(x,y):
     if ((x,y) in bricks):
@@ -175,6 +178,9 @@ def unwind(x,y):
 
 
 # say come out sprinkler moving down - increasing Y 
+# sprinkler at 500 , 0 
+
+# waterfall == solve 
 def solve(x,y):
     global minX , maxX , minY ,maxY    
     if y > maxY :
@@ -220,12 +226,13 @@ def solve_left_or_right(x,y,dir):
         raise ValueError('x exceeding maxX')
     if isBrick(x,y):
         return 1
+    # brick below me - 
     if isBrick(x,y+1):
         water[(x,y)] = True 
         return solve_left_or_right(x+dir,y,dir)
     if isWater(x,y):
-        # already water here
-        return 1
+        # already water here - keep going?
+        return solve_left_or_right(x+dir,y,dir)
 
     if isWater(x,y+1):
         water[(x,y)] = True 
@@ -417,6 +424,7 @@ if __name__ == "__main__":
     get_content()
     print("maximums x axis =>" , [minX ,maxX] , " y axis =>" ,[ minY , maxY])
     solve(500,1)
+
 
     root = tk.Tk()
     app = AnimationWindow(root)
