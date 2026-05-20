@@ -41,6 +41,7 @@ FUN> (length *linear-cups-hash*)
 
 |#
 
+(declaim (optimize (debug 3)))
 
 (defpackage :fun
   (:use :cl))
@@ -1886,6 +1887,70 @@ FUN> (length *linear-cups-hash*)
     (setq *linear-bricks-hash* s)
     s))
 
+
+;; BUG HERE SOMEWHERE =================================
+;; (identify-cup-from-brick 500 22) --- expect answer found cup with id 477
+;; but instead gives answer found cup with id 477 and loops forever ??
+(defun identify-cup-from-brick2 (x y)
+  (cond
+    ((is-not-brick-at x y) nil)
+    (t
+     (catch 'cup2
+       (loop for cup across *cups* do
+	 (when (member (list x y) (cup-points cup) :test #'equalp)
+	   (format t "found cup with id ~a ~%" (cup-id cup))
+	   (throw 'cup2 cup)))
+       (error "must not have brick without cup! ")))))
+
+(defun identify-cup-from-brick3 (x y)
+  (cond
+    ((is-not-brick-at x y) nil)
+    (t
+     (catch 'cup2
+       (loop for cup across *cups* do
+	 (when (member (list x y) (cup-points cup) :test #'equalp)
+	   (format t "found cup with id ~a ~%" (cup-id cup))
+	   (throw 'cup2 cup)))))))
+
+(defun identify-cup-from-brick (x y)
+  (cond
+    ((is-not-brick-at x y) nil)
+    (t (let ((result nil)
+	     (i 0))
+	 (loop while (< i (length *cups*)) do 
+           (let ((cup (aref *cups* i)))
+	     (when (member (list x y) (cup-points cup) :test #'equalp)
+	       (format t "found cup with id ~a ~%" (cup-id cup))
+	       (setq result cup)
+	       (setq i (length *cups*)))
+	     (incf i)))
+	 result))))
+
+
+
+
+;; each cup if it is inside another cup gets a parent-child
+;; only accounted for one cup inside another cup for now ...
+(defun find-child-cups ()
+  (loop for cup across *cups* do
+    (destructuring-bind (x1 y1) (cup-nw cup)
+      (destructuring-bind (x2 y2) (cup-se cup)
+	(assert (> x2 x1) nil "find-child-cups : x2 > x1")
+	(assert (> y2 y1) nil "find-child-cups : y2 > y1")
+	(catch 'found
+	  (loop for x from (+ x1 1) to (- x2 1) do
+	    (loop for y from (+ y1 1) to (- y2 1) do
+	      (let ((pot (identify-cup-from-brick x y)))
+		(when (and pot (/= (cup-id pot) (cup-id cup)))
+		  (setf (cup-child cup) pot)
+		  (setf (cup-parent pot) cup)
+		  (throw 'found t)))))
+	  nil)))))
+      
+  
+  
+
+
 ;; display true cup ... including the true bounds of any contained cups !!
 (defun display-cup (n)
   (let ((cup (aref *cups* n)))
@@ -1898,9 +1963,24 @@ FUN> (length *linear-cups-hash*)
 ;; contained cup is at a 
 (defun display-true-cup (n)
   (let ((cup (aref *cups* n)))
-    (destructuring-bind (x y) (cup-nw cup)
+    (destructuring-bind (x1 y1) (cup-nw cup)
       (destructuring-bind (x2 y2) (cup-se cup)
-	(display x x2 (max 0 (- y 20)) y2)))))
+	(let ((child (cup-child cup)))
+	  (cond
+	    (child
+	     (destructuring-bind (x3 y3) (cup-nw (cup-child cup))
+	       (destructuring-bind (x4 y4) (cup-ne (cup-child cup))
+		 (let ((max-y y2)(min-y (min y3 y4))
+		       (max-x x2)(min-x x1))
+		   (display min-x max-x min-y max-y)))))
+	    (t
+	     (let ((max-y y2)(min-y y1)
+		   (max-x x2)(min-x x1))
+	       (display min-x max-x min-y max-y)))))))))
+	     
+	    
+
+
 
 
 
@@ -1920,11 +2000,17 @@ FUN> (length *linear-cups-hash*)
     (loop for brick in *bricks* do
       (setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
     (setf (board-grid *board*) *grid*)
+    (format t "finding cups ...~%")
     (find-cups)
+    (format t "finding cups points ...~%")
     (find-cups-points)
+    (format t "finding child cups ...~%")    
     (find-child-cups)
+    (format t "linearise cups hash ...~%")    
     (linearise-cups-hash)
+    (format t "linearise bricks hash ...~%")        
     (linearise-bricks-hash)
+    (format t "start ... completed~%")        
     ))
 
 
@@ -1945,6 +2031,7 @@ FUN> (length *linear-cups-hash*)
 (defparameter todo nil)
 
 
+
 (defun run ()
   (setq todo nil) ;; the sprinklers awaiting sprinkle 
   (solve 500 1) ;; do we include sprinkler itself as water count ?no.
@@ -1957,13 +2044,15 @@ FUN> (length *linear-cups-hash*)
 (defun solve (x y)
   (catch 'cup
     (loop while t do
+      (format t "solve at ~a ~a ~%" x y)
       (cond
 	((> y (board-max-y *board*)) (throw 'cup nil))
 	((is-not-brick-at x y) (incf y))
 	(t ;; what cup did we hit
-	 (loop for cup across *cups* do
-	   (when (member (list x y) (cup-points cup) :test #'equalp)
-	     (throw 'cup cup))))))))
+	 (let ((c (identify-cup-from-brick x y)))
+	   (cond
+	     (c (throw 'cup c))
+	     (t (error (format nil "solve at ~a ~a did not find a cup!" x y))))))))))
 
 ;; best to use (load "fun.lisp") for this - perhaps
 ;; configure everything before run 
