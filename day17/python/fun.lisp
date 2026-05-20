@@ -38,6 +38,7 @@ do we ignore enclosed cups ?
 (defparameter *brick-type* 1)
 (defparameter *water-type* 2)
 
+(defparameter *cups* nil)
 
 (defstruct cup
   ne
@@ -1545,6 +1546,8 @@ do we ignore enclosed cups ?
 ;; (setf (brick-x mybrick) 5)
 ;; mybrick
 
+(defparameter *cups-hash* nil)
+
 (defparameter *board* nil) 
 
 (defparameter *brick-id* 1)
@@ -1629,20 +1632,21 @@ do we ignore enclosed cups ?
 
 
 
-(defun make-connected (x y n)
-  (let ((b (is-brick-at x y)))
-    (when b
-      (format t "n = ~a : there is a brick at ~a ~a : brick = ~a ~%" n x y b)
-      (let ((n2 (brick-id b)))
-	(cond
-	  ((and (integerp n2) (/= n2 n)) nil) ;; different brick?
-	  ((and (integerp n2) (= n2 n)) nil)
-	  (t 
-	   (setf (brick-id b) n)
-	   (make-connected (- x 1) y n)
-	   (make-connected (+ x 1) y n)
-	   (make-connected x (- y 1) n)
-	   (make-connected x (+ y 1) n)))))))
+;; (defun make-connected (x y n)
+;;   nil
+;;   (let ((b (is-brick-at x y)))
+;;     (when b
+;;       (format t "n = ~a : there is a brick at ~a ~a : brick = ~a ~%" n x y b)
+;;       (let ((n2 (brick-id b)))
+;; 	(cond
+;; 	  ((and (integerp n2) (/= n2 n)) nil) ;; different brick?
+;; 	  ((and (integerp n2) (= n2 n)) nil)
+;; 	  (t 
+;; 	   (setf (brick-id b) n)
+;; 	   (make-connected (- x 1) y n)
+;; 	   (make-connected (+ x 1) y n)
+;; 	   (make-connected x (- y 1) n)
+;; 	   (make-connected x (+ y 1) n)))))))
 
 
 
@@ -1669,7 +1673,8 @@ do we ignore enclosed cups ?
     (loop for brick in *bricks* do
       (setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
     (setf (board-grid *board*) *grid*)
-      ;; 
+    ;;
+    (find-cups)
     *bricks*))
 
 (defun check-lookup ()
@@ -1684,6 +1689,8 @@ do we ignore enclosed cups ?
 ;; just make a big 2d array - even though most of it is not used !
 ;;
 
+(defparameter *display-specials* nil)
+
 (defun display (x1 x2 y1 y2)
   (format t "~%~%")
   (loop for y from y1 to y2 do
@@ -1693,13 +1700,24 @@ do we ignore enclosed cups ?
 	(cond
 	  ((and at (= at 1)) (format t "#")) ;;  clay
 	  ((and (= x 500)(= y 0)) (format t "*")) ;; sprinkler!
+	  ((member (list x y) *display-specials* :test 'equalp) (format t "O"))
 	  ((and at (= at 2)) (format t "~a" #\~ )) ;; water	  
 	  (t (format t " ")))))))
+
+(defun display-easy (x y)
+  (let ((*display-specials* (list (list x y))))
+    (display (- x 40) (+ x 40) (max 0 (- y 30)) (min (+ y 30) (board-max-y *board*)))))
+
+
+
 
 
 (defun intro ()
   (display (- 500 40) (+ 500 40) 0 50))
 
+
+(defun stash-brick (x y)  (setf (gethash (list x y) *cups-hash*) t))
+(defun stashed-p (x y)  (gethash (list x y) *cups-hash* nil))
 
 
 ;; because searching bottom up - know that the lower left corner is at x y
@@ -1711,6 +1729,8 @@ do we ignore enclosed cups ?
 ;; then given the cup definitions - can we recreate the complete map of individual clay bricks
 ;; can we theorise a solution 
 (defun find-cups ()
+  (setq *cups* nil)
+  (setq *cups-hash* (make-hash-table :test 'equalp))
   (let ((minx (board-min-x *board*))
 	(maxx (board-max-x *board*))
 	(maxy (board-max-y *board*)))
@@ -1718,66 +1738,84 @@ do we ignore enclosed cups ?
       (let ((x minx))
 	(loop while (< x maxx) do
 	  ;; find two bricks together
-	  (cond	  
+	  ;; if already been stashed - move along
+	  (cond
+	    ((stashed-p x y) (incf x))
 	    ((and (is-brick-at x y) (is-brick-at (+ x 1) y))
-
-	     (let ((x1 x)(y1 y)
-		   (x2 x)(y2 y)
-		   (x3 x)(y3 y)
-		   (x4 x)(y4 y)
-		   (enclosed nil))
-	     ;;; south-west corner is x y 
-	       
-	     ;;; find north-west corner x1 y1
-	       (loop while (is-brick-at x1 y1) do
-		 (decf y1))
-	       (incf y1)
-	       (assert (is-brick-at x1 y1))
-	       (assert (is-not-brick-at x1 (- y1 1)))
-	       (assert (is-not-brick-at (- x1 1) y1))
-
-	     ;;; find south-east corner at x2 y2 
-	       (loop while (is-brick-at x2 y2) do
-		 (incf x2))
-	       (decf x2)
-	       (assert (is-brick-at x2 y2))
-	       (assert (is-not-brick-at x2 (+ y2 1)))
-	       (assert (is-not-brick-at (+ x2 1) y2))
-
-	      ;;; find north-east corner
-	       (setq x3 x2)
-	       (setq y3 y2)
-	       (loop while (is-brick-at x3 y3) do
-		 (decf y3))
-	       (incf y3)
-	       (assert (is-brick-at x3 y3))
-	       (assert (is-not-brick-at x3 (- y3 1)))
-
-	     ;;; is this cup enclosed ?
-	       (setq x4 x3)
-	       (setq y4 y3)
-	       (setq enclosed (and (= y1 y4)
-				   (catch 'enclosed
-				     (loop for x4 from x1 to x3 do
-				       (when (is-not-brick-at x4 y4)
-					 (throw 'enclosed nil)))
-				     t)))
-	       ;; the cup !
-	       (let ((new-cup (make-cup :ne (list x3 y3)
-					:nw (list x1 y1)
-					:se (list x2 y2)
-					:sw (list x y)
-					:enclosed enclosed)))
-		 (setq *cups* (cons new-cup *cups*)))
-	       
-	     ;;; next cup after this cup edge  
-	       (setq x (+ x2 1))))
+	     (setq x (find-cups-helper x y)))
 	    (t (incf x))))))))
 
-	   
-      
 
-	
-      
+(defun find-cups-helper (x y)
+  (let ((x1 x)(y1 y)
+	(x2 x)(y2 y)
+	(x3 x)(y3 y)
+	(x4 x)(y4 y)
+	(enclosed nil))
+    ;; south-west corner is x y 
+    ;; find north-west corner x1 y1
+    (loop while (is-brick-at x1 y1) do
+      (stash-brick x1 y1)
+      (decf y1))
+    (incf y1)
+    (assert (is-brick-at x1 y1)  nil "north west corner assert1")
+    (assert (is-not-brick-at x1 (- y1 1)) nil "north west corner assert2")
+    (assert (is-not-brick-at (- x1 1) y1) nil "north west corner assert3")
+
+    ;; find south-east corner at x2 y2 
+    (loop while (is-brick-at x2 y2) do
+      (stash-brick x2 y2)
+      (incf x2))
+    (decf x2)
+    (assert (is-brick-at x2 y2) nil "south east corner assert1")
+    (assert (is-not-brick-at x2 (+ y2 1)) nil "south east corner assert2")
+    (assert (is-not-brick-at (+ x2 1) y2) nil "south east corner assert3")
+
+    ;; find north-east corner
+    (setq x3 x2)
+    (setq y3 y2)
+    (loop while (is-brick-at x3 y3) do
+      (stash-brick x3 y3)      
+      (decf y3))
+    (incf y3)
+    (assert (is-brick-at x3 y3) nil "north east corner assert1")
+    (assert (is-not-brick-at x3 (- y3 1)) nil "north east corner assert2")
+
+    ;; is this cup enclosed ?
+    (setq x4 x3)
+    (setq y4 y3)
+    (setq enclosed (and (= y1 y4)
+			(catch 'enclosed
+			  (loop for x4 from x1 to x3 do
+			    (cond
+			      ((is-brick-at x4 y4) (stash-brick x4 y4))
+			      (t 
+			       (throw 'enclosed nil))))
+			  t)))
+    ;; the cup !
+    (let ((new-cup (make-cup :ne (list x3 y3)
+			     :nw (list x1 y1)
+			     :se (list x2 y2)
+			     :sw (list x y)
+			     :enclosed enclosed)))
+      (setq *cups* (cons new-cup *cups*)))
+    
+	     ;;; next cup after this cup edge  
+    (+ x2 1)))
+
+
+(defun board-dimensions ()
+  (let ((b *board*))
+    (format t "board has dimensions X : ~a ~a  :Y:: ~a ~a ~%"
+	    (board-min-x b)
+	    (board-max-x b)
+	    (board-min-y b)
+	    (board-max-y b))))
+	    
+
+
+
+
+
 
 
