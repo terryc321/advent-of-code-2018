@@ -1,5 +1,13 @@
 #|
 
+Ranges -> set of Cups
+
+given a point (x,y) we can say if there is a clay brick there
+and what cup it belongs to
+one brick belongs only to one cup
+but a cup may contain a smaller cup
+(cup hierachy)
+
 if we make notes on diagrams we see when we plot the various ranges we find we end up with
 cup shapes , some cups have flat lids , most cups have open lids
 some cups contain other cups
@@ -41,13 +49,15 @@ FUN> (length *linear-cups-hash*)
 
 |#
 
-(declaim (optimize (debug 3)))
+;;(declaim (optimize (debug 3)))
+;;
 
 (defpackage :fun
   (:use :cl))
 
 (in-package :fun)
 
+(defparameter *has-started* nil)
 
 (defparameter *ranges* '((x 581 396 399)
 (y 1491 566 573)
@@ -1525,6 +1535,7 @@ FUN> (length *linear-cups-hash*)
 (defparameter *water-type* 2)
 
 (defparameter *cups* nil)
+(defparameter *cups-array* nil)
 
 (defstruct cup
   ne
@@ -1818,55 +1829,53 @@ FUN> (length *linear-cups-hash*)
 ;; can we have duplicates ?
 ;; is a short list of points more useful than a hash at this distance
 (defun find-cups-points ()
-  (cond
-    ((eq (type-of *cups*) 'cons)
-     (let ((result (reverse *cups*)))
-       (let ((i 0))
-	 (loop for cup in result do
-	   (let ((points nil))
-	     
-	     ;; left arm
-	     (destructuring-bind (x1 y1) (cup-nw cup)
-	       (destructuring-bind (x2 y2) (cup-sw cup)
-		 (assert (= x1 x2) nil "left arm : xs are same")
-		 (assert (> y2 y1) nil "left arm : y2 > y1")
-		 (loop for y from y1 to y2 do
-		   (setq points (cons (list x1 y) points)))))
-	     
-	     ;; lower arm	     
-	     (destructuring-bind (x1 y1) (cup-sw cup)
-	       (destructuring-bind (x2 y2) (cup-se cup)
-		 (assert (= y1 y2) nil "lower arm : ys are same")
-		 (assert (> x2 x1) nil "lower arm x2 > x1")
-		 (loop for x from x1 to x2 do
-		   (setq points (cons (list x y1) points)))))
-	     
-	     ;; right arm
-	     (destructuring-bind (x1 y1) (cup-ne cup)
-	       (destructuring-bind (x2 y2) (cup-se cup)
-		 (assert (= x1 x2) nil "right arm : xs are same")
-		 (assert (> y2 y1) nil "right arm : y2 > y1")
-		 (loop for y from y1 to y2 do
-		   (setq points (cons (list x1 y) points)))))
-	     
-	     ;; if enclosed - upper arm
-	     (when (cup-enclosed cup)
-	       (destructuring-bind (x1 y1) (cup-nw cup)
-		 (destructuring-bind (x2 y2) (cup-ne cup)
-		   (assert (= y1 y2) nil "upper arm : ys are same")
-		   (assert (> x2 x1) nil "upper arm : x2 > x1")
-		   (loop for x from x1 to x2 do
-		     (setq points (cons (list x y1) points))))))
-	     
-	     ;; increment id  
-	     (setf (cup-id cup) i)
-	     (setf (cup-points cup) (remove-duplicates points :test #'equalp))
-	     (incf i))))
-       (setq result (coerce result 'vector))
-       (setq *cups* result)
-       result))
-    (t *cups*)))
+  (let ((id 0))
+    (loop for cup in *cups* do
+      (let ((points nil))
+	;; left arm
+	(destructuring-bind (x1 y1) (cup-nw cup)
+	  (destructuring-bind (x2 y2) (cup-sw cup)
+	    (assert (= x1 x2) nil "left arm : xs are same")
+	    (assert (> y2 y1) nil "left arm : y2 > y1")
+	    (loop for y from y1 to y2 do
+	      (setq points (cons (list x1 y) points)))))
+	;; lower arm	     
+	(destructuring-bind (x1 y1) (cup-sw cup)
+	  (destructuring-bind (x2 y2) (cup-se cup)
+	    (assert (= y1 y2) nil "lower arm : ys are same")
+	    (assert (> x2 x1) nil "lower arm x2 > x1")
+	    (loop for x from x1 to x2 do
+	      (setq points (cons (list x y1) points)))))
+	;; right arm
+	(destructuring-bind (x1 y1) (cup-ne cup)
+	  (destructuring-bind (x2 y2) (cup-se cup)
+	    (assert (= x1 x2) nil "right arm : xs are same")
+	    (assert (> y2 y1) nil "right arm : y2 > y1")
+	    (loop for y from y1 to y2 do
+	      (setq points (cons (list x1 y) points)))))
+	;; if enclosed - upper arm
+	(when (cup-enclosed cup)
+	  (destructuring-bind (x1 y1) (cup-nw cup)
+	    (destructuring-bind (x2 y2) (cup-ne cup)
+	      (assert (= y1 y2) nil "upper arm : ys are same")
+	      (assert (> x2 x1) nil "upper arm : x2 > x1")
+	      (loop for x from x1 to x2 do
+		(setq points (cons (list x y1) points))))))
+	;; increment id  
+	(setf (cup-id cup) id)
+	(setf (cup-points cup) (remove-duplicates points :test #'equalp))
+	(incf id)))))
+    
+(defun copy-global-cups ()
+  (setq *cups-array* (coerce *cups* 'vector)))
 
+;; check each entry in cups-array is a cup and lookup at index id gives the same cup
+(defun check-cups-array ()
+  (loop for cup across *cups-array* do
+    (assert (eq (type-of cup) 'cup))
+    (assert (equalp cup (aref *cups-array* (cup-id cup))))))
+
+		    
 
 
 
@@ -1898,7 +1907,7 @@ FUN> (length *linear-cups-hash*)
      (catch 'cup2
        (loop for cup across *cups* do
 	 (when (member (list x y) (cup-points cup) :test #'equalp)
-	   (format t "found cup with id ~a ~%" (cup-id cup))
+	   (format t "found22 cup with id ~a ~%" (cup-id cup))
 	   (throw 'cup2 cup)))
        (error "must not have brick without cup! ")))))
 
@@ -1909,10 +1918,10 @@ FUN> (length *linear-cups-hash*)
      (catch 'cup2
        (loop for cup across *cups* do
 	 (when (member (list x y) (cup-points cup) :test #'equalp)
-	   (format t "found cup with id ~a ~%" (cup-id cup))
+	   (format t "found33 cup with id ~a ~%" (cup-id cup))
 	   (throw 'cup2 cup)))))))
 
-(defun identify-cup-from-brick (x y)
+(defun identify-cup-from-brick4 (x y)
   (cond
     ((is-not-brick-at x y) nil)
     (t (let ((result nil)
@@ -1920,11 +1929,24 @@ FUN> (length *linear-cups-hash*)
 	 (loop while (< i (length *cups*)) do 
            (let ((cup (aref *cups* i)))
 	     (when (member (list x y) (cup-points cup) :test #'equalp)
-	       (format t "found cup with id ~a ~%" (cup-id cup))
+	       (format t "found44 cup with id ~a ~%" (cup-id cup))
 	       (setq result cup)
 	       (setq i (length *cups*)))
 	     (incf i)))
 	 result))))
+
+
+(defun identify-cup-from-brick (x y)  
+  (cond
+    ((is-not-brick-at x y) nil)
+    (t (let ((i 0))
+	 (loop while (< i (length *cups-array*)) do
+	   ;;(when (= i (break) ;; insert breakpoint directly
+           (let ((cup (aref *cups-array* i)))
+	     (when (member (list x y) (cup-points cup) :test #'equalp)
+	       (format t "found00 cup with id ~a ~%" (cup-id cup))
+	       (return cup)))
+	   (incf i))))))
 
 
 
@@ -1932,7 +1954,7 @@ FUN> (length *linear-cups-hash*)
 ;; each cup if it is inside another cup gets a parent-child
 ;; only accounted for one cup inside another cup for now ...
 (defun find-child-cups ()
-  (loop for cup across *cups* do
+  (loop for cup across *cups-array* do
     (destructuring-bind (x1 y1) (cup-nw cup)
       (destructuring-bind (x2 y2) (cup-se cup)
 	(assert (> x2 x1) nil "find-child-cups : x2 > x1")
@@ -1985,33 +2007,45 @@ FUN> (length *linear-cups-hash*)
 
 
 (defun start ()
-  (setq *board* (make-board))
-  (setq *bricks* nil)
-  (setq *bricks-hash* (make-hash-table :test 'equalp))
-  (setq *brick-id* 1)
-  (setq *linear-cups-hash* nil)
-  (setq *cups* nil)
-  (let* ((ranges (read-ranges)))
-    (process-input-ranges ranges)    
-    ;; *bricks* defined now
-    (setq *grid* (make-array (list (+ 20 (board-max-x *board*))
-				   (+ 20 (board-max-y *board*)))
-			    :initial-element nil))
-    (loop for brick in *bricks* do
-      (setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
-    (setf (board-grid *board*) *grid*)
-    (format t "finding cups ...~%")
-    (find-cups)
-    (format t "finding cups points ...~%")
-    (find-cups-points)
-    (format t "finding child cups ...~%")    
-    (find-child-cups)
-    (format t "linearise cups hash ...~%")    
-    (linearise-cups-hash)
-    (format t "linearise bricks hash ...~%")        
-    (linearise-bricks-hash)
-    (format t "start ... completed~%")        
-    ))
+  (when (not *has-started*)
+
+    (setq *has-started* t)
+    (setq *board* (make-board))
+    (setq *bricks* nil)
+    (setq *bricks-hash* (make-hash-table :test 'equalp))
+    (setq *brick-id* 1)
+    (setq *linear-cups-hash* nil)
+    (setq *cups* nil)
+    (setq *cups-array* nil)
+    
+    (let* ((ranges (read-ranges)))
+      (process-input-ranges ranges)    
+      ;; *bricks* defined now
+      (setq *grid* (make-array (list (+ 20 (board-max-x *board*))
+				     (+ 20 (board-max-y *board*)))
+			       :initial-element nil))
+      (loop for brick in *bricks* do
+	(setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
+      (setf (board-grid *board*) *grid*)
+      (format t "finding cups ...~%")
+      (find-cups)
+      (format t "finding cups points ...~%")
+      (find-cups-points)
+      (format t "making cups array ...~%")
+      (copy-global-cups)
+      (format t "checking cups array ...~%")      
+      (check-cups-array)
+      (format t "finding child cups ...~%")    
+      (find-child-cups)
+      (format t "linearise cups hash ...~%")    
+      (linearise-cups-hash)
+      (format t "linearise bricks hash ...~%")        
+      (linearise-bricks-hash)
+      (linearise-bricks-hash)
+      
+      (format t "start ... completed~%")
+      
+      )))
 
 
 ;; initially 500,0 sprinkler delivers infinite amount water
@@ -2051,7 +2085,9 @@ FUN> (length *linear-cups-hash*)
 	(t ;; what cup did we hit
 	 (let ((c (identify-cup-from-brick x y)))
 	   (cond
-	     (c (throw 'cup c))
+	     (c ;;(throw 'cup c)
+	      (return c)
+	      )
 	     (t (error (format nil "solve at ~a ~a did not find a cup!" x y))))))))))
 
 ;; best to use (load "fun.lisp") for this - perhaps
