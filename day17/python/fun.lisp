@@ -1,5 +1,13 @@
 #|
 
+if we make notes on diagrams we see when we plot the various ranges we find we end up with
+cup shapes , some cups have flat lids , most cups have open lids
+some cups contain other cups
+
+we say contain when in region bounded by further most corners of the cup another cup
+intrudes on that space
+
+
 Question - are there any cups with walls thicker than one unit ?
 
 If we scan from left to right looking for continuous clay ####
@@ -24,7 +32,12 @@ since searching from left to right first two bricks together signify either bott
 an enclosed cup
 do we ignore enclosed cups ?
 
+FUN> (length *linear-bricks-hash*)
+18231
+FUN> (length *linear-cups-hash*)
+18231
 
+18231 clay bricks - apparently
 
 |#
 
@@ -1520,6 +1533,8 @@ do we ignore enclosed cups ?
   enclosed
   points
   id
+  child  ;; child cup 
+  parent ;; parent cup - if this is a child cup we can find the outer cup  
   )
 
 (defstruct brick
@@ -1698,9 +1713,6 @@ do we ignore enclosed cups ?
     (display (- x 40) (+ x 40) (max 0 (- y 30)) (min (+ y 30) (board-max-y *board*)))))
 
 
-
-
-
 (defun intro ()
   (display (- 500 40) (+ 500 40) 0 50))
 
@@ -1800,19 +1812,62 @@ do we ignore enclosed cups ?
 	    (board-max-x b)
 	    (board-min-y b)
 	    (board-max-y b))))
-	    
+
+;; for each cup - generate the unique points they occupy
+;; can we have duplicates ?
+;; is a short list of points more useful than a hash at this distance
 (defun find-cups-points ()
   (cond
     ((eq (type-of *cups*) 'cons)
      (let ((result (reverse *cups*)))
        (let ((i 0))
 	 (loop for cup in result do
-	   (setf (cup-id cup) i)
-	   (incf i))
-	 (setq result (coerce result 'vector))
-	 (setq *cups* result)
-	 result)))
+	   (let ((points nil))
+	     
+	     ;; left arm
+	     (destructuring-bind (x1 y1) (cup-nw cup)
+	       (destructuring-bind (x2 y2) (cup-sw cup)
+		 (assert (= x1 x2) nil "left arm : xs are same")
+		 (assert (> y2 y1) nil "left arm : y2 > y1")
+		 (loop for y from y1 to y2 do
+		   (setq points (cons (list x1 y) points)))))
+	     
+	     ;; lower arm	     
+	     (destructuring-bind (x1 y1) (cup-sw cup)
+	       (destructuring-bind (x2 y2) (cup-se cup)
+		 (assert (= y1 y2) nil "lower arm : ys are same")
+		 (assert (> x2 x1) nil "lower arm x2 > x1")
+		 (loop for x from x1 to x2 do
+		   (setq points (cons (list x y1) points)))))
+	     
+	     ;; right arm
+	     (destructuring-bind (x1 y1) (cup-ne cup)
+	       (destructuring-bind (x2 y2) (cup-se cup)
+		 (assert (= x1 x2) nil "right arm : xs are same")
+		 (assert (> y2 y1) nil "right arm : y2 > y1")
+		 (loop for y from y1 to y2 do
+		   (setq points (cons (list x1 y) points)))))
+	     
+	     ;; if enclosed - upper arm
+	     (when (cup-enclosed cup)
+	       (destructuring-bind (x1 y1) (cup-nw cup)
+		 (destructuring-bind (x2 y2) (cup-ne cup)
+		   (assert (= y1 y2) nil "upper arm : ys are same")
+		   (assert (> x2 x1) nil "upper arm : x2 > x1")
+		   (loop for x from x1 to x2 do
+		     (setq points (cons (list x y1) points))))))
+	     
+	     ;; increment id  
+	     (setf (cup-id cup) i)
+	     (setf (cup-points cup) (remove-duplicates points :test #'equalp))
+	     (incf i))))
+       (setq result (coerce result 'vector))
+       (setq *cups* result)
+       result))
     (t *cups*)))
+
+
+
 
 
 (defun linearise-cups-hash ()
@@ -1830,7 +1885,22 @@ do we ignore enclosed cups ?
 	     *bricks-hash*)
     (setq *linear-bricks-hash* s)
     s))
-      
+
+;; display true cup ... including the true bounds of any contained cups !!
+(defun display-cup (n)
+  (let ((cup (aref *cups* n)))
+    (destructuring-bind (x y) (cup-nw cup)
+      (destructuring-bind (x2 y2) (cup-se cup)
+	(display x x2 (max 0 (- y 20)) y2)))))
+
+;; supposing at most one contained cup per cup
+;; make an assertion to this affect/effect
+;; contained cup is at a 
+(defun display-true-cup (n)
+  (let ((cup (aref *cups* n)))
+    (destructuring-bind (x y) (cup-nw cup)
+      (destructuring-bind (x2 y2) (cup-se cup)
+	(display x x2 (max 0 (- y 20)) y2)))))
 
 
 
@@ -1849,28 +1919,67 @@ do we ignore enclosed cups ?
 			    :initial-element nil))
     (loop for brick in *bricks* do
       (setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
-
-    
     (setf (board-grid *board*) *grid*)
-    ;;
     (find-cups)
     (find-cups-points)
+    (find-child-cups)
     (linearise-cups-hash)
     (linearise-bricks-hash)
-    ;;*bricks*
     ))
 
-#|
 
-FUN> (length *linear-bricks-hash*)
-18231
-FUN> (length *linear-cups-hash*)
-18231
+;; initially 500,0 sprinkler delivers infinite amount water
+;; see all of the cups - many thousands of them - here its 479 for given input
+;; (length *cups*)
+;;
+;; how can we visualise each cup
+;; given sprinkler placed at X Y - what cup will be hit by sprinkler
+;; what further sprinklers are generated
+;; what about multiple sprinklers hit the same cup
+;;
+;; many sprinklers active any one time -- a todo list of points 
+;; concentrate on one sprinkler at a time
+;;
+;; which cup gets hit with water first - where does it contact clay brick ?
 
-18231 clay bricks - apparently
+(defparameter todo nil)
 
 
-|#
+(defun run ()
+  (setq todo nil) ;; the sprinklers awaiting sprinkle 
+  (solve 500 1) ;; do we include sprinkler itself as water count ?no.
+  ;; all other sprinklers are essentially counted as water
+  )
+
+;; imagine we have a source of water like a sprinkler at x y
+;; what cup if any do we hit
+;; or is it just a flow directly to infinity - no cup gets filled
+(defun solve (x y)
+  (catch 'cup
+    (loop while t do
+      (cond
+	((> y (board-max-y *board*)) (throw 'cup nil))
+	((is-not-brick-at x y) (incf y))
+	(t ;; what cup did we hit
+	 (loop for cup across *cups* do
+	   (when (member (list x y) (cup-points cup) :test #'equalp)
+	     (throw 'cup cup))))))))
+
+;; best to use (load "fun.lisp") for this - perhaps
+;; configure everything before run 
+(start)
+
+
+	   
+	 
+	 
+      
+
+
+
+
+
+
 
 
 
