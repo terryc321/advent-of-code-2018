@@ -34,35 +34,6 @@ do we ignore enclosed cups ?
 
 (in-package :fun)
 
-;; does common lisp have enumeration types ?
-(defparameter *brick-type* 1)
-(defparameter *water-type* 2)
-
-(defparameter *cups* nil)
-
-(defstruct cup
-  ne
-  nw
-  se
-  sw
-  enclosed)
-    
-  
-
-
-(defstruct brick
-  x
-  y
-  id)
-
-;; #S(BOARD :MIN-X 404 :MIN-Y 6 :MAX-X 628 :MAX-Y 1631)
-(defstruct board
-  min-x
-  min-y
-  max-x
-  max-y
-  grid
-  )
 
 (defparameter *ranges* '((x 581 396 399)
 (y 1491 566 573)
@@ -1535,6 +1506,36 @@ do we ignore enclosed cups ?
 (x 436 1274 1301)
 (x 513 1076 1081)))
 
+;; does common lisp have enumeration types ?
+(defparameter *brick-type* 1)
+(defparameter *water-type* 2)
+
+(defparameter *cups* nil)
+
+(defstruct cup
+  ne
+  nw
+  se
+  sw
+  enclosed
+  points
+  id
+  )
+
+(defstruct brick
+  x
+  y
+  id)
+
+;; #S(BOARD :MIN-X 404 :MIN-Y 6 :MAX-X 628 :MAX-Y 1631)
+(defstruct board
+  min-x
+  min-y
+  max-x
+  max-y
+  grid
+  )
+
 
 (defparameter *grid* nil)
 
@@ -1547,11 +1548,14 @@ do we ignore enclosed cups ?
 ;; mybrick
 
 (defparameter *cups-hash* nil)
+(defparameter *linear-cups-hash* nil)
+(defparameter *linear-bricks-hash* nil)
 
 (defparameter *board* nil) 
 
 (defparameter *brick-id* 1)
 (defparameter *bricks* nil)
+(defparameter *bricks-hash* nil)
 
 (defun make-clay-brick (x y)
   ;; default value initial x y position 
@@ -1564,8 +1568,11 @@ do we ignore enclosed cups ?
   (when (> x (board-max-x *board*))  (setf (board-max-x *board*) x))
   (when (< y (board-min-y *board*))  (setf (board-min-y *board*) y))
   (when (> y (board-max-y *board*))  (setf (board-max-y *board*) y))
-  ;; record brick here  
-  (setq *bricks* (cons (make-brick :x x :y y) *bricks*)))
+  ;; record brick here
+  (let ((b (make-brick :x x :y y)))
+    (setf (gethash (list x y) *bricks-hash*) 1)
+    (setq *bricks* (cons b *bricks*))
+    b))
 
 
 ;; if no brick there - answer with nil ?
@@ -1659,24 +1666,6 @@ do we ignore enclosed cups ?
 	(throw 'found brick)))
     nil))
     
-
-(defun start ()
-  (setq *board* (make-board))
-  (setq *bricks* nil)
-  (setq *brick-id* 1)
-  (let* ((ranges (read-ranges)))
-    (process-input-ranges ranges)    
-    ;; *bricks* defined now
-    (setq *grid* (make-array (list (+ 20 (board-max-x *board*))
-				   (+ 20 (board-max-y *board*)))
-			    :initial-element nil))
-    (loop for brick in *bricks* do
-      (setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
-    (setf (board-grid *board*) *grid*)
-    ;;
-    (find-cups)
-    *bricks*))
-
 (defun check-lookup ()
   (loop for b in *bricks* do
     (let ((x (brick-x b))
@@ -1750,7 +1739,7 @@ do we ignore enclosed cups ?
   (let ((x1 x)(y1 y)
 	(x2 x)(y2 y)
 	(x3 x)(y3 y)
-	(x4 x)(y4 y)
+	(y4 y)
 	(enclosed nil))
     ;; south-west corner is x y 
     ;; find north-west corner x1 y1
@@ -1782,7 +1771,7 @@ do we ignore enclosed cups ?
     (assert (is-not-brick-at x3 (- y3 1)) nil "north east corner assert2")
 
     ;; is this cup enclosed ?
-    (setq x4 x3)
+    ;;(setq x4 x3)
     (setq y4 y3)
     (setq enclosed (and (= y1 y4)
 			(catch 'enclosed
@@ -1812,6 +1801,76 @@ do we ignore enclosed cups ?
 	    (board-min-y b)
 	    (board-max-y b))))
 	    
+(defun find-cups-points ()
+  (cond
+    ((eq (type-of *cups*) 'cons)
+     (let ((result (reverse *cups*)))
+       (let ((i 0))
+	 (loop for cup in result do
+	   (setf (cup-id cup) i)
+	   (incf i))
+	 (setq result (coerce result 'vector))
+	 (setq *cups* result)
+	 result)))
+    (t *cups*)))
+
+
+(defun linearise-cups-hash ()
+  (let ((s nil))
+    (maphash (lambda (key val)
+	       (setq s (cons key s)))
+	     *cups-hash*)
+    (setq *linear-cups-hash* s)
+    s))
+      
+(defun linearise-bricks-hash ()
+  (let ((s nil))
+    (maphash (lambda (key val)
+	       (setq s (cons key s)))
+	     *bricks-hash*)
+    (setq *linear-bricks-hash* s)
+    s))
+      
+
+
+
+(defun start ()
+  (setq *board* (make-board))
+  (setq *bricks* nil)
+  (setq *bricks-hash* (make-hash-table :test 'equalp))
+  (setq *brick-id* 1)
+  (setq *linear-cups-hash* nil)
+  (setq *cups* nil)
+  (let* ((ranges (read-ranges)))
+    (process-input-ranges ranges)    
+    ;; *bricks* defined now
+    (setq *grid* (make-array (list (+ 20 (board-max-x *board*))
+				   (+ 20 (board-max-y *board*)))
+			    :initial-element nil))
+    (loop for brick in *bricks* do
+      (setf (aref *grid* (brick-x brick) (brick-y brick)) *brick-type*))
+
+    
+    (setf (board-grid *board*) *grid*)
+    ;;
+    (find-cups)
+    (find-cups-points)
+    (linearise-cups-hash)
+    (linearise-bricks-hash)
+    ;;*bricks*
+    ))
+
+#|
+
+FUN> (length *linear-bricks-hash*)
+18231
+FUN> (length *linear-cups-hash*)
+18231
+
+18231 clay bricks - apparently
+
+
+|#
 
 
 
