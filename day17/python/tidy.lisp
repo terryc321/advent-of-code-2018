@@ -1559,144 +1559,155 @@
   )
 
 
+(defun private-find-cups-points (&key cups)
+  (let ((id 0))
+    (loop for cup in cups do
+      (let ((points nil))
+	;; left arm
+	(destructuring-bind (x1 y1) (cup-nw cup)
+	  (destructuring-bind (x2 y2) (cup-sw cup)
+	    (assert (= x1 x2) nil "left arm : xs are same")
+	    (assert (> y2 y1) nil "left arm : y2 > y1")
+	    (loop for y from y1 to y2 do
+	      (setq points (cons (list x1 y) points)))))
+	;; lower arm	     
+	(destructuring-bind (x1 y1) (cup-sw cup)
+	  (destructuring-bind (x2 y2) (cup-se cup)
+	    (assert (= y1 y2) nil "lower arm : ys are same")
+	    (assert (> x2 x1) nil "lower arm x2 > x1")
+	    (loop for x from x1 to x2 do
+	      (setq points (cons (list x y1) points)))))
+	;; right arm
+	(destructuring-bind (x1 y1) (cup-ne cup)
+	  (destructuring-bind (x2 y2) (cup-se cup)
+	    (assert (= x1 x2) nil "right arm : xs are same")
+	    (assert (> y2 y1) nil "right arm : y2 > y1")
+	    (loop for y from y1 to y2 do
+	      (setq points (cons (list x1 y) points)))))
+	;; if enclosed - upper arm
+	(when (cup-enclosed cup)
+	  (destructuring-bind (x1 y1) (cup-nw cup)
+	    (destructuring-bind (x2 y2) (cup-ne cup)
+	      (assert (= y1 y2) nil "upper arm : ys are same")
+	      (assert (> x2 x1) nil "upper arm : x2 > x1")
+	      (loop for x from x1 to x2 do
+		(setq points (cons (list x y1) points))))))
+	;; increment id  
+	(setf (cup-id cup) id)
+	(setf (cup-points cup) (remove-duplicates points :test #'equalp))
+	(incf id)))))
+
+
+(defun private-find-cups-helper (&key grid x y stashfn addcupfn)
+  (let ((x1 x)(y1 y)
+	(x2 x)(y2 y)
+	(x3 x)(y3 y)
+	(y4 y)
+	(enclosed nil))
+    ;; south-west corner is x y 
+    ;; find north-west corner x1 y1
+    (loop while (brick-at grid x1 y1) do
+      (funcall stashfn x1 y1)
+      (decf y1))
+    (incf y1)
+    (assert (brick-at grid x1 y1)  nil "north west corner assert1")
+    (assert (not-brick-at grid x1 (- y1 1)) nil "north west corner assert2")
+    (assert (not-brick-at grid (- x1 1) y1) nil "north west corner assert3")
+
+    ;; find south-east corner at x2 y2 
+    (loop while (brick-at grid x2 y2) do
+      (funcall stashfn x2 y2)
+      (incf x2))
+    (decf x2)
+    (assert (brick-at grid x2 y2) nil "south east corner assert1")
+    (assert (not-brick-at grid x2 (+ y2 1)) nil "south east corner assert2")
+    (assert (not-brick-at grid (+ x2 1) y2) nil "south east corner assert3")
+
+    ;; find north-east corner
+    (setq x3 x2)
+    (setq y3 y2)
+    (loop while (brick-at grid x3 y3) do
+      (funcall stashfn x3 y3)      
+      (decf y3))
+    (incf y3)
+    (assert (brick-at grid x3 y3) nil "north east corner assert1")
+    (assert (not-brick-at grid x3 (- y3 1)) nil "north east corner assert2")
+
+    ;; is this cup enclosed ?
+    ;;(setq x4 x3)
+    (setq y4 y3)
+    (setq enclosed (and (= y1 y4)
+			(catch 'enclosed
+			  (loop for x4 from x1 to x3 do
+			    (cond
+			      ((brick-at grid x4 y4) (funcall stashfn x4 y4))
+			      (t 
+			       (throw 'enclosed nil))))
+			  t)))
+    ;; the cup !
+    (let ((new-cup (make-cup :ne (list x3 y3)
+			     :nw (list x1 y1)
+			     :se (list x2 y2)
+			     :sw (list x y)			     
+			     :parent nil
+			     :child nil
+			     :enclosed enclosed)))
+      ;;(setq cups (cons new-cup cups)
+      (funcall addcupfn new-cup))
+	    
+	     ;;; next cup after this cup edge  
+    (+ x2 1)))
+
+
 ;; find two bricks together
 ;; if already been stashed - move along - already seen this square
 ;; 
-(defun find-cups (g)
+(defun private-find-cups (&key grid)
   (let ((cups nil)
-	(id 0)
 	(seen (make-hash-table :test 'equalp))
-	(minx (grid-minx g))
-	(maxx (grid-maxx g))
-	(maxy (grid-maxy g)))
+	(minx (grid-minx grid))
+	(maxx (grid-maxx grid))
+	(maxy (grid-maxy grid)))
     (labels
 	((stashed-p (x y) (gethash (list x y) seen nil))
 	 (stash-brick (x y) (setf (gethash (list x y) seen) t))
-	 (find-cups-points ()
-	     (loop for cup in cups do
-	       (let ((points nil))
-		 ;; left arm
-		 (destructuring-bind (x1 y1) (cup-nw cup)
-		   (destructuring-bind (x2 y2) (cup-sw cup)
-		     (assert (= x1 x2) nil "left arm : xs are same")
-		     (assert (> y2 y1) nil "left arm : y2 > y1")
-		     (loop for y from y1 to y2 do
-		       (setq points (cons (list x1 y) points)))))
-		 ;; lower arm	     
-		 (destructuring-bind (x1 y1) (cup-sw cup)
-		   (destructuring-bind (x2 y2) (cup-se cup)
-		     (assert (= y1 y2) nil "lower arm : ys are same")
-		     (assert (> x2 x1) nil "lower arm x2 > x1")
-		     (loop for x from x1 to x2 do
-		       (setq points (cons (list x y1) points)))))
-		 ;; right arm
-		 (destructuring-bind (x1 y1) (cup-ne cup)
-		   (destructuring-bind (x2 y2) (cup-se cup)
-		     (assert (= x1 x2) nil "right arm : xs are same")
-		     (assert (> y2 y1) nil "right arm : y2 > y1")
-		     (loop for y from y1 to y2 do
-		       (setq points (cons (list x1 y) points)))))
-		 ;; if enclosed - upper arm
-		 (when (cup-enclosed cup)
-		   (destructuring-bind (x1 y1) (cup-nw cup)
-		     (destructuring-bind (x2 y2) (cup-ne cup)
-		       (assert (= y1 y2) nil "upper arm : ys are same")
-		       (assert (> x2 x1) nil "upper arm : x2 > x1")
-		       (loop for x from x1 to x2 do
-			 (setq points (cons (list x y1) points))))))
-		 ;; increment id  
-		 (setf (cup-id cup) id)
-		 (setf (cup-points cup) (remove-duplicates points :test #'equalp))
-		 (incf id))))
-	 (find-cups-helper (x y)
-	   (let ((x1 x)(y1 y)
-		 (x2 x)(y2 y)
-		 (x3 x)(y3 y)
-		 (y4 y)
-		 (enclosed nil))
-	     ;; south-west corner is x y 
-	     ;; find north-west corner x1 y1
-	     (loop while (brick-at g x1 y1) do
-	       (stash-brick x1 y1)
-	       (decf y1))
-	     (incf y1)
-	     (assert (brick-at g x1 y1)  nil "north west corner assert1")
-	     (assert (not-brick-at g x1 (- y1 1)) nil "north west corner assert2")
-	     (assert (not-brick-at g (- x1 1) y1) nil "north west corner assert3")
-
-	     ;; find south-east corner at x2 y2 
-	     (loop while (brick-at g x2 y2) do
-	       (stash-brick x2 y2)
-	       (incf x2))
-	     (decf x2)
-	     (assert (brick-at g x2 y2) nil "south east corner assert1")
-	     (assert (not-brick-at g x2 (+ y2 1)) nil "south east corner assert2")
-	     (assert (not-brick-at g (+ x2 1) y2) nil "south east corner assert3")
-
-	     ;; find north-east corner
-	     (setq x3 x2)
-	     (setq y3 y2)
-	     (loop while (brick-at g x3 y3) do
-	       (stash-brick x3 y3)      
-	       (decf y3))
-	     (incf y3)
-	     (assert (brick-at g x3 y3) nil "north east corner assert1")
-	     (assert (not-brick-at g x3 (- y3 1)) nil "north east corner assert2")
-
-	     ;; is this cup enclosed ?
-	     ;;(setq x4 x3)
-	     (setq y4 y3)
-	     (setq enclosed (and (= y1 y4)
-				 (catch 'enclosed
-				   (loop for x4 from x1 to x3 do
-				     (cond
-				       ((brick-at g x4 y4) (stash-brick x4 y4))
-				       (t 
-					(throw 'enclosed nil))))
-				   t)))
-	     ;; the cup !
-	     (let ((new-cup (make-cup :ne (list x3 y3)
-				      :nw (list x1 y1)
-				      :se (list x2 y2)
-				      :sw (list x y)
-				      :id id
-				      :parent nil
-				      :child nil
-				      :enclosed enclosed)))
-	       (setq cups (cons new-cup cups)))
-	     ;;; next cup after this cup edge  
-	     (+ x2 1))))
+	 (add-cup (c) (setq cups (cons c cups))))
       
-    (assert (> maxy 1) nil "find-cups : maxy should be more than 1 ")
-    ;; determine where cups are
+      (assert (> maxy 1) nil "find-cups : maxy should be more than 1 ")
+      ;; determine where cups are
       (loop for y from maxy downto 1 do
 	(let ((x minx))
 	  (loop while (< x maxx) do
 	    (cond
 	      ((stashed-p x y) (incf x))
-	      ((and (brick-at g x y) (brick-at g (+ x 1) y))
-	       (setq x (find-cups-helper x y)))
+	      ((and (brick-at grid x y) (brick-at grid (+ x 1) y))
+	       (setq x (private-find-cups-helper :grid grid
+						 :x x
+						 :y y
+						 :stashfn #'stash-brick
+						 :addcupfn #'add-cup)))
 	      (t (incf x))))))
-    ;; attribute points to cups
-      (find-cups-points)
+
+      ;; attribute points to cups
+      (private-find-cups-points :cups cups)
       
-    (let ((array (coerce cups 'vector))
-	  (id 0))      
-      (loop for cup across array do
-	(setf (cup-id cup) id)
-	(incf id))
-      array))))
+      (let ((array (coerce cups 'vector))
+	    (id 0))      
+	(loop for cup across array do
+	  (setf (cup-id cup) id)
+	  (incf id))
+	array))))
 
 ;; =================================================================
 ;; given grid g we can find cups array <a> by 
 ;; (setq a (find-cups g))
 
-(defun identify-cup-from-brick (a g x y)  
+(defun identify-cup-from-brick (&key cups grid x y)  
   (cond
-    ((not-brick-at g x y) nil)
+    ((not-brick-at grid x y) nil)
     (t
      (catch 'found
-       (loop for cup across a do
+       (loop for cup across cups do
 	 (when (member (list x y) (cup-points cup) :test #'equalp)
 	   (throw 'found cup)))
        (error (format nil "expected to find a cup associated with brick at ~a ~a " x y))))))
@@ -1705,14 +1716,14 @@
 ;; given grid g , cups a , we can identify cup from a given brick 
 ;; (identify-cup-from-brick a g 500 22)
 
-(defun enforce-check-all-bricks-have-cups (a g)
-  (let ((minx (grid-minx g))
-	(maxx (grid-maxx g))
-	(miny (grid-miny g))
-	(maxy (grid-maxy g)))
+(defun enforce-check-all-bricks-have-cups (&key cups grid)
+  (let ((minx (grid-minx grid))
+	(maxx (grid-maxx grid))
+	(miny (grid-miny grid))
+	(maxy (grid-maxy grid)))
     (loop for x from minx to maxx do
       (loop for y from miny to maxy do
-	(identify-cup-from-brick a g x y)))))
+	(identify-cup-from-brick :cups cups :grid grid :x x :y y)))))
 
 ;; ===================================================================
 ;; can enforce check - passes
@@ -1720,8 +1731,8 @@
 ;; => nil 
 
 
-(defun find-child-cups (a g)
-  (loop for cup across a do
+(defun private-find-child-cups (&key cups grid)
+  (loop for cup across cups do
     (destructuring-bind (x1 y1) (cup-nw cup)
       (destructuring-bind (x2 y2) (cup-se cup)
 	(assert (> x2 x1) nil "find-child-cups : x2 > x1")
@@ -1729,7 +1740,7 @@
 	(catch 'found
 	  (loop for x from (+ x1 1) to (- x2 1) do
 	    (loop for y from (+ y1 1) to (- y2 1) do
-	      (let ((pot (identify-cup-from-brick a g x y)))
+	      (let ((pot (identify-cup-from-brick :cups cups :grid grid :x x :y y)))
 		(when (and pot (/= (cup-id pot) (cup-id cup)))
 		  (format t "found parent-child in cups ~a ~a ~%" (cup-id pot) (cup-id cup))
 		  (setf (cup-child cup) (lambda () pot))
@@ -1737,14 +1748,28 @@
 		  (throw 'found t)))))
 	  nil)))))
 
+
+(defun find-cups (grid)
+  (let ((cups (private-find-cups :grid grid)))
+    (private-find-child-cups :cups cups :grid grid)
+    cups))
+
+
       
-
-
 ;; ===================================================================
 ;; (setq g (the-grid (ranges)))
 ;; (funcall (grid-proc g) 500 22) => 1 meaning a brick
 ;; (setq a (find-cups g))
-  
+;; (identify-cup-from-brick a g 500 22)
+;; (funcall (cup-child (identify-cup-from-brick a g 500 22))) ;; retrieve child cup - if has one?
+
+(defun demo ()
+  (let* ((grid (the-grid (ranges)))
+	 (cups (find-cups grid)))
+    (format t "<g>~%~a" grid)
+    (format t "<cups>~%~a" cups)))
+
+    
 
 	
 
