@@ -1769,8 +1769,8 @@
 (defun demo ()
   (let* ((grid (the-grid (ranges)))
 	 (cups (find-cups grid)))
-    (format t "<g>~%~a" grid)
-    (format t "<cups>~%~a" cups)))
+    (format t "~%<g>~%~a~%" grid)
+    (format t "~%<cups>~%~a~%" cups)))
 
 ;;====================================================================
 ;; iterative solver
@@ -1792,6 +1792,23 @@
 (defparameter *waterfall-seen* nil)
 (defparameter *last-active-cup* nil)
 
+(defun water-only-at (&key grid x y)
+  (let ((w (gethash (list x y) *water* nil))
+	(s (gethash (list x y) *sand* nil))
+	(b (brick-at :grid grid :x x :y y)))
+    (and w (not s) (not b))))
+
+(defun empty-at (&key grid x y)
+  (let ((w (gethash (list x y) *water* nil))
+	(s (gethash (list x y) *sand* nil))
+	(b (brick-at :grid grid :x x :y y)))
+    (and (not w) (not s) (not b))))
+
+
+(defun water-at (&key grid x y)
+  (gethash (list x y) *water* nil))
+
+
 (defun record-water-at! (&key grid x y)
   (setf (gethash (list x y) *water*) t))
 
@@ -1800,13 +1817,17 @@
 	     (not (gethash (list x y) *waterfall-seen* nil)))
     (setf (gethash (list x y) *waterfall*) t)))
 
+(defun sand-at (&key x y)
+  (gethash (list x y) *sand* nil))
+
 (defun sand-left (&key cups grid x y)
   (loop while t do
     (cond
       ((not-brick-at :grid grid :x x :y y)
        (setf (gethash (list x y) *sand*) t)
        (decf x))
-      (t (return nil)))))
+      (t       
+       (return nil)))))
 
 (defun sand-right (&key cups grid x y)
   (loop while t do
@@ -1841,6 +1862,7 @@
 	     (cond 
 	       ((and (eq left 'brick) (eq right 'brick))
 		;; ok put sand here
+		(setf (gethash (list x y) *water*) t)
 		(setf (gethash (list x y) *sand*) t)
 		(sand-left :cups cups :grid grid :x (- x 1) :y y)		
 		(sand-right :cups cups :grid grid :x (+ x 1) :y y)		
@@ -1856,16 +1878,28 @@
 	((brick-at :grid grid :x x :y y)
 	 (throw 'cup 'brick))
 	(t
+	 ;; (when (and (= x 497) (= y 53)) (break))
+	 (when (and (= y 53) (= x 497)) (error "hit 497 and y=53"))
 	 ;; no brick at x y 
 	 (record-water-at! :grid grid :x x :y y)
 	 (cond
+	   ((and (sand-at :x x :y (+ y 1)))
+	    (record-water-at! :grid grid :x x :y y)	    
+	    (decf x))	   
+	   ((and (brick-at :grid grid :x (+ x 1) :y (+ y 1))
+		 (sand-at :x x :y (+ y 1)))
+	    ;; keep moving left
+	    (record-water-at! :grid grid :x x :y y)	    
+	    (decf x))	   
 	   ((and (brick-at :grid grid :x (+ x 1) :y (+ y 1))
 		 (not-brick-at :grid grid :x x :y (+ y 1)))
 	    ;; if brick lower - right and no brick under me then waterfall
+	    (record-water-at! :grid grid :x x :y y)
 	    (record-waterfall-at! :grid grid :x x :y y)
 	    (throw 'cup 'waterfall))
 	   (t
 	    ;; otherwise just keep moving left
+	    (record-water-at! :grid grid :x x :y y)
 	    (decf x))))))))
 	
 
@@ -1879,6 +1913,14 @@
 	 ;; no brick at x y 
 	 (record-water-at! :grid grid :x x :y y)
 	 (cond
+	   ;; if brick lower left and sand underneath - not a waterfall 
+	   ((and (sand-at :x x :y (+ y 1)))
+	    (record-water-at! :grid grid :x x :y y)	    
+	    (incf x))	   
+	   ((and (brick-at :grid grid :x (- x 1) :y (+ y 1))
+		 (sand-at :x x :y (+ y 1)))
+	    ;; keep moving right
+	    (incf x))	   
 	    ;; if brick lower - left and no brick under me then waterfall
 	   ((and (brick-at :grid grid :x (- x 1) :y (+ y 1))
 		 (not-brick-at :grid grid :x x :y (+ y 1)))
@@ -1913,24 +1955,28 @@
 
 ;; display slightly more than just raw box
 (defun display (&key grid x1 x2 y1 y2)
-  (let ((margin 5))
-    (let ((sx1 (max 0 (- x1 margin)))
-	  (sx2 (+ x2 margin))
+  (let ((margin 10))
+    (let (
+	  (sx1 (max 0 (- x1 margin)))
+	  (sx2 (min (+ x2 margin) (grid-maxx grid)))
 	  (sy1 (max (- y1 margin) 0))
 	  (sy2 (min (grid-maxy grid) (+ y2 margin)))
 	  )
       (format t "~%~%")
       (loop for y from sy1 to sy2 do
-	(format t "~%")
+	(format t "~%~5D: " y)
 	(loop for x from sx1 to sx2 do
 	  (let ((at (brick-at :grid grid :x x :y y)))
 	    (cond
+	      ;;((and (= x 497)(= y 53)) (format t "X")) ;; terry	      
 	      ((and at (= at 1)) (format t "#")) ;;  clay
-	      ((and (= x 500)(= y 0)) (format t "*")) ;; sprinkler!
-	      ((gethash (list x y) *water* nil)
-	       (cond
-		 ((gethash (list x y) *sand* nil)   (format t "~a" #\~ )) ;; sand+water
-		 (t (format t "~a" #\| ))))
+	      ((and (= x 500)(= y 0)) (format t "*")) ;; sprinkler!	      
+	      ((and (gethash (list x y) *water* nil)(gethash (list x y) *sand* nil))
+	       (format t "~a" #\~ ))
+	      ((and (gethash (list x y) *water* nil))
+	       (format t "~a" #\| ))
+	      ((and (gethash (list x y) *sand* nil))
+	       (format t "~a" #\S ))
 	      (t (format t " ")))))))))
 
 
@@ -1958,12 +2004,60 @@
       (remhash next-key *waterfall*)
       (destructuring-bind (x y) next-key
 	(waterfall :cups *cups* :grid *grid* :x x :y y)
-	(waterfall-stuck :cups *cups* :grid *grid* :x x :y y)
+	(waterfall :cups *cups* :grid *grid* :x x :y y)
+	(waterfall :cups *cups* :grid *grid* :x x :y y)
 	)
       (display-cup *last-active-cup*))))
 
 
-    
+;; 
+;; | ? |
+;; ~ ~ ~
+(defun fixup-missing-water ()
+  (let ((fixups 0)
+	(minx (grid-minx *grid*))
+	(maxx (grid-maxx *grid*))
+	(miny (grid-miny *grid*))
+	(maxy (grid-maxy *grid*)))
+    (loop for x from minx to (- maxx 2) do
+      (loop for y from miny to (- maxy 1) do
+	(when (and (water-only-at :grid *grid* :x x :y y)
+		   (empty-at :grid *grid* :x (+ x 1) :y y)
+		   (water-only-at :grid *grid* :x (+ x 2) :y y)
+		   (sand-at :x x :y (+ y 1))
+		   (sand-at :x (+ x 1) :y (+ y 1))
+		   (sand-at :x (+ x 2) :y (+ y 1)))
+	  (incf fixups)
+	  (setf (gethash (list (+ x 1) y) *water*) t))))
+    fixups))
 
+(defun solve ()
+  (demo2)
+  (loop for i from 1 to 10000 do
+    (next))
+  (fixup-missing-water))
+
+;;  (fixup-missing-water))
+
+(defun python-water ()
+  (with-open-file (stream "water.dat" :direction :output :if-exists :supersede)
+    (format stream "def part1():~%")
+    (maphash (lambda (key val)
+	       (destructuring-bind (x y) key
+		 (format stream "  water[(~a,~a)] = 1~%" x y)))
+	     *water*)))
+
+;; 5 drops water from sprinkler at 500,0 that are above the minimum Y - ie not any ranges
+(defun part1 ()
+  (solve)
+  (- (hash-table-count *water*) 5))
+
+(defun part2 ()
+  (solve)
+  (hash-table-count *sand*))
+
+;; part1 -> 36035
+;; part2 -> 25094
+;; both answers accepted 
 
 
