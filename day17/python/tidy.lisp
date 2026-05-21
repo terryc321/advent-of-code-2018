@@ -1538,11 +1538,11 @@
 ;; (funcall (grid-proc g) 500 22) => 1 meaning a brick
 
 
-(defun brick-at (g x y)
-  (funcall (grid-proc g) x y))
+(defun brick-at (&key grid x y)
+  (funcall (grid-proc grid) x y))
 
-(defun not-brick-at (g x y)
-  (not (brick-at g x y)))
+(defun not-brick-at (&key grid x y)
+  (not (brick-at :grid grid :x x :y y)))
 
 
 
@@ -1606,32 +1606,32 @@
 	(enclosed nil))
     ;; south-west corner is x y 
     ;; find north-west corner x1 y1
-    (loop while (brick-at grid x1 y1) do
+    (loop while (brick-at :grid grid :x x1 :y y1) do
       (funcall stashfn x1 y1)
       (decf y1))
     (incf y1)
-    (assert (brick-at grid x1 y1)  nil "north west corner assert1")
-    (assert (not-brick-at grid x1 (- y1 1)) nil "north west corner assert2")
-    (assert (not-brick-at grid (- x1 1) y1) nil "north west corner assert3")
+    (assert (brick-at :grid grid :x x1 :y y1)  nil "north west corner assert1")
+    (assert (not-brick-at :grid grid :x x1 :y (- y1 1)) nil "north west corner assert2")
+    (assert (not-brick-at :grid grid :x (- x1 1) :y y1) nil "north west corner assert3")
 
     ;; find south-east corner at x2 y2 
-    (loop while (brick-at grid x2 y2) do
+    (loop while (brick-at :grid grid :x x2 :y y2) do
       (funcall stashfn x2 y2)
       (incf x2))
     (decf x2)
-    (assert (brick-at grid x2 y2) nil "south east corner assert1")
-    (assert (not-brick-at grid x2 (+ y2 1)) nil "south east corner assert2")
-    (assert (not-brick-at grid (+ x2 1) y2) nil "south east corner assert3")
+    (assert (brick-at :grid grid :x x2 :y y2) nil "south east corner assert1")
+    (assert (not-brick-at :grid grid :x x2 :y (+ y2 1)) nil "south east corner assert2")
+    (assert (not-brick-at :grid grid :x (+ x2 1) :y y2) nil "south east corner assert3")
 
     ;; find north-east corner
     (setq x3 x2)
     (setq y3 y2)
-    (loop while (brick-at grid x3 y3) do
+    (loop while (brick-at :grid grid :x x3 :y y3) do
       (funcall stashfn x3 y3)      
       (decf y3))
     (incf y3)
-    (assert (brick-at grid x3 y3) nil "north east corner assert1")
-    (assert (not-brick-at grid x3 (- y3 1)) nil "north east corner assert2")
+    (assert (brick-at :grid grid :x x3 :y y3) nil "north east corner assert1")
+    (assert (not-brick-at :grid grid :x x3 :y (- y3 1)) nil "north east corner assert2")
 
     ;; is this cup enclosed ?
     ;;(setq x4 x3)
@@ -1640,7 +1640,7 @@
 			(catch 'enclosed
 			  (loop for x4 from x1 to x3 do
 			    (cond
-			      ((brick-at grid x4 y4) (funcall stashfn x4 y4))
+			      ((brick-at :grid grid :x x4 :y y4) (funcall stashfn x4 y4))
 			      (t 
 			       (throw 'enclosed nil))))
 			  t)))
@@ -1680,7 +1680,7 @@
 	  (loop while (< x maxx) do
 	    (cond
 	      ((stashed-p x y) (incf x))
-	      ((and (brick-at grid x y) (brick-at grid (+ x 1) y))
+	      ((and (brick-at :grid grid :x x :y y) (brick-at :grid grid :x (+ x 1) :y y))
 	       (setq x (private-find-cups-helper :grid grid
 						 :x x
 						 :y y
@@ -1704,7 +1704,7 @@
 
 (defun identify-cup-from-brick (&key cups grid x y)  
   (cond
-    ((not-brick-at grid x y) nil)
+    ((not-brick-at :grid grid :x x :y y) nil)
     (t
      (catch 'found
        (loop for cup across cups do
@@ -1742,7 +1742,7 @@
 	    (loop for y from (+ y1 1) to (- y2 1) do
 	      (let ((pot (identify-cup-from-brick :cups cups :grid grid :x x :y y)))
 		(when (and pot (/= (cup-id pot) (cup-id cup)))
-		  (format t "found parent-child in cups ~a ~a ~%" (cup-id pot) (cup-id cup))
+		  ;;(format t "found parent-child in cups ~a ~a ~%" (cup-id pot) (cup-id cup))
 		  (setf (cup-child cup) (lambda () pot))
 		  (setf (cup-parent pot) (lambda () cup))
 		  (throw 'found t)))))
@@ -1762,17 +1762,208 @@
 ;; (setq a (find-cups g))
 ;; (identify-cup-from-brick a g 500 22)
 ;; (funcall (cup-child (identify-cup-from-brick a g 500 22))) ;; retrieve child cup - if has one?
-
+;;
+;; does it work?
+;;
+;;
 (defun demo ()
   (let* ((grid (the-grid (ranges)))
 	 (cups (find-cups grid)))
     (format t "<g>~%~a" grid)
     (format t "<cups>~%~a" cups)))
 
-    
+;;====================================================================
+;; iterative solver
+;; stage : squares filled by water in this stage - so we can wind unwind 
+;; todo : set of sprinklers that are awaiting activation
+;;
+;; filling an already filled cup may lead to activation of already seen sprinklers
+;; if sprinkler has already been seen at that location - it does not get added to todo list
+;; either in the todo list already or it has been executed
+;;
+;; once we know format of solution we can make a structure to capture - hindsight programming 
+;;
 
+(defparameter *grid* nil)
+(defparameter *cups* nil)
+(defparameter *water* nil)
+(defparameter *waterfall* nil)
+(defparameter *sand* nil)
+(defparameter *waterfall-seen* nil)
+(defparameter *last-active-cup* nil)
+
+(defun record-water-at! (&key grid x y)
+  (setf (gethash (list x y) *water*) t))
+
+(defun record-waterfall-at! (&key grid x y)
+  (when (and (not (gethash (list x y) *waterfall* nil))
+	     (not (gethash (list x y) *waterfall-seen* nil)))
+    (setf (gethash (list x y) *waterfall*) t)))
+
+(defun sand-left (&key cups grid x y)
+  (loop while t do
+    (cond
+      ((not-brick-at :grid grid :x x :y y)
+       (setf (gethash (list x y) *sand*) t)
+       (decf x))
+      (t (return nil)))))
+
+(defun sand-right (&key cups grid x y)
+  (loop while t do
+    (cond
+      ((not-brick-at :grid grid :x x :y y)
+       (setf (gethash (list x y) *sand*) t)
+       (incf x))
+      (t (return nil)))))
+
+
+(defun waterfall (&key cups grid x y)
+  (catch 'cup
+    (loop while t do
+      (cond
+	((> y (grid-maxy grid)) (throw 'cup nil))
+	((not-brick-at :grid grid :x x :y y)
+	 (record-water-at! :grid grid :x x :y y)
+	 (incf y))
+	(t
+	 ;; x,y now on a brick
+	 (setq *last-active-cup* (identify-cup-from-brick :cups cups :grid grid :x x :y y))	   
+	 (loop while t do
+	   (decf y)
+	   (let ((left (waterfall-left :cups cups :grid grid :x (- x 1) :y y))
+		 (right (waterfall-right :cups cups :grid grid :x (+ x 1) :y y)))
+	     (assert (or (eq left 'brick)
+			 (eq left 'waterfall))
+		     nil "waterfall left must be either brick or waterfall")
+	     (assert (or (eq right 'brick)
+			 (eq right 'waterfall))
+		     nil "waterfall right must be either brick or waterfall")	   
+	     (cond 
+	       ((and (eq left 'brick) (eq right 'brick))
+		;; ok put sand here
+		(setf (gethash (list x y) *sand*) t)
+		(sand-left :cups cups :grid grid :x (- x 1) :y y)		
+		(sand-right :cups cups :grid grid :x (+ x 1) :y y)		
+		t) ; unwinds itself
+	       (t (throw 'cup 'waterfall))))))))))
+
+
+
+(defun waterfall-left (&key cups grid x y)
+  (catch 'cup
+    (loop while t do
+      (cond
+	((brick-at :grid grid :x x :y y)
+	 (throw 'cup 'brick))
+	(t
+	 ;; no brick at x y 
+	 (record-water-at! :grid grid :x x :y y)
+	 (cond
+	   ((and (brick-at :grid grid :x (+ x 1) :y (+ y 1))
+		 (not-brick-at :grid grid :x x :y (+ y 1)))
+	    ;; if brick lower - right and no brick under me then waterfall
+	    (record-waterfall-at! :grid grid :x x :y y)
+	    (throw 'cup 'waterfall))
+	   (t
+	    ;; otherwise just keep moving left
+	    (decf x))))))))
 	
 
+(defun waterfall-right (&key cups grid x y)
+  (catch 'cup
+    (loop while t do
+      (cond
+	((brick-at :grid grid :x x :y y)
+	 (throw 'cup 'brick))
+	(t
+	 ;; no brick at x y 
+	 (record-water-at! :grid grid :x x :y y)
+	 (cond
+	    ;; if brick lower - left and no brick under me then waterfall
+	   ((and (brick-at :grid grid :x (- x 1) :y (+ y 1))
+		 (not-brick-at :grid grid :x x :y (+ y 1)))
+	    (record-waterfall-at! :grid grid :x x :y y)
+	    (throw 'cup 'waterfall))
+	   (t
+	    ;; otherwise just keep moving right
+	    (incf x))))))))
+	
+
+
+;; supposing at most one contained cup per cup
+;; make an assertion to this affect/effect
+;; contained cup is at a 
+(defun display-cup (cup)
+  (format t "<cup ~a> ~%" (cup-id cup))
+  (destructuring-bind (x1 y1) (cup-nw cup)
+    (destructuring-bind (x2 y2) (cup-se cup)
+      (let ((cc (if (cup-child cup) (funcall (cup-child cup)) nil)))
+	(cond
+	  (cc
+	   (destructuring-bind (x3 y3) (cup-nw cc)
+	     (destructuring-bind (x4 y4) (cup-ne cc)
+		 (let ((max-y y2)(min-y (min y3 y4))
+		       (max-x x2)(min-x x1))
+		   (display :grid *grid* :x1 min-x :x2 max-x :y1 min-y :y2 max-y)))))
+	  (t
+	   (let ((max-y y2)(min-y y1)
+		 (max-x x2)(min-x x1))
+	     (display :grid *grid* :x1 min-x :x2 max-x :y1 min-y :y2 max-y))))))))
+
+
+;; display slightly more than just raw box
+(defun display (&key grid x1 x2 y1 y2)
+  (let ((margin 5))
+    (let ((sx1 (max 0 (- x1 margin)))
+	  (sx2 (+ x2 margin))
+	  (sy1 (max (- y1 margin) 0))
+	  (sy2 (min (grid-maxy grid) (+ y2 margin)))
+	  )
+      (format t "~%~%")
+      (loop for y from sy1 to sy2 do
+	(format t "~%")
+	(loop for x from sx1 to sx2 do
+	  (let ((at (brick-at :grid grid :x x :y y)))
+	    (cond
+	      ((and at (= at 1)) (format t "#")) ;;  clay
+	      ((and (= x 500)(= y 0)) (format t "*")) ;; sprinkler!
+	      ((gethash (list x y) *water* nil)
+	       (cond
+		 ((gethash (list x y) *sand* nil)   (format t "~a" #\~ )) ;; sand+water
+		 (t (format t "~a" #\| ))))
+	      (t (format t " ")))))))))
+
+
+;; (defun display-easy (x y)
+;;   (let ((*display-specials* (list (list x y))))
+;;     (display (- x 40) (+ x 40) (max 0 (- y 30)) (min (+ y 30) (board-max-y *board*)))))
+
+(defun demo2 ()
+  (setq *grid* (the-grid (ranges)))
+  (setq *cups* (find-cups *grid*))
+  (setq *sand* (make-hash-table :test 'equalp))
+  (setq *water* (make-hash-table :test 'equalp))
+  (setq *waterfall* (make-hash-table :test 'equalp))
+  (setq *waterfall-seen* (make-hash-table :test 'equalp))
+  (setf (gethash (list 500 1) *waterfall*) t)
+  (next))
+
+(defun next ()
+  (let ((next-key nil))
+    ;; iterate over all keys in hash table - just get one key 
+    ;; put this into waterfall seen and remove it from waterfall 
+    (maphash (lambda (key val) (setq next-key key)) *waterfall*)
+    (when next-key
+      (setf (gethash next-key *waterfall-seen*) t)
+      (remhash next-key *waterfall*)
+      (destructuring-bind (x y) next-key
+	(waterfall :cups *cups* :grid *grid* :x x :y y)
+	(waterfall-stuck :cups *cups* :grid *grid* :x x :y y)
+	)
+      (display-cup *last-active-cup*))))
+
+
+    
 
 
 

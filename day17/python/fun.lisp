@@ -1,5 +1,5 @@
 
-;;
+;; please use tidy.lisp instead - this has a recursive print bug
 ;; aoc 2018 day 17
 ;;
 
